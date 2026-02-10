@@ -24,3 +24,28 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Cobra Crackers specific styles */
+html {
+  scroll-behavior: smooth;
+}
+
+a {
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+button {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+section {
+  position: relative;
+}
+
+/* Remove default image styling */
+img {
+  max-width: 100%;
+  height: auto;
+}

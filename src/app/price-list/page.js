@@ -122,8 +122,8 @@ export default function PriceList() {
                 {catIdx + 1}. {category.name.toUpperCase()} ({category.discount})
               </div>
 
-              {/* Products Table */}
-              <div className="bg-white border border-purple-400 rounded-b-lg overflow-hidden shadow-md">
+              {/* Products Table - Desktop */}
+              <div className="hidden md:block bg-white border border-purple-400 rounded-b-lg overflow-hidden shadow-md">
                 <table className="w-full">
                   <thead className="bg-purple-300 text-black font-semibold">
                     <tr>
@@ -203,6 +203,69 @@ export default function PriceList() {
                     })}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Products Cards - Mobile */}
+              <div className="md:hidden bg-white border border-purple-400 rounded-b-lg overflow-hidden shadow-md">
+                {category.products.map((product) => {
+                  const qty = getQuantity(product.id);
+                  const total = calculateTotal(product.discount, qty);
+
+                  return (
+                    <div key={product.id} className="border-b p-4 hover:bg-gray-50">
+                      {/* Image and Product Name */}
+                      <div className="flex gap-3 mb-3">
+                        <div className="w-12 h-12 bg-yellow-100 rounded flex items-center justify-center text-lg flex-shrink-0">
+                          🎆
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-black text-sm">{product.name}</div>
+                          <div className="text-xs text-gray-500">{product.description}</div>
+                          <div className="text-xs text-gray-600 mt-1">{product.size}</div>
+                        </div>
+                      </div>
+
+                      {/* Prices */}
+                      <div className="grid grid-cols-3 gap-2 mb-3 text-center">
+                        <div>
+                          <div className="text-xs text-gray-600">Original</div>
+                          <div className="text-xs line-through text-gray-500">₹{product.originalPrice.toFixed(2)}</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-600">Discount</div>
+                          <div className="text-sm font-bold text-red-600">₹{product.discount.toFixed(2)}</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-600">Total</div>
+                          <div className="font-bold text-black">₹{total}</div>
+                        </div>
+                      </div>
+
+                      {/* Quantity Controls */}
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => setQuantity(product.id, qty - 1)}
+                          className="bg-red-500 text-white w-7 h-7 rounded font-bold hover:bg-red-600 transition-colors"
+                        >
+                          −
+                        </button>
+                        <input
+                          type="number"
+                          value={qty}
+                          onChange={(e) => setQuantity(product.id, parseInt(e.target.value) || 0)}
+                          className="w-10 text-center border border-gray-300 rounded py-1 text-sm font-semibold"
+                          min="0"
+                        />
+                        <button
+                          onClick={() => setQuantity(product.id, qty + 1)}
+                          className="bg-green-600 text-white w-7 h-7 rounded font-bold hover:bg-green-700 transition-colors"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           ))}

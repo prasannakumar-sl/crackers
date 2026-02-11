@@ -1,10 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useCart } from './context/CartContext';
 
 export default function Home() {
-  const [cart, setCart] = useState([]);
-  const [showCart, setShowCart] = useState(false);
+  const { addToCart, getCartItemCount, getCartTotal } = useCart();
 
   const products = {
     sale: [
@@ -37,95 +36,11 @@ export default function Home() {
     { id: 4, title: 'Diwali Crackers for Kids and Safe Celebration', image: '👨‍👩‍👧‍👦' },
   ];
 
-  const addToCart = (product) => {
-    const existingItem = cart.find(item => item.id === product.id);
-    if (existingItem) {
-      setCart(cart.map(item =>
-        item.id === product.id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      ));
-    } else {
-      setCart([...cart, { ...product, quantity: 1 }]);
-    }
-  };
-
-  const removeFromCart = (productId) => {
-    setCart(cart.filter(item => item.id !== productId));
-  };
-
-  const updateQuantity = (productId, quantity) => {
-    if (quantity <= 0) {
-      removeFromCart(productId);
-    } else {
-      setCart(cart.map(item =>
-        item.id === productId
-          ? { ...item, quantity }
-          : item
-      ));
-    }
-  };
-
-  const cartTotal = cart.reduce((total, item) => {
-    const price = parseFloat(item.discount.replace('₹', ''));
-    return total + (price * item.quantity);
-  }, 0);
+  const cartTotal = getCartTotal();
+  const cartItemsCount = getCartItemCount();
 
   return (
     <div className="bg-white">
-      {/* Cart Modal */}
-      {showCart && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-96 overflow-auto p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">Shopping Cart ({cart.length})</h2>
-              <button onClick={() => setShowCart(false)} className="text-2xl font-bold text-gray-600 hover:text-black">
-                ✕
-              </button>
-            </div>
-            
-            {cart.length === 0 ? (
-              <p className="text-gray-600 text-center py-8">Your cart is empty</p>
-            ) : (
-              <>
-                <div className="space-y-4 mb-6">
-                  {cart.map(item => (
-                    <div key={item.id} className="flex items-center justify-between border-b pb-4">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-black">{item.name}</h3>
-                        <p className="text-sm text-gray-600">{item.discount} each</p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300">
-                          −
-                        </button>
-                        <span className="w-8 text-center font-semibold">{item.quantity}</span>
-                        <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300">
-                          +
-                        </button>
-                      </div>
-                      <button onClick={() => removeFromCart(item.id)} className="ml-4 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm">
-                        Remove
-                      </button>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="border-t pt-4">
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-lg font-bold">Total:</span>
-                    <span className="text-2xl font-bold text-red-600">₹{cartTotal.toFixed(2)}</span>
-                  </div>
-                  <button className="w-full bg-teal-900 text-white py-3 rounded-lg font-bold hover:bg-teal-800 transition-colors">
-                    Proceed to Checkout
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* Festival Banners */}
       <section className="py-6 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
@@ -348,18 +263,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Cart Button Floating */}
-      <button 
-        onClick={() => setShowCart(true)}
-        className="fixed bottom-8 right-8 bg-red-500 text-white rounded-full p-4 shadow-lg hover:bg-red-600 transition-colors flex items-center justify-center"
-      >
-        <span className="text-2xl">🛒</span>
-        {cart.length > 0 && (
-          <span className="absolute -top-2 -right-2 bg-yellow-500 text-black font-bold rounded-full w-6 h-6 flex items-center justify-center text-sm">
-            {cart.length}
-          </span>
-        )}
-      </button>
     </div>
   );
 }

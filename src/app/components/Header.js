@@ -1,4 +1,11 @@
+'use client';
+
+import { useCart } from '../context/CartContext';
+
 export default function Header() {
+  const { getCartItemCount, setShowCart } = useCart();
+  const cartItemsCount = getCartItemCount();
+
   return (
     <header className="bg-teal-900 text-white py-3 px-6 sticky top-0 z-50 shadow-md">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -8,13 +15,24 @@ export default function Header() {
           </div>
           <span className="font-bold text-sm">pk crackers</span>
         </div>
-        <nav className="flex gap-8 text-sm">
+        <nav className="flex gap-8 text-sm items-center">
           <a href="/" className="hover:text-yellow-400 transition-colors">Home</a>
           <a href="/price-list" className="hover:text-yellow-400 transition-colors">Price List</a>
           <a href="/about-us" className="hover:text-yellow-400 transition-colors">About Us</a>
           <a href="/contact-us" className="hover:text-yellow-400 transition-colors">Contact Us</a>
           <a href="/payments-info" className="hover:text-yellow-400 transition-colors">Payments Info</a>
           <a href="/chit-fund" className="hover:text-yellow-400 transition-colors">Chit Fund</a>
+          <button
+            onClick={() => setShowCart(true)}
+            className="relative hover:text-yellow-400 transition-colors flex items-center gap-2"
+          >
+            🛒 Cart
+            {cartItemsCount > 0 && (
+              <span className="bg-red-500 text-white font-bold rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                {cartItemsCount}
+              </span>
+            )}
+          </button>
         </nav>
       </div>
     </header>

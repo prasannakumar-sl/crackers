@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { useCart } from '../context/CartContext';
 
 export default function PriceList() {
+  const { cart, addToCart, setShowCart } = useCart();
   const [quantities, setQuantities] = useState({});
-  const [showCart, setShowCart] = useState(false);
-  const [cart, setCart] = useState([]);
 
   const categories = [
     {
@@ -37,13 +37,26 @@ export default function PriceList() {
 
   const calculateTotal = (price, qty) => (price * qty).toFixed(2);
 
-  const cartTotal = Object.entries(quantities).reduce((total, [id, qty]) => {
-    if (qty === 0) return total;
-    const product = categories.flatMap(c => c.products).find(p => p.id === parseInt(id));
-    return total + (product.discount * qty);
+  const allProducts = categories.flatMap(c => c.products);
+
+  const cartTotal = cart.reduce((total, item) => {
+    return total + (item.discount * item.quantity);
   }, 0);
 
-  const cartItemsCount = Object.values(quantities).reduce((total, qty) => total + qty, 0);
+  const cartItemsCount = cart.reduce((total, item) => total + item.quantity, 0);
+
+  const handleViewCart = () => {
+    // Add selected quantities to global cart
+    Object.entries(quantities).forEach(([id, qty]) => {
+      if (qty > 0) {
+        const product = allProducts.find(p => p.id === parseInt(id));
+        if (product) {
+          addToCart({ ...product, quantity: qty });
+        }
+      }
+    });
+    setShowCart(true);
+  };
 
   return (
     <div className="bg-white">
@@ -67,8 +80,8 @@ export default function PriceList() {
 
             {/* View Cart Button */}
             <div className="text-center">
-              <button 
-                onClick={() => setShowCart(true)}
+              <button
+                onClick={handleViewCart}
                 className="bg-yellow-100 text-black px-6 py-2 rounded font-semibold hover:bg-yellow-50 transition-colors flex items-center justify-center gap-2 w-full"
               >
                 🛒 View Cart
@@ -187,52 +200,6 @@ export default function PriceList() {
         </div>
       </section>
 
-      {/* Cart Modal */}
-      {showCart && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-96 overflow-auto p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">Shopping Summary</h2>
-              <button onClick={() => setShowCart(false)} className="text-2xl font-bold text-gray-600 hover:text-black">
-                ✕
-              </button>
-            </div>
-            
-            {cartItemsCount === 0 ? (
-              <p className="text-gray-600 text-center py-8">Your cart is empty</p>
-            ) : (
-              <>
-                <div className="space-y-4 mb-6 max-h-48 overflow-y-auto">
-                  {categories.flatMap(c => c.products).map(product => {
-                    const qty = getQuantity(product.id);
-                    if (qty === 0) return null;
-                    const total = (product.discount * qty).toFixed(2);
-
-                    return (
-                      <div key={product.id} className="flex items-center justify-between border-b pb-4">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-black">{product.name}</h3>
-                          <p className="text-sm text-gray-600">₹{product.discount.toFixed(2)} × {qty} = ₹{total}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="border-t pt-4">
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-lg font-bold">Grand Total:</span>
-                    <span className="text-2xl font-bold text-red-600">₹{cartTotal.toFixed(2)}</span>
-                  </div>
-                  <button className="w-full bg-teal-900 text-white py-3 rounded-lg font-bold hover:bg-teal-800 transition-colors">
-                    Proceed to Checkout
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

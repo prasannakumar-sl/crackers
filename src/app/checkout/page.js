@@ -27,8 +27,26 @@ export default function CheckoutPage() {
       alert('Please fill in all customer details');
       return;
     }
-    // Here you would process the order
-    alert('Order confirmed! Redirecting to payment...');
+
+    // Save order to localStorage
+    const newOrder = {
+      id: Date.now(),
+      customerName: formData.name,
+      phone: formData.phone,
+      email: formData.email,
+      address: formData.address,
+      items: cart,
+      itemCount: cart.length,
+      totalAmount: getCartTotal() + 100 + packingFee,
+      date: new Date().toLocaleDateString()
+    };
+
+    const existingOrders = localStorage.getItem('adminOrders');
+    const orders = existingOrders ? JSON.parse(existingOrders) : [];
+    orders.push(newOrder);
+    localStorage.setItem('adminOrders', JSON.stringify(orders));
+
+    alert('Order confirmed! Thank you for your order.');
     // In a real app, you'd navigate to a payment processing page or handle payment here
   };
 

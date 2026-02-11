@@ -1,11 +1,18 @@
 'use client';
 
 import { useCart } from '../context/CartContext';
+import { useRouter } from 'next/navigation';
 
 export default function CartModal() {
   const { cart, updateQuantity, removeFromCart, getCartTotal, getCartItemCount, showCart, setShowCart } = useCart();
+  const router = useRouter();
   const cartItemsCount = getCartItemCount();
   const cartTotal = getCartTotal();
+
+  const handleCheckout = () => {
+    setShowCart(false);
+    router.push('/checkout');
+  };
 
   if (!showCart) return null;
 
@@ -97,7 +104,10 @@ export default function CartModal() {
             <span className="text-base font-bold">Total:</span>
             <span className="text-xl font-bold text-red-600">₹{cartTotal.toFixed(2)}</span>
           </div>
-          <button className="w-full bg-blue-600 text-white py-3 rounded font-bold hover:bg-blue-700 transition-colors">
+          <button
+            onClick={handleCheckout}
+            className="w-full bg-blue-600 text-white py-3 rounded font-bold hover:bg-blue-700 transition-colors"
+          >
             Proceed to Checkout
           </button>
         </div>

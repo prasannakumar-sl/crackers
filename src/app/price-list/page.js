@@ -12,20 +12,20 @@ export default function PriceList() {
       name: 'ONE SOUND CRACKERS',
       discount: '50% discount',
       products: [
-        { id: 1, name: '2½ Kuruvi', description: '2½" звукові', size: '1 Box', originalPrice: 12.00, discount: 6.00 },
-        { id: 2, name: '3½ Lakshmi', description: '3½" बॉक्स', size: '1 Box', originalPrice: 24.00, discount: 12.00 },
-        { id: 3, name: '4" Hulk', description: '4" आकार', size: '1 Box', originalPrice: 36.00, discount: 18.00 },
-        { id: 4, name: 'Gold Lakshmi Machine Fuse', description: 'सोने की फ्यूज', size: '1 Pkt', originalPrice: 96.00, discount: 48.00 },
-        { id: 5, name: 'Bahubali Super Deluxe Machine Fuse', description: 'सुपर डिलक्स', size: '1 Pkt', originalPrice: 130.00, discount: 65.00 },
+        { id: 1, productNumber: 'P001', name: '2½ Kuruvi', description: '2½" звукові', size: '1 Box', originalPrice: 12.00, discount: 6.00, image: '🎆' },
+        { id: 2, productNumber: 'P002', name: '3½ Lakshmi', description: '3½" बॉक्स', size: '1 Box', originalPrice: 24.00, discount: 12.00, image: '🎇' },
+        { id: 3, productNumber: 'P003', name: '4" Hulk', description: '4" आकार', size: '1 Box', originalPrice: 36.00, discount: 18.00, image: '🎉' },
+        { id: 4, productNumber: 'P004', name: 'Gold Lakshmi Machine Fuse', description: 'सोने की फ्यूज', size: '1 Pkt', originalPrice: 96.00, discount: 48.00, image: '✨' },
+        { id: 5, productNumber: 'P005', name: 'Bahubali Super Deluxe Machine Fuse', description: 'सुपर डिलक्स', size: '1 Pkt', originalPrice: 130.00, discount: 65.00, image: '👑' },
       ]
     },
     {
       name: 'BOMBS',
       discount: '50% discount',
       products: [
-        { id: 6, name: 'Bullet Bomb', description: 'बुलेट बम', size: '1 Box', originalPrice: 60.00, discount: 30.00 },
-        { id: 7, name: 'Super Bomb', description: 'सुपर बम', size: '1 Box', originalPrice: 80.00, discount: 40.00 },
-        { id: 8, name: 'Deluxe Bomb', description: 'डीलक्स बम', size: '1 Pkt', originalPrice: 45.00, discount: 22.50 },
+        { id: 6, productNumber: 'P006', name: 'Bullet Bomb', description: 'बुलेट बम', size: '1 Box', originalPrice: 60.00, discount: 30.00, image: '💥' },
+        { id: 7, productNumber: 'P007', name: 'Super Bomb', description: 'सुपर बम', size: '1 Box', originalPrice: 80.00, discount: 40.00, image: '🔥' },
+        { id: 8, productNumber: 'P008', name: 'Deluxe Bomb', description: 'डीलक्स बम', size: '1 Pkt', originalPrice: 45.00, discount: 22.50, image: '⚡' },
       ]
     }
   ];

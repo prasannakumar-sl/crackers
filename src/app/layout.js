@@ -3,6 +3,7 @@ import "./globals.css";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import CartModal from "./components/CartModal";
+import FloatingCartButton from "./components/FloatingCartButton";
 import { CartProvider } from "./context/CartContext";
 
 const geistSans = Geist({
@@ -32,6 +33,7 @@ export default function RootLayout({ children }) {
             {children}
           </main>
           <CartModal />
+          <FloatingCartButton />
           <Footer />
         </CartProvider>
       </body>

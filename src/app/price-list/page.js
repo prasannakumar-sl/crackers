@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 
 export default function PriceList() {
@@ -32,12 +32,30 @@ export default function PriceList() {
 
   const getQuantity = (productId) => quantities[productId] || 0;
   const setQuantity = (productId, qty) => {
-    setQuantities({ ...quantities, [productId]: Math.max(0, qty) });
+    const newQty = Math.max(0, qty);
+    setQuantities({ ...quantities, [productId]: newQty });
+
+    // Add/update item in cart immediately
+    if (newQty > 0) {
+      const product = allProducts.find(p => p.id === productId);
+      if (product) {
+        addToCart({ ...product, quantity: newQty });
+      }
+    }
   };
 
-  const calculateTotal = (price, qty) => (price * qty).toFixed(2);
-
   const allProducts = categories.flatMap(c => c.products);
+
+  // Sync local quantities with cart state
+  useEffect(() => {
+    const newQuantities = {};
+    cart.forEach(item => {
+      newQuantities[item.id] = item.quantity;
+    });
+    setQuantities(newQuantities);
+  }, [cart]);
+
+  const calculateTotal = (price, qty) => (price * qty).toFixed(2);
 
   const cartTotal = cart.reduce((total, item) => {
     return total + (item.discount * item.quantity);
@@ -46,15 +64,6 @@ export default function PriceList() {
   const cartItemsCount = cart.reduce((total, item) => total + item.quantity, 0);
 
   const handleViewCart = () => {
-    // Add selected quantities to global cart
-    Object.entries(quantities).forEach(([id, qty]) => {
-      if (qty > 0) {
-        const product = allProducts.find(p => p.id === parseInt(id));
-        if (product) {
-          addToCart({ ...product, quantity: qty });
-        }
-      }
-    });
     setShowCart(true);
   };
 

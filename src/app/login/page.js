@@ -1,21 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const router = useRouter();
 
   const handleLogin = () => {
     // Simple authentication check
     if (username === 'prasanna' && password === 'pk160011') {
-      // Store admin token/session (you can expand this with proper auth)
+      // Store admin token/session
       localStorage.setItem('adminUser', username);
-      // Redirect to admin panel
-      router.push('/admin');
+      // Redirect to admin panel using hash-based routing
+      window.location.href = '/#/admin/dashboard';
     } else {
       setError('Invalid username or password');
     }

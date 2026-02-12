@@ -1,26 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useState } from 'react';
 
 export default function AdminLayout({ children }) {
-  const router = useRouter();
-  const [isAuthorized, setIsAuthorized] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-
-  useEffect(() => {
-    const adminUser = localStorage.getItem('adminUser');
-    if (!adminUser) {
-      router.push('/login');
-    } else {
-      setIsAuthorized(true);
-    }
-  }, [router]);
-
-  if (!isAuthorized) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
-  }
 
   const navItems = [
     { label: 'Dashboard', href: '/admin', icon: '📊' },
@@ -34,7 +17,7 @@ export default function AdminLayout({ children }) {
 
   const handleLogout = () => {
     localStorage.removeItem('adminUser');
-    router.push('/login');
+    window.location.href = '/#/admin/login';
   };
 
   return (
@@ -60,14 +43,14 @@ export default function AdminLayout({ children }) {
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto py-4">
           {navItems.map((item) => (
-            <Link
+            <a
               key={item.href}
-              href={item.href}
+              href={`#${item.href}`}
               className="px-4 py-3 hover:bg-gray-800 transition-colors flex items-center gap-3 text-sm border-l-4 border-transparent hover:border-yellow-500"
             >
               <span className="text-xl">{item.icon}</span>
               {sidebarOpen && <span>{item.label}</span>}
-            </Link>
+            </a>
           ))}
         </nav>
 

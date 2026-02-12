@@ -47,7 +47,7 @@ export default function Header() {
             )}
           </button>
           <a
-            href="/login"
+            href="/#/admin/login"
             className="bg-yellow-500 text-teal-900 px-4 py-2 rounded font-semibold hover:bg-yellow-400 transition-colors"
           >
             Admin Login
@@ -92,7 +92,7 @@ export default function Header() {
               )}
             </button>
             <a
-              href="/login"
+              href="/#/admin/login"
               className="px-6 py-3 hover:bg-teal-700 transition-colors text-sm border-b border-teal-700 block"
               onClick={() => setMobileMenuOpen(false)}
             >

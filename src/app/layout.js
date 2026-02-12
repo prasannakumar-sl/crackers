@@ -4,6 +4,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import CartModal from "./components/CartModal";
 import FloatingCartButton from "./components/FloatingCartButton";
+import HashRouter from "./components/HashRouter";
 import { CartProvider } from "./context/CartContext";
 
 const geistSans = Geist({
@@ -28,13 +29,11 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
         <CartProvider>
-          <Header />
-          <main className="flex-1">
+          <HashRouter>
             {children}
-          </main>
-          <CartModal />
-          <FloatingCartButton />
-          <Footer />
+            <CartModal />
+            <FloatingCartButton />
+          </HashRouter>
         </CartProvider>
       </body>
     </html>

@@ -34,6 +34,38 @@ async function initializeDatabase() {
     await connection.execute(createAdminsTableQuery);
     console.log('✓ Admins table created successfully!');
 
+    const createOrdersTableQuery = `
+      CREATE TABLE IF NOT EXISTS orders (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        customer_name VARCHAR(255) NOT NULL,
+        phone VARCHAR(20) NOT NULL,
+        email VARCHAR(255),
+        address TEXT NOT NULL,
+        total_amount DECIMAL(10, 2) NOT NULL,
+        item_count INT NOT NULL,
+        status VARCHAR(50) DEFAULT 'Pending',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+
+    await connection.execute(createOrdersTableQuery);
+    console.log('✓ Orders table created successfully!');
+
+    const createOrderItemsTableQuery = `
+      CREATE TABLE IF NOT EXISTS order_items (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        order_id INT NOT NULL,
+        product_id INT,
+        product_name VARCHAR(255) NOT NULL,
+        quantity INT NOT NULL,
+        price DECIMAL(10, 2) NOT NULL,
+        FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+      )
+    `;
+
+    await connection.execute(createOrderItemsTableQuery);
+    console.log('✓ Order Items table created successfully!');
+
     // Check if default admin exists
     const [rows] = await connection.execute('SELECT * FROM admins WHERE username = ?', ['prasanna']);
     if (rows.length === 0) {

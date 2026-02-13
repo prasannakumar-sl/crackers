@@ -6,8 +6,9 @@ import { useState } from 'react';
 import { Snackbar, Alert } from '@mui/material';
 
 export default function CheckoutPage() {
-  const { cart, getCartTotal } = useCart();
+  const { cart, getCartTotal, clearCart } = useCart();
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -38,32 +39,51 @@ export default function CheckoutPage() {
     }));
   };
 
-  const handleConfirmOrder = () => {
+  const handleConfirmOrder = async () => {
     if (!formData.name || !formData.phone || !formData.email || !formData.address) {
       showAlert('Please fill in all customer details', 'warning');
       return;
     }
 
-    // Save order to localStorage
-    const newOrder = {
-      id: Date.now(),
-      customerName: formData.name,
-      phone: formData.phone,
-      email: formData.email,
-      address: formData.address,
-      items: cart,
-      itemCount: cart.length,
-      totalAmount: getCartTotal() + 100 + packingFee,
-      date: new Date().toLocaleDateString()
-    };
+    try {
+      setLoading(true);
 
-    const existingOrders = localStorage.getItem('adminOrders');
-    const orders = existingOrders ? JSON.parse(existingOrders) : [];
-    orders.push(newOrder);
-    localStorage.setItem('adminOrders', JSON.stringify(orders));
+      const orderData = {
+        customerName: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        address: formData.address,
+        items: cart,
+        itemCount: cart.length,
+        totalAmount: getCartTotal() + 100 + packingFee,
+      };
 
-    showAlert('Order confirmed! Thank you for your order.', 'success');
-    // In a real app, you'd navigate to a payment processing page or handle payment here
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        showAlert('✓ Order confirmed! Thank you for your order.', 'success');
+        clearCart();
+        // Redirect or show success message
+        setTimeout(() => {
+          router.push('/');
+        }, 2000);
+      } else {
+        showAlert(`Failed to confirm order: ${data.error || 'Unknown error'}`, 'error');
+      }
+    } catch (error) {
+      console.error('Error confirming order:', error);
+      showAlert(`Error confirming order: ${error.message}`, 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (cart.length === 0) {
@@ -264,9 +284,10 @@ export default function CheckoutPage() {
             {/* Confirm Order Button */}
             <button
               onClick={handleConfirmOrder}
-              className="w-full bg-blue-900 text-white py-3 rounded font-bold hover:bg-blue-800 transition"
+              disabled={loading}
+              className="w-full bg-blue-900 text-white py-3 rounded font-bold hover:bg-blue-800 transition disabled:bg-gray-400"
             >
-              Confirm Order
+              {loading ? 'Confirming...' : 'Confirm Order'}
             </button>
 
             {/* Continue Shopping Button */}

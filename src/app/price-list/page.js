@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 
 export default function PriceList() {
-  const { cart, addToCart, setShowCart } = useCart();
+  const { cart, addToCart, setShowCart, updateQuantity, removeFromCart } = useCart();
   const [quantities, setQuantities] = useState({});
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,32 +55,68 @@ export default function PriceList() {
     fetchProducts();
   }, []);
 
-  const getQuantity = (productId) => quantities[productId] || 0;
+  const getQuantity = (productId) => {
+    const qty = quantities[productId];
+    return qty === undefined ? 0 : qty;
+  };
+
   const setQuantity = (productId, qty) => {
-    const newQty = Math.max(0, qty);
+    // If qty is a string (from input), handle empty case for backspace
+    if (qty === '') {
+      setQuantities({ ...quantities, [productId]: '' });
+      removeFromCart(productId);
+      return;
+    }
+
+    const newQty = Math.max(0, parseInt(qty) || 0);
     setQuantities({ ...quantities, [productId]: newQty });
 
-    // Add/update item in cart immediately
+    // Find if product is already in cart
+    const existingItem = cart.find(item => item.id === productId);
+
     if (newQty > 0) {
-      const product = allProducts.find(p => p.id === productId);
-      if (product) {
-        const price = parseFloat(product.price);
-        addToCart({
-          id: product.id,
-          name: product.name,
-          discount: price / 2,
-          quantity: newQty
-        });
+      if (existingItem) {
+        // Use updateQuantity to set exact value
+        updateQuantity(productId, newQty);
+      } else {
+        // Add new item to cart
+        const product = allProducts.find(p => p.id === productId);
+        if (product) {
+          const price = parseFloat(product.price);
+          addToCart({
+            id: product.id,
+            name: product.name,
+            discount: price / 2,
+            quantity: newQty
+          });
+        }
       }
+    } else {
+      // If quantity is 0, remove from cart
+      removeFromCart(productId);
     }
   };
 
   // Sync local quantities with cart state
   useEffect(() => {
-    const newQuantities = {};
+    const newQuantities = { ...quantities };
+
+    // Update quantities from cart
     cart.forEach(item => {
       newQuantities[item.id] = item.quantity;
     });
+
+    // Handle items removed from cart
+    Object.keys(newQuantities).forEach(id => {
+      const productId = parseInt(id);
+      if (!cart.find(item => item.id === productId)) {
+        // If it's not in the cart and not currently being edited (empty string), set to 0
+        if (newQuantities[id] !== '') {
+          newQuantities[id] = 0;
+        }
+      }
+    });
+
     setQuantities(newQuantities);
   }, [cart]);
 
@@ -217,11 +253,17 @@ export default function PriceList() {
                                   −
                                 </button>
                                 <input
-                                  type="number"
+                                  type="text"
+                                  inputMode="numeric"
+                                  pattern="[0-9]*"
                                   value={qty}
-                                  onChange={(e) => setQuantity(product.id, parseInt(e.target.value) || 0)}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val === '' || /^\d+$/.test(val)) {
+                                      setQuantity(product.id, val);
+                                    }
+                                  }}
                                   className="w-10 text-center border border-gray-300 rounded py-1 text-sm font-semibold"
-                                  min="0"
                                 />
                                 <button
                                   onClick={() => setQuantity(product.id, qty + 1)}
@@ -288,11 +330,17 @@ export default function PriceList() {
                             −
                           </button>
                           <input
-                            type="number"
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
                             value={qty}
-                            onChange={(e) => setQuantity(product.id, parseInt(e.target.value) || 0)}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (val === '' || /^\d+$/.test(val)) {
+                                setQuantity(product.id, val);
+                              }
+                            }}
                             className="w-10 text-center border border-gray-300 rounded py-1 text-sm font-semibold"
-                            min="0"
                           />
                           <button
                             onClick={() => setQuantity(product.id, qty + 1)}

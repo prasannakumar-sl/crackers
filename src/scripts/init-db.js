@@ -66,6 +66,35 @@ async function initializeDatabase() {
     await connection.execute(createOrderItemsTableQuery);
     console.log('✓ Order Items table created successfully!');
 
+    const createProductSectionsTableQuery = `
+      CREATE TABLE IF NOT EXISTS product_sections (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        display_order INT DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      )
+    `;
+
+    await connection.execute(createProductSectionsTableQuery);
+    console.log('✓ Product Sections table created successfully!');
+
+    const createSectionProductsTableQuery = `
+      CREATE TABLE IF NOT EXISTS section_products (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        section_id INT NOT NULL,
+        product_id INT NOT NULL,
+        display_order INT DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (section_id) REFERENCES product_sections(id) ON DELETE CASCADE,
+        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+        UNIQUE KEY unique_section_product (section_id, product_id)
+      )
+    `;
+
+    await connection.execute(createSectionProductsTableQuery);
+    console.log('✓ Section Products table created successfully!');
+
     // Check if default admin exists
     const [rows] = await connection.execute('SELECT * FROM admins WHERE username = ?', ['prasanna']);
     if (rows.length === 0) {

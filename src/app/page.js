@@ -1,32 +1,28 @@
 'use client';
 
 import { useCart } from './context/CartContext';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
   const { addToCart, getCartItemCount, getCartTotal } = useCart();
+  const [sections, setSections] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const products = {
-    sale: [
-      { id: 1, productNumber: 'P001', name: '2½ Kuruvi', originalPrice: '₹12.00', discount: '₹6.00', image: '🎆' },
-      { id: 2, productNumber: 'P002', name: '3½ Lakshmi', originalPrice: '₹24.00', discount: '₹12.00', image: '🎇' },
-      { id: 3, productNumber: 'P003', name: '4" Hulk', originalPrice: '₹36.00', discount: '₹18.00', image: '🎉' },
-    ],
-    new: [
-      { id: 4, productNumber: 'P004', name: 'Rainbow Cracker', originalPrice: '₹28.00', discount: '₹14.00', image: '🌈' },
-      { id: 5, productNumber: 'P005', name: 'Super Combo', originalPrice: '₹50.00', discount: '₹25.00', image: '🎆' },
-      { id: 6, productNumber: 'P006', name: 'Deluxe Pack', originalPrice: '₹45.00', discount: '₹22.50', image: '✨' },
-    ],
-    bestsellers: [
-      { id: 7, productNumber: 'P007', name: 'Gold Lakshmi', originalPrice: '₹96.00', discount: '₹48.00', image: '🎇' },
-      { id: 8, productNumber: 'P008', name: 'Silver Combo', originalPrice: '₹120.00', discount: '₹60.00', image: '💫' },
-      { id: 9, productNumber: 'P009', name: 'Premium Pack', originalPrice: '₹150.00', discount: '₹75.00', image: '👑' },
-    ],
-    daily: [
-      { id: 10, productNumber: 'P010', name: 'Daily Deal 1', originalPrice: '₹18.00', discount: '₹9.00', image: '🎆' },
-      { id: 11, productNumber: 'P011', name: 'Daily Deal 2', originalPrice: '₹22.00', discount: '₹11.00', image: '🎇' },
-      { id: 12, productNumber: 'P012', name: 'Daily Deal 3', originalPrice: '₹26.00', discount: '₹13.00', image: '🎉' },
-    ],
-  };
+  useEffect(() => {
+    const fetchSections = async () => {
+      try {
+        const response = await fetch('/api/sections');
+        const data = await response.json();
+        setSections(data);
+      } catch (error) {
+        console.error('Error fetching sections:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSections();
+  }, []);
 
   const brands = ['Renu Crackers', 'Mightloads', 'Sri Aravind', 'Ramesh'];
   const blogPosts = [
@@ -106,101 +102,43 @@ export default function Home() {
       {/* Products Section */}
       <section className="py-12 px-6 bg-gray-50">
         <div className="max-w-7xl mx-auto">
-          {/* Sale Products */}
-          <div className="mb-16">
-            <h2 className="text-3xl font-bold text-black mb-8">SALE PRODUCTS</h2>
-            <div className="grid grid-cols-3 gap-6">
-              {products.sale.map(product => (
-                <div key={product.id} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-                  <div className="bg-purple-100 p-8 text-6xl flex items-center justify-center h-48">
-                    {product.image}
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-bold text-black mb-3">{product.name}</h3>
-                    <div className="flex gap-3 mb-4">
-                      <span className="text-gray-500 line-through text-sm">{product.originalPrice}</span>
-                      <span className="text-red-600 font-bold">{product.discount}</span>
-                    </div>
-                    <button onClick={() => addToCart(product)} className="w-full bg-red-500 text-white py-2 rounded font-semibold hover:bg-red-600 transition-colors">
-                      ADD TO CART
-                    </button>
-                  </div>
-                </div>
-              ))}
+          {loading ? (
+            <div className="text-center py-12">
+              <p className="text-gray-600">Loading products...</p>
             </div>
-          </div>
-
-          {/* New Arrivals */}
-          <div className="mb-16">
-            <h2 className="text-3xl font-bold text-black mb-8">NEW ARRIVALS - CRACKERS ONLINE</h2>
-            <div className="grid grid-cols-3 gap-6">
-              {products.new.map(product => (
-                <div key={product.id} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-                  <div className="bg-pink-100 p-8 text-6xl flex items-center justify-center h-48">
-                    {product.image}
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-bold text-black mb-3">{product.name}</h3>
-                    <div className="flex gap-3 mb-4">
-                      <span className="text-gray-500 line-through text-sm">{product.originalPrice}</span>
-                      <span className="text-red-600 font-bold">{product.discount}</span>
-                    </div>
-                    <button onClick={() => addToCart(product)} className="w-full bg-red-500 text-white py-2 rounded font-semibold hover:bg-red-600 transition-colors">
-                      ADD TO CART
-                    </button>
-                  </div>
-                </div>
-              ))}
+          ) : sections.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-600">No product sections available. Visit the admin panel to create sections and add products.</p>
             </div>
-          </div>
-
-          {/* Best Sellers */}
-          <div className="mb-16">
-            <h2 className="text-3xl font-bold text-black mb-8">BEST SELLERS</h2>
-            <div className="grid grid-cols-3 gap-6">
-              {products.bestsellers.map(product => (
-                <div key={product.id} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-                  <div className="bg-yellow-100 p-8 text-6xl flex items-center justify-center h-48">
-                    {product.image}
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-bold text-black mb-3">{product.name}</h3>
-                    <div className="flex gap-3 mb-4">
-                      <span className="text-gray-500 line-through text-sm">{product.originalPrice}</span>
-                      <span className="text-red-600 font-bold">{product.discount}</span>
-                    </div>
-                    <button onClick={() => addToCart(product)} className="w-full bg-red-500 text-white py-2 rounded font-semibold hover:bg-red-600 transition-colors">
-                      ADD TO CART
-                    </button>
-                  </div>
+          ) : (
+            sections.map((section) => (
+              <div key={section.id} className="mb-16">
+                <h2 className="text-3xl font-bold text-black mb-8">{section.title}</h2>
+                <div className="grid grid-cols-3 gap-6">
+                  {section.products && section.products.length > 0 ? (
+                    section.products.map(product => (
+                      <div key={product.id} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+                        <div className="bg-purple-100 p-8 text-6xl flex items-center justify-center h-48">
+                          {product.image || '📦'}
+                        </div>
+                        <div className="p-4">
+                          <h3 className="font-bold text-black mb-3">{product.name}</h3>
+                          <div className="flex gap-3 mb-4">
+                            <span className="text-gray-800 font-bold">₹{parseFloat(product.price).toFixed(2)}</span>
+                          </div>
+                          <button onClick={() => addToCart(product)} className="w-full bg-red-500 text-white py-2 rounded font-semibold hover:bg-red-600 transition-colors">
+                            ADD TO CART
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-600 col-span-3">No products in this section yet.</p>
+                  )}
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Daily Products */}
-          <div>
-            <h2 className="text-3xl font-bold text-black mb-8">DAILY PRODUCTS</h2>
-            <div className="grid grid-cols-3 gap-6">
-              {products.daily.map(product => (
-                <div key={product.id} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-                  <div className="bg-blue-100 p-8 text-6xl flex items-center justify-center h-48">
-                    {product.image}
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-bold text-black mb-3">{product.name}</h3>
-                    <div className="flex gap-3 mb-4">
-                      <span className="text-gray-500 line-through text-sm">{product.originalPrice}</span>
-                      <span className="text-red-600 font-bold">{product.discount}</span>
-                    </div>
-                    <button onClick={() => addToCart(product)} className="w-full bg-red-500 text-white py-2 rounded font-semibold hover:bg-red-600 transition-colors">
-                      ADD TO CART
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+              </div>
+            ))
+          )}
         </div>
       </section>
 

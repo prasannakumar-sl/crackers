@@ -16,28 +16,40 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-    const formData = await request.formData();
-    const name = formData.get('name');
-    const price = formData.get('price');
-    const description = formData.get('description');
-    const category = formData.get('category');
-    const quantity = formData.get('quantity');
-    const imageFile = formData.get('image');
+    const contentType = request.headers.get('content-type');
+    let name, price, description, category, quantity, imageData = null;
 
-    console.log('POST /api/products - Received data:', { name, price, description, category, quantity, hasImage: !!imageFile });
+    if (contentType && contentType.includes('application/json')) {
+      // Handle JSON request (from admin panel)
+      const data = await request.json();
+      name = data.name;
+      price = data.price;
+      description = data.description;
+      category = data.category;
+      quantity = data.quantity;
+      imageData = data.image;
+    } else {
+      // Handle FormData request
+      const formData = await request.formData();
+      name = formData.get('name');
+      price = formData.get('price');
+      description = formData.get('description');
+      category = formData.get('category');
+      quantity = formData.get('quantity');
+      const imageFile = formData.get('image');
+
+      if (imageFile && imageFile.size > 0) {
+        const buffer = await imageFile.arrayBuffer();
+        const base64 = Buffer.from(buffer).toString('base64');
+        imageData = `data:${imageFile.type};base64,${base64}`;
+      }
+    }
+
+    console.log('POST /api/products - Received data:', { name, price, description, category, quantity, hasImage: !!imageData });
 
     if (!name || !price) {
       console.error('Validation error: Missing name or price');
       return NextResponse.json({ error: 'Name and price are required' }, { status: 400 });
-    }
-
-    // Handle image upload
-    let imageData = null;
-    if (imageFile && imageFile.size > 0) {
-      const buffer = await imageFile.arrayBuffer();
-      const base64 = Buffer.from(buffer).toString('base64');
-      imageData = `data:${imageFile.type};base64,${base64}`;
-      console.log('Image uploaded and converted to base64');
     }
 
     console.log('Connecting to database...');

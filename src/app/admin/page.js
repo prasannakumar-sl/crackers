@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Snackbar, Alert, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import SectionManager from '../components/SectionManager';
 
 export default function AdminDashboard() {
   const [products, setProducts] = useState([]);
@@ -17,6 +18,7 @@ export default function AdminDashboard() {
     quantity: '',
   });
   const [submitting, setSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState('products');
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -158,201 +160,235 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <h2 className="text-3xl font-bold text-gray-800 mb-8">Dashboard</h2>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm">Total Products</p>
-              <p className="text-3xl font-bold text-gray-800">{products.length}</p>
-            </div>
-            <span className="text-4xl">📦</span>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm">Total Orders</p>
-              <p className="text-3xl font-bold text-gray-800">0</p>
-            </div>
-            <span className="text-4xl">📋</span>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm">Total Customers</p>
-              <p className="text-3xl font-bold text-gray-800">0</p>
-            </div>
-            <span className="text-4xl">👥</span>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm">Total Revenue</p>
-              <p className="text-3xl font-bold text-gray-800">₹{totalRevenue.toFixed(2)}</p>
-            </div>
-            <span className="text-4xl">💰</span>
-          </div>
+      {/* Tabs */}
+      <div className="mb-8 border-b border-gray-200">
+        <div className="flex gap-4">
+          <button
+            onClick={() => setActiveTab('products')}
+            className={`px-6 py-3 font-semibold transition ${
+              activeTab === 'products'
+                ? 'text-blue-600 border-b-2 border-blue-600'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            Products Management
+          </button>
+          <button
+            onClick={() => setActiveTab('sections')}
+            className={`px-6 py-3 font-semibold transition ${
+              activeTab === 'sections'
+                ? 'text-blue-600 border-b-2 border-blue-600'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            Sections Management
+          </button>
         </div>
       </div>
 
-      {/* Add Product Button */}
-      <div className="mb-6">
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
-        >
-          {showForm ? 'Cancel' : '+ Add New Product'}
-        </button>
-      </div>
+      {/* Products Tab */}
+      {activeTab === 'products' && (
+        <div>
+          <h2 className="text-3xl font-bold text-gray-800 mb-8">Dashboard</h2>
 
-      {/* Add Product Form */}
-      {showForm && (
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <h3 className="text-xl font-bold text-gray-800 mb-6">Add New Product</h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">Product Name *</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="e.g., Sparklers"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">Price (₹) *</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  name="price"
-                  value={formData.price}
-                  onChange={handleInputChange}
-                  placeholder="e.g., 50"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">Category</label>
-                <input
-                  type="text"
-                  name="category"
-                  value={formData.category}
-                  onChange={handleInputChange}
-                  placeholder="e.g., Sparklers, Bombs"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">Quantity</label>
-                <input
-                  type="number"
-                  name="quantity"
-                  value={formData.quantity}
-                  onChange={handleInputChange}
-                  placeholder="e.g., 100"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">Image URL</label>
-                <input
-                  type="url"
-                  name="image"
-                  value={formData.image}
-                  onChange={handleInputChange}
-                  placeholder="https://example.com/image.jpg"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-600 text-sm">Total Products</p>
+                  <p className="text-3xl font-bold text-gray-800">{products.length}</p>
+                </div>
+                <span className="text-4xl">📦</span>
               </div>
             </div>
 
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">Description</label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                placeholder="Product description..."
-                rows="3"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              ></textarea>
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-600 text-sm">Total Orders</p>
+                  <p className="text-3xl font-bold text-gray-800">0</p>
+                </div>
+                <span className="text-4xl">📋</span>
+              </div>
             </div>
 
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-600 text-sm">Total Customers</p>
+                  <p className="text-3xl font-bold text-gray-800">0</p>
+                </div>
+                <span className="text-4xl">👥</span>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-600 text-sm">Total Revenue</p>
+                  <p className="text-3xl font-bold text-gray-800">₹{totalRevenue.toFixed(2)}</p>
+                </div>
+                <span className="text-4xl">💰</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Add Product Button */}
+          <div className="mb-6">
             <button
-              type="submit"
-              disabled={submitting}
-              className="w-full bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition disabled:bg-gray-400"
+              onClick={() => setShowForm(!showForm)}
+              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
             >
-              {submitting ? 'Adding...' : 'Add Product'}
+              {showForm ? 'Cancel' : '+ Add New Product'}
             </button>
-          </form>
+          </div>
+
+          {/* Add Product Form */}
+          {showForm && (
+            <div className="bg-white rounded-lg shadow p-6 mb-8">
+              <h3 className="text-xl font-bold text-gray-800 mb-6">Add New Product</h3>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">Product Name *</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      placeholder="e.g., Sparklers"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">Price (₹) *</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      name="price"
+                      value={formData.price}
+                      onChange={handleInputChange}
+                      placeholder="e.g., 50"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">Category</label>
+                    <input
+                      type="text"
+                      name="category"
+                      value={formData.category}
+                      onChange={handleInputChange}
+                      placeholder="e.g., Sparklers, Bombs"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">Quantity</label>
+                    <input
+                      type="number"
+                      name="quantity"
+                      value={formData.quantity}
+                      onChange={handleInputChange}
+                      placeholder="e.g., 100"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">Image URL</label>
+                    <input
+                      type="url"
+                      name="image"
+                      value={formData.image}
+                      onChange={handleInputChange}
+                      placeholder="https://example.com/image.jpg"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">Description</label>
+                  <textarea
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    placeholder="Product description..."
+                    rows="3"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  ></textarea>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="w-full bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition disabled:bg-gray-400"
+                >
+                  {submitting ? 'Adding...' : 'Add Product'}
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* Products Table */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Products List</h3>
+
+            {loading ? (
+              <p className="text-gray-600">Loading products...</p>
+            ) : products.length === 0 ? (
+              <p className="text-gray-600">No products added yet. Click "Add New Product" to get started!</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="px-4 py-2 text-left text-gray-700 font-medium">Name</th>
+                      <th className="px-4 py-2 text-left text-gray-700 font-medium">Category</th>
+                      <th className="px-4 py-2 text-left text-gray-700 font-medium">Price</th>
+                      <th className="px-4 py-2 text-left text-gray-700 font-medium">Quantity</th>
+                      <th className="px-4 py-2 text-left text-gray-700 font-medium">Description</th>
+                      <th className="px-4 py-2 text-left text-gray-700 font-medium">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {products.map((product) => (
+                      <tr key={product.id} className="border-b hover:bg-gray-50">
+                        <td className="px-4 py-3 text-gray-800">{product.name}</td>
+                        <td className="px-4 py-3 text-gray-600">{product.category || '-'}</td>
+                        <td className="px-4 py-3 text-gray-800">₹{parseFloat(product.price).toFixed(2)}</td>
+                        <td className="px-4 py-3 text-gray-800">{product.quantity}</td>
+                        <td className="px-4 py-3 text-gray-600 max-w-xs truncate">{product.description || '-'}</td>
+                        <td className="px-4 py-3">
+                          <IconButton
+                            onClick={() => handleDeleteProduct(product.id)}
+                            color="error"
+                            size="small"
+                            title="Delete product"
+                            aria-label="Delete product"
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
-      {/* Products Table */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-xl font-bold text-gray-800 mb-4">Products List</h3>
-
-        {loading ? (
-          <p className="text-gray-600">Loading products...</p>
-        ) : products.length === 0 ? (
-          <p className="text-gray-600">No products added yet. Click "Add New Product" to get started!</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="px-4 py-2 text-left text-gray-700 font-medium">Name</th>
-                  <th className="px-4 py-2 text-left text-gray-700 font-medium">Category</th>
-                  <th className="px-4 py-2 text-left text-gray-700 font-medium">Price</th>
-                  <th className="px-4 py-2 text-left text-gray-700 font-medium">Quantity</th>
-                  <th className="px-4 py-2 text-left text-gray-700 font-medium">Description</th>
-                  <th className="px-4 py-2 text-left text-gray-700 font-medium">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {products.map((product) => (
-                  <tr key={product.id} className="border-b hover:bg-gray-50">
-                    <td className="px-4 py-3 text-gray-800">{product.name}</td>
-                    <td className="px-4 py-3 text-gray-600">{product.category || '-'}</td>
-                    <td className="px-4 py-3 text-gray-800">₹{parseFloat(product.price).toFixed(2)}</td>
-                    <td className="px-4 py-3 text-gray-800">{product.quantity}</td>
-                    <td className="px-4 py-3 text-gray-600 max-w-xs truncate">{product.description || '-'}</td>
-                    <td className="px-4 py-3">
-                      <IconButton
-                        onClick={() => handleDeleteProduct(product.id)}
-                        color="error"
-                        size="small"
-                        title="Delete product"
-                        aria-label="Delete product"
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      {/* Sections Tab */}
+      {activeTab === 'sections' && <SectionManager />}
 
       <Snackbar
         open={snackbar.open}

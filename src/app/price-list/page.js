@@ -6,29 +6,54 @@ import { useCart } from '../context/CartContext';
 export default function PriceList() {
   const { cart, addToCart, setShowCart } = useCart();
   const [quantities, setQuantities] = useState({});
+  const [allProducts, setAllProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState([]);
 
-  const categories = [
-    {
-      name: 'ONE SOUND CRACKERS',
-      discount: '50% discount',
-      products: [
-        { id: 1, productNumber: 'P001', name: '2½ Kuruvi', description: '2½" звукові', size: '1 Box', originalPrice: 12.00, discount: 6.00, image: '🎆' },
-        { id: 2, productNumber: 'P002', name: '3½ Lakshmi', description: '3½" बॉक्स', size: '1 Box', originalPrice: 24.00, discount: 12.00, image: '🎇' },
-        { id: 3, productNumber: 'P003', name: '4" Hulk', description: '4" आकार', size: '1 Box', originalPrice: 36.00, discount: 18.00, image: '🎉' },
-        { id: 4, productNumber: 'P004', name: 'Gold Lakshmi Machine Fuse', description: 'सोने की फ्यूज', size: '1 Pkt', originalPrice: 96.00, discount: 48.00, image: '✨' },
-        { id: 5, productNumber: 'P005', name: 'Bahubali Super Deluxe Machine Fuse', description: 'सुपर डिलक्स', size: '1 Pkt', originalPrice: 130.00, discount: 65.00, image: '👑' },
-      ]
-    },
-    {
-      name: 'BOMBS',
-      discount: '50% discount',
-      products: [
-        { id: 6, productNumber: 'P006', name: 'Bullet Bomb', description: 'बुलेट बम', size: '1 Box', originalPrice: 60.00, discount: 30.00, image: '💥' },
-        { id: 7, productNumber: 'P007', name: 'Super Bomb', description: 'सुपर बम', size: '1 Box', originalPrice: 80.00, discount: 40.00, image: '🔥' },
-        { id: 8, productNumber: 'P008', name: 'Deluxe Bomb', description: 'डीलक्स बम', size: '1 Pkt', originalPrice: 45.00, discount: 22.50, image: '⚡' },
-      ]
-    }
-  ];
+  // Fetch products from database
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('/api/products');
+        const data = await response.json();
+        setAllProducts(data);
+
+        // Group products by category
+        const grouped = {};
+        data.forEach(product => {
+          const category = product.category || 'UNCATEGORIZED';
+          if (!grouped[category]) {
+            grouped[category] = [];
+          }
+          const price = parseFloat(product.price);
+          grouped[category].push({
+            id: product.id,
+            name: product.name,
+            description: product.description || '',
+            size: '1 Box',
+            originalPrice: price,
+            discount: price / 2,
+            image: product.image,
+          });
+        });
+
+        // Convert to array format
+        const categoriesArray = Object.entries(grouped).map(([name, products]) => ({
+          name,
+          discount: '50% discount',
+          products,
+        }));
+
+        setCategories(categoriesArray);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const getQuantity = (productId) => quantities[productId] || 0;
   const setQuantity = (productId, qty) => {
@@ -39,12 +64,16 @@ export default function PriceList() {
     if (newQty > 0) {
       const product = allProducts.find(p => p.id === productId);
       if (product) {
-        addToCart({ ...product, quantity: newQty });
+        const price = parseFloat(product.price);
+        addToCart({
+          id: product.id,
+          name: product.name,
+          discount: price / 2,
+          quantity: newQty
+        });
       }
     }
   };
-
-  const allProducts = categories.flatMap(c => c.products);
 
   // Sync local quantities with cart state
   useEffect(() => {
@@ -115,163 +144,172 @@ export default function PriceList() {
       {/* Categories and Products */}
       <section className="py-8 px-6 bg-gray-50">
         <div className="max-w-7xl mx-auto">
-          {categories.map((category, catIdx) => (
-            <div key={catIdx} className="mb-12">
-              {/* Category Header */}
-              <div className="bg-purple-400 text-white py-3 px-6 rounded-t-lg font-bold text-lg mb-0">
-                {catIdx + 1}. {category.name.toUpperCase()} ({category.discount})
-              </div>
-
-              {/* Products Table - Desktop */}
-              <div className="hidden md:block bg-white border border-purple-400 rounded-b-lg overflow-hidden shadow-md">
-                <table className="w-full">
-                  <thead className="bg-purple-300 text-black font-semibold">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs">Image</th>
-                      <th className="px-4 py-3 text-left text-xs">Product</th>
-                      <th className="px-4 py-3 text-left text-xs">Size</th>
-                      <th className="px-4 py-3 text-left text-xs">Price</th>
-                      <th className="px-4 py-3 text-left text-xs">Discount</th>
-                      <th className="px-4 py-3 text-center text-xs">Quantity</th>
-                      <th className="px-4 py-3 text-right text-xs">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {category.products.map((product) => {
-                      const qty = getQuantity(product.id);
-                      const total = calculateTotal(product.discount, qty);
-
-                      return (
-                        <tr key={product.id} className="border-b hover:bg-gray-50">
-                          {/* Image */}
-                          <td className="px-4 py-3">
-                            <div className="w-12 h-12 bg-yellow-100 rounded flex items-center justify-center text-lg">
-                              🎆
-                            </div>
-                          </td>
-
-                          {/* Product Name */}
-                          <td className="px-4 py-3">
-                            <div className="text-sm font-semibold text-black">{product.name}</div>
-                            <div className="text-xs text-gray-500">{product.description}</div>
-                          </td>
-
-                          {/* Size */}
-                          <td className="px-4 py-3 text-sm text-black">{product.size}</td>
-
-                          {/* Original Price */}
-                          <td className="px-4 py-3">
-                            <span className="text-sm line-through text-gray-600">₹{product.originalPrice.toFixed(2)}</span>
-                          </td>
-
-                          {/* Discount Price */}
-                          <td className="px-4 py-3">
-                            <span className="text-sm font-bold text-red-600">₹{product.discount.toFixed(2)}</span>
-                          </td>
-
-                          {/* Quantity Controls */}
-                          <td className="px-4 py-3">
-                            <div className="flex items-center justify-center gap-2">
-                              <button
-                                onClick={() => setQuantity(product.id, qty - 1)}
-                                className="bg-red-500 text-white w-7 h-7 rounded font-bold hover:bg-red-600 transition-colors"
-                              >
-                                −
-                              </button>
-                              <input
-                                type="number"
-                                value={qty}
-                                onChange={(e) => setQuantity(product.id, parseInt(e.target.value) || 0)}
-                                className="w-10 text-center border border-gray-300 rounded py-1 text-sm font-semibold"
-                                min="0"
-                              />
-                              <button
-                                onClick={() => setQuantity(product.id, qty + 1)}
-                                className="bg-green-600 text-white w-7 h-7 rounded font-bold hover:bg-green-700 transition-colors"
-                              >
-                                +
-                              </button>
-                            </div>
-                          </td>
-
-                          {/* Total */}
-                          <td className="px-4 py-3 text-right">
-                            <span className="font-bold text-black">₹{total}</span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Products Cards - Mobile */}
-              <div className="md:hidden bg-white border border-purple-400 rounded-b-lg overflow-hidden shadow-md">
-                {category.products.map((product) => {
-                  const qty = getQuantity(product.id);
-                  const total = calculateTotal(product.discount, qty);
-
-                  return (
-                    <div key={product.id} className="border-b p-4 hover:bg-gray-50">
-                      {/* Image and Product Name */}
-                      <div className="flex gap-3 mb-3">
-                        <div className="w-12 h-12 bg-yellow-100 rounded flex items-center justify-center text-lg flex-shrink-0">
-                          🎆
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-black text-sm">{product.name}</div>
-                          <div className="text-xs text-gray-500">{product.description}</div>
-                          <div className="text-xs text-gray-600 mt-1">{product.size}</div>
-                        </div>
-                      </div>
-
-                      {/* Prices */}
-                      <div className="grid grid-cols-3 gap-2 mb-3 text-center">
-                        <div>
-                          <div className="text-xs text-gray-600">Original</div>
-                          <div className="text-xs line-through text-gray-500">₹{product.originalPrice.toFixed(2)}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-gray-600">Discount</div>
-                          <div className="text-sm font-bold text-red-600">₹{product.discount.toFixed(2)}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-gray-600">Total</div>
-                          <div className="font-bold text-black">₹{total}</div>
-                        </div>
-                      </div>
-
-                      {/* Quantity Controls */}
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => setQuantity(product.id, qty - 1)}
-                          className="bg-red-500 text-white w-7 h-7 rounded font-bold hover:bg-red-600 transition-colors"
-                        >
-                          −
-                        </button>
-                        <input
-                          type="number"
-                          value={qty}
-                          onChange={(e) => setQuantity(product.id, parseInt(e.target.value) || 0)}
-                          className="w-10 text-center border border-gray-300 rounded py-1 text-sm font-semibold"
-                          min="0"
-                        />
-                        <button
-                          onClick={() => setQuantity(product.id, qty + 1)}
-                          className="bg-green-600 text-white w-7 h-7 rounded font-bold hover:bg-green-700 transition-colors"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+          {loading ? (
+            <div className="bg-white rounded-lg shadow p-6 text-center">
+              <p className="text-gray-600">Loading products from database...</p>
             </div>
-          ))}
+          ) : categories.length === 0 ? (
+            <div className="bg-white rounded-lg shadow p-6 text-center">
+              <p className="text-gray-600">No products available. Please add products from the admin panel.</p>
+            </div>
+          ) : (
+            categories.map((category, catIdx) => (
+              <div key={catIdx} className="mb-12">
+                {/* Category Header */}
+                <div className="bg-purple-400 text-white py-3 px-6 rounded-t-lg font-bold text-lg mb-0">
+                  {catIdx + 1}. {category.name.toUpperCase()} ({category.discount})
+                </div>
+
+                {/* Products Table - Desktop */}
+                <div className="hidden md:block bg-white border border-purple-400 rounded-b-lg overflow-hidden shadow-md">
+                  <table className="w-full">
+                    <thead className="bg-purple-300 text-black font-semibold">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs">Image</th>
+                        <th className="px-4 py-3 text-left text-xs">Product</th>
+                        <th className="px-4 py-3 text-left text-xs">Size</th>
+                        <th className="px-4 py-3 text-left text-xs">Price</th>
+                        <th className="px-4 py-3 text-left text-xs">Discount</th>
+                        <th className="px-4 py-3 text-center text-xs">Quantity</th>
+                        <th className="px-4 py-3 text-right text-xs">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {category.products.map((product) => {
+                        const qty = getQuantity(product.id);
+                        const total = calculateTotal(product.discount, qty);
+
+                        return (
+                          <tr key={product.id} className="border-b hover:bg-gray-50">
+                            {/* Image */}
+                            <td className="px-4 py-3">
+                              <div className="w-12 h-12 bg-yellow-100 rounded flex items-center justify-center text-lg">
+                                {product.image || '🎆'}
+                              </div>
+                            </td>
+
+                            {/* Product Name */}
+                            <td className="px-4 py-3">
+                              <div className="text-sm font-semibold text-black">{product.name}</div>
+                              <div className="text-xs text-gray-500">{product.description}</div>
+                            </td>
+
+                            {/* Size */}
+                            <td className="px-4 py-3 text-sm text-black">{product.size}</td>
+
+                            {/* Original Price */}
+                            <td className="px-4 py-3">
+                              <span className="text-sm line-through text-gray-600">₹{product.originalPrice.toFixed(2)}</span>
+                            </td>
+
+                            {/* Discount Price */}
+                            <td className="px-4 py-3">
+                              <span className="text-sm font-bold text-red-600">₹{product.discount.toFixed(2)}</span>
+                            </td>
+
+                            {/* Quantity Controls */}
+                            <td className="px-4 py-3">
+                              <div className="flex items-center justify-center gap-2">
+                                <button
+                                  onClick={() => setQuantity(product.id, qty - 1)}
+                                  className="bg-red-500 text-white w-7 h-7 rounded font-bold hover:bg-red-600 transition-colors"
+                                >
+                                  −
+                                </button>
+                                <input
+                                  type="number"
+                                  value={qty}
+                                  onChange={(e) => setQuantity(product.id, parseInt(e.target.value) || 0)}
+                                  className="w-10 text-center border border-gray-300 rounded py-1 text-sm font-semibold"
+                                  min="0"
+                                />
+                                <button
+                                  onClick={() => setQuantity(product.id, qty + 1)}
+                                  className="bg-green-600 text-white w-7 h-7 rounded font-bold hover:bg-green-700 transition-colors"
+                                >
+                                  +
+                                </button>
+                              </div>
+                            </td>
+
+                            {/* Total */}
+                            <td className="px-4 py-3 text-right">
+                              <span className="font-bold text-black">₹{total}</span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Products Cards - Mobile */}
+                <div className="md:hidden bg-white border border-purple-400 rounded-b-lg overflow-hidden shadow-md">
+                  {category.products.map((product) => {
+                    const qty = getQuantity(product.id);
+                    const total = calculateTotal(product.discount, qty);
+
+                    return (
+                      <div key={product.id} className="border-b p-4 hover:bg-gray-50">
+                        {/* Image and Product Name */}
+                        <div className="flex gap-3 mb-3">
+                          <div className="w-12 h-12 bg-yellow-100 rounded flex items-center justify-center text-lg flex-shrink-0">
+                            {product.image || '🎆'}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold text-black text-sm">{product.name}</div>
+                            <div className="text-xs text-gray-500">{product.description}</div>
+                            <div className="text-xs text-gray-600 mt-1">{product.size}</div>
+                          </div>
+                        </div>
+
+                        {/* Prices */}
+                        <div className="grid grid-cols-3 gap-2 mb-3 text-center">
+                          <div>
+                            <div className="text-xs text-gray-600">Original</div>
+                            <div className="text-xs line-through text-gray-500">₹{product.originalPrice.toFixed(2)}</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-gray-600">Discount</div>
+                            <div className="text-sm font-bold text-red-600">₹{product.discount.toFixed(2)}</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-gray-600">Total</div>
+                            <div className="font-bold text-black">₹{total}</div>
+                          </div>
+                        </div>
+
+                        {/* Quantity Controls */}
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => setQuantity(product.id, qty - 1)}
+                            className="bg-red-500 text-white w-7 h-7 rounded font-bold hover:bg-red-600 transition-colors"
+                          >
+                            −
+                          </button>
+                          <input
+                            type="number"
+                            value={qty}
+                            onChange={(e) => setQuantity(product.id, parseInt(e.target.value) || 0)}
+                            className="w-10 text-center border border-gray-300 rounded py-1 text-sm font-semibold"
+                            min="0"
+                          />
+                          <button
+                            onClick={() => setQuantity(product.id, qty + 1)}
+                            className="bg-green-600 text-white w-7 h-7 rounded font-bold hover:bg-green-700 transition-colors"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </section>
-
     </div>
   );
 }

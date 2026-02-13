@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Snackbar, Alert } from '@mui/material';
 
 export default function PaymentsInfoPage() {
   const [payments, setPayments] = useState({
@@ -21,6 +22,21 @@ export default function PaymentsInfoPage() {
 
   const [editMode, setEditMode] = useState(false);
   const [tempPayments, setTempPayments] = useState(payments);
+
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success',
+  });
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') return;
+    setSnackbar(prev => ({ ...prev, open: false }));
+  };
+
+  const showAlert = (message, severity = 'success') => {
+    setSnackbar({ open: true, message, severity });
+  };
 
   useEffect(() => {
     const savedPayments = localStorage.getItem('adminPayments');
@@ -45,7 +61,7 @@ export default function PaymentsInfoPage() {
     setPayments(tempPayments);
     localStorage.setItem('adminPayments', JSON.stringify(tempPayments));
     setEditMode(false);
-    alert('Payment methods updated successfully!');
+    showAlert('Payment methods updated successfully!', 'success');
   };
 
   return (
@@ -178,6 +194,17 @@ export default function PaymentsInfoPage() {
           </button>
         </div>
       )}
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} variant="filled" sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

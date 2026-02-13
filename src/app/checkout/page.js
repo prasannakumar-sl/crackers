@@ -3,6 +3,7 @@
 import { useCart } from '../context/CartContext';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { Snackbar, Alert } from '@mui/material';
 
 export default function CheckoutPage() {
   const { cart, getCartTotal } = useCart();
@@ -14,6 +15,21 @@ export default function CheckoutPage() {
     address: '',
   });
 
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success',
+  });
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') return;
+    setSnackbar(prev => ({ ...prev, open: false }));
+  };
+
+  const showAlert = (message, severity = 'success') => {
+    setSnackbar({ open: true, message, severity });
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -24,7 +40,7 @@ export default function CheckoutPage() {
 
   const handleConfirmOrder = () => {
     if (!formData.name || !formData.phone || !formData.email || !formData.address) {
-      alert('Please fill in all customer details');
+      showAlert('Please fill in all customer details', 'warning');
       return;
     }
 
@@ -46,7 +62,7 @@ export default function CheckoutPage() {
     orders.push(newOrder);
     localStorage.setItem('adminOrders', JSON.stringify(orders));
 
-    alert('Order confirmed! Thank you for your order.');
+    showAlert('Order confirmed! Thank you for your order.', 'success');
     // In a real app, you'd navigate to a payment processing page or handle payment here
   };
 
@@ -263,6 +279,17 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} variant="filled" sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

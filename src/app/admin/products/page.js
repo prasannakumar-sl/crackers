@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { Snackbar, Alert, IconButton } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
@@ -17,6 +19,23 @@ export default function ProductsPage() {
     image: null,
     quantity: '',
   });
+
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success',
+  });
+
+  const fileInputRef = useRef(null);
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') return;
+    setSnackbar(prev => ({ ...prev, open: false }));
+  };
+
+  const showAlert = (message, severity = 'success') => {
+    setSnackbar({ open: true, message, severity });
+  };
 
   // Fetch products from database on mount
   useEffect(() => {
@@ -39,7 +58,7 @@ export default function ProductsPage() {
       setProducts(data);
     } catch (error) {
       console.error('Error fetching products:', error);
-      alert(`Error fetching products: ${error.message}`);
+      showAlert(`Error fetching products: ${error.message}`, 'error');
     } finally {
       setLoading(false);
     }
@@ -60,7 +79,7 @@ export default function ProductsPage() {
         ...prev,
         image: file
       }));
-      
+
       // Show preview
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -70,11 +89,22 @@ export default function ProductsPage() {
     }
   };
 
+  const handleRemoveImage = () => {
+    setFormData(prev => ({
+      ...prev,
+      image: null
+    }));
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleAddProduct = async (e) => {
     e.preventDefault();
 
     if (!formData.name || !formData.price) {
-      alert('Product name and price are required');
+      showAlert('Product name and price are required', 'warning');
       return;
     }
 
@@ -105,8 +135,8 @@ export default function ProductsPage() {
       console.log('Response data:', responseData);
 
       if (response.ok) {
-        alert('✓ Product added successfully to database!');
-        
+        showAlert('✓ Product added successfully to database!', 'success');
+
         // Reset form
         setFormData({
           name: '',
@@ -122,11 +152,11 @@ export default function ProductsPage() {
         // Fetch fresh data from database
         await fetchProducts();
       } else {
-        alert(`Failed to add product: ${responseData.error || 'Unknown error'}`);
+        showAlert(`Failed to add product: ${responseData.error || 'Unknown error'}`, 'error');
       }
     } catch (error) {
       console.error('Error adding product:', error);
-      alert(`Error adding product: ${error.message}`);
+      showAlert(`Error adding product: ${error.message}`, 'error');
     } finally {
       setSubmitting(false);
     }
@@ -156,18 +186,48 @@ export default function ProductsPage() {
       console.log('=== DELETE END ===');
 
       if (response.ok) {
-        alert('✓ Product deleted successfully');
+        showAlert('✓ Product deleted successfully', 'success');
         await fetchProducts();
       } else {
         const errorMsg = responseData.error || 'Unknown error';
         console.error('Delete failed with error:', errorMsg);
-        alert(`Failed to delete product: ${errorMsg}`);
+        showAlert(`Failed to delete product: ${errorMsg}`, 'error');
       }
     } catch (error) {
       console.error('Error deleting product:', error);
       console.error('Error message:', error.message);
       console.error('Error stack:', error.stack);
-      alert(`Error deleting product: ${error.message}`);
+      showAlert(`Error deleting product: ${error.message}`, 'error');
+    } finally {
+      setDeleting(null);
+    }
+  };
+
+  const handleDeleteImage = async (id) => {
+    if (!confirm('Are you sure you want to delete this product image?')) {
+      return;
+    }
+
+    try {
+      setDeleting(id);
+      const response = await fetch(`/api/products/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ image: null }),
+      });
+
+      if (response.ok) {
+        showAlert('✓ Image deleted successfully', 'success');
+        await fetchProducts();
+      } else {
+        const data = await response.json();
+        showAlert(`Failed to delete image: ${data.error || 'Unknown error'}`, 'error');
+      }
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      showAlert(`Error deleting image: ${error.message}`, 'error');
     } finally {
       setDeleting(null);
     }
@@ -257,6 +317,7 @@ export default function ProductsPage() {
                 <div className="flex items-center gap-4">
                   <div className="flex-1">
                     <input
+                      ref={fileInputRef}
                       type="file"
                       accept="image/*"
                       onChange={handleImageChange}
@@ -265,12 +326,20 @@ export default function ProductsPage() {
                     <p className="text-xs text-gray-500 mt-1">Upload JPG, PNG, or GIF (Max 5MB)</p>
                   </div>
                   {imagePreview && (
-                    <div className="flex-shrink-0">
-                      <img 
-                        src={imagePreview} 
-                        alt="Preview" 
+                    <div className="flex-shrink-0 relative group">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
                         className="w-20 h-20 object-cover rounded border border-gray-300"
                       />
+                      <button
+                        type="button"
+                        onClick={handleRemoveImage}
+                        className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center shadow hover:bg-red-700 transition-colors"
+                        title="Remove image"
+                      >
+                        ✕
+                      </button>
                     </div>
                   )}
                 </div>
@@ -321,29 +390,41 @@ export default function ProductsPage() {
                     <td className="px-6 py-3 text-sm text-gray-600 max-w-xs truncate">{product.description || '-'}</td>
                     <td className="px-6 py-3">
                       {product.image ? (
-                        <div className="flex items-center">
-                          {product.image.startsWith('data:') || product.image.startsWith('/uploads') ? (
-                            <img 
-                              src={product.image} 
-                              alt={product.name}
-                              className="w-10 h-10 object-cover rounded"
-                            />
-                          ) : (
-                            <span className="text-2xl">{product.image}</span>
-                          )}
+                        <div className="flex items-center gap-2">
+                          <div className="relative group">
+                            {product.image.startsWith('data:') || product.image.startsWith('/uploads') ? (
+                              <img
+                                src={product.image}
+                                alt={product.name}
+                                className="w-10 h-10 object-cover rounded border border-gray-200"
+                              />
+                            ) : (
+                              <span className="text-2xl">{product.image}</span>
+                            )}
+                            <button
+                              onClick={() => handleDeleteImage(product.id)}
+                              disabled={deleting === product.id}
+                              className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
+                              title="Delete Image"
+                            >
+                              ✕
+                            </button>
+                          </div>
                         </div>
                       ) : (
                         <span className="text-gray-400">-</span>
                       )}
                     </td>
                     <td className="px-6 py-3 text-sm">
-                      <button
+                      <IconButton
                         onClick={() => handleDeleteProduct(product.id)}
                         disabled={deleting === product.id}
-                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors disabled:bg-gray-400"
+                        color="error"
+                        size="small"
+                        title="Delete Product"
                       >
-                        {deleting === product.id ? 'Deleting...' : 'Delete'}
-                      </button>
+                        <DeleteIcon />
+                      </IconButton>
                     </td>
                   </tr>
                 ))}
@@ -352,6 +433,17 @@ export default function ProductsPage() {
           </div>
         )}
       </div>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} variant="filled" sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

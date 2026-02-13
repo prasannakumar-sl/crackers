@@ -1,3 +1,4 @@
+import { NextResponse } from 'next/server';
 import { getConnection } from '@/lib/db';
 
 export async function GET() {
@@ -6,10 +7,10 @@ export async function GET() {
     const [products] = await connection.execute('SELECT * FROM products ORDER BY created_at DESC');
     await connection.end();
 
-    return Response.json(products);
+    return NextResponse.json(products);
   } catch (error) {
     console.error('Error fetching products:', error);
-    return Response.json({ error: 'Failed to fetch products' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
   }
 }
 
@@ -27,7 +28,7 @@ export async function POST(request) {
 
     if (!name || !price) {
       console.error('Validation error: Missing name or price');
-      return Response.json({ error: 'Name and price are required' }, { status: 400 });
+      return NextResponse.json({ error: 'Name and price are required' }, { status: 400 });
     }
 
     // Handle image upload
@@ -49,7 +50,7 @@ export async function POST(request) {
     console.log('INSERT successful. ID:', result.insertId);
     await connection.end();
 
-    return Response.json({
+    return NextResponse.json({
       id: result.insertId,
       name,
       price,
@@ -61,6 +62,6 @@ export async function POST(request) {
   } catch (error) {
     console.error('Error adding product:', error.message);
     console.error('Full error:', error);
-    return Response.json({ error: `Failed to add product: ${error.message}` }, { status: 500 });
+    return NextResponse.json({ error: `Failed to add product: ${error.message}` }, { status: 500 });
   }
 }

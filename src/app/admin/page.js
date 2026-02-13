@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Snackbar, Alert, IconButton } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 export default function AdminDashboard() {
   const [products, setProducts] = useState([]);
@@ -15,6 +17,21 @@ export default function AdminDashboard() {
     quantity: '',
   });
   const [submitting, setSubmitting] = useState(false);
+
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success',
+  });
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') return;
+    setSnackbar(prev => ({ ...prev, open: false }));
+  };
+
+  const showAlert = (message, severity = 'success') => {
+    setSnackbar({ open: true, message, severity });
+  };
 
   useEffect(() => {
     fetchProducts();
@@ -36,7 +53,7 @@ export default function AdminDashboard() {
       setProducts(data);
     } catch (error) {
       console.error('Error fetching products:', error);
-      alert(`Error fetching products: ${error.message}`);
+      showAlert(`Error fetching products: ${error.message}`, 'error');
     } finally {
       setLoading(false);
     }
@@ -87,13 +104,13 @@ export default function AdminDashboard() {
         });
         setShowForm(false);
         fetchProducts();
-        alert('✓ Product added successfully! Check the Products List below.');
+        showAlert('✓ Product added successfully! Check the Products List below.', 'success');
       } else {
-        alert(`Failed to add product: ${responseData.error || 'Unknown error'}`);
+        showAlert(`Failed to add product: ${responseData.error || 'Unknown error'}`, 'error');
       }
     } catch (error) {
       console.error('Error adding product:', error);
-      alert(`Error adding product: ${error.message}`);
+      showAlert(`Error adding product: ${error.message}`, 'error');
     } finally {
       setSubmitting(false);
     }
@@ -126,14 +143,14 @@ export default function AdminDashboard() {
       console.log('Delete response data:', responseData);
 
       if (response.ok) {
-        alert('✓ Product deleted successfully!');
+        showAlert('✓ Product deleted successfully!', 'success');
         fetchProducts();
       } else {
-        alert(`Failed to delete product: ${responseData.error || 'Unknown error'}`);
+        showAlert(`Failed to delete product: ${responseData.error || 'Unknown error'}`, 'error');
       }
     } catch (error) {
       console.error('Error deleting product:', error);
-      alert(`Error deleting product: ${error.message}`);
+      showAlert(`Error deleting product: ${error.message}`, 'error');
     }
   };
 
@@ -319,14 +336,15 @@ export default function AdminDashboard() {
                     <td className="px-4 py-3 text-gray-800">{product.quantity}</td>
                     <td className="px-4 py-3 text-gray-600 max-w-xs truncate">{product.description || '-'}</td>
                     <td className="px-4 py-3">
-                      <button
+                      <IconButton
                         onClick={() => handleDeleteProduct(product.id)}
-                        className="inline-flex items-center justify-center w-8 h-8 text-red-600 hover:bg-red-100 rounded-lg transition"
+                        color="error"
+                        size="small"
                         title="Delete product"
                         aria-label="Delete product"
                       >
-                        🗑️
-                      </button>
+                        <DeleteIcon />
+                      </IconButton>
                     </td>
                   </tr>
                 ))}
@@ -335,6 +353,17 @@ export default function AdminDashboard() {
           </div>
         )}
       </div>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} variant="filled" sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

@@ -12,6 +12,7 @@ import CustomersPage from '../admin/customers/page';
 import PaymentsInfoPage from '../admin/payments-info/page';
 import ChitFundPage from '../admin/chit-fund/page';
 import StaffsPage from '../admin/staffs/page';
+import CompanyInfoPage from '../admin/company-info/page';
 
 export default function HashRouter({ children }) {
   const [hash, setHash] = useState('');
@@ -33,7 +34,7 @@ export default function HashRouter({ children }) {
   const route = hash.replace('#', '') || '/';
 
   // Admin routes - check if user is authorized
-  const adminRoutes = ['/admin', '/admin/dashboard', '/admin/products', '/admin/orders', '/admin/customers', '/admin/payments-info', '/admin/chit-fund', '/admin/staffs'];
+  const adminRoutes = ['/admin', '/admin/dashboard', '/admin/products', '/admin/orders', '/admin/customers', '/admin/payments-info', '/admin/chit-fund', '/admin/staffs', '/admin/company-info'];
   const isAdminRoute = adminRoutes.includes(route);
   const adminUser = typeof window !== 'undefined' ? localStorage.getItem('adminUser') : null;
 
@@ -62,6 +63,8 @@ export default function HashRouter({ children }) {
       pageContent = <ChitFundPage />;
     } else if (route === '/admin/staffs') {
       pageContent = <StaffsPage />;
+    } else if (route === '/admin/company-info') {
+      pageContent = <CompanyInfoPage />;
     }
 
     return <AdminLayout>{pageContent}</AdminLayout>;

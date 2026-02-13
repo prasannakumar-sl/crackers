@@ -1,12 +1,45 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 
 export default function Header() {
   const { getCartItemCount, setShowCart } = useCart();
   const cartItemsCount = getCartItemCount();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [companyInfo, setCompanyInfo] = useState({
+    company_name: 'pk crackers',
+    logo: null,
+  });
+  const [loadingCompanyInfo, setLoadingCompanyInfo] = useState(true);
+
+  useEffect(() => {
+    fetchCompanyInfo();
+  }, []);
+
+  const fetchCompanyInfo = async () => {
+    try {
+      const response = await fetch('/api/company-info', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCompanyInfo({
+          company_name: data.company_name || 'pk crackers',
+          logo: data.logo,
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching company info:', error);
+      // Use default values on error
+    } finally {
+      setLoadingCompanyInfo(false);
+    }
+  };
 
   const navLinks = [
     { href: '/', label: 'Home' },
@@ -22,10 +55,18 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center font-bold text-teal-900">
-            P
-          </div>
-          <span className="font-bold text-sm">pk crackers</span>
+          {!loadingCompanyInfo && companyInfo.logo ? (
+            <img
+              src={companyInfo.logo}
+              alt={companyInfo.company_name}
+              className="w-8 h-8 rounded-full object-cover"
+            />
+          ) : (
+            <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center font-bold text-teal-900">
+              {companyInfo.company_name.charAt(0).toUpperCase()}
+            </div>
+          )}
+          <span className="font-bold text-sm">{companyInfo.company_name}</span>
         </div>
 
         {/* Desktop Navigation */}

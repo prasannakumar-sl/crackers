@@ -39,7 +39,34 @@ async function migrateDatabase() {
     await connection.execute(createSectionProductsTableQuery);
     console.log('✓ Section products table created');
 
-    console.log('\n4. Verifying products table structure...');
+    console.log('\n4. Creating company_info table...');
+    const createCompanyInfoTableQuery = `
+      CREATE TABLE IF NOT EXISTS company_info (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        company_name VARCHAR(255) NOT NULL,
+        phone_number VARCHAR(20),
+        gst_number VARCHAR(50),
+        email VARCHAR(255),
+        logo LONGTEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      )
+    `;
+    await connection.execute(createCompanyInfoTableQuery);
+    console.log('✓ Company info table created');
+
+    // Insert default company info if table is empty
+    const [companyInfo] = await connection.execute('SELECT COUNT(*) as count FROM company_info');
+    if (companyInfo[0].count === 0) {
+      const defaultCompanyQuery = `
+        INSERT INTO company_info (company_name, phone_number, gst_number, email)
+        VALUES (?, ?, ?, ?)
+      `;
+      await connection.execute(defaultCompanyQuery, ['pk crackers', '', '', '']);
+      console.log('✓ Default company info inserted');
+    }
+
+    console.log('\n5. Verifying products table structure...');
     const [tableInfo] = await connection.execute('DESCRIBE products');
     console.log('✓ Products table structure:');
     tableInfo.forEach(col => {

@@ -13,6 +13,7 @@ export default function AdminLayout({ children }) {
     { label: 'Payments Info', href: '/admin/payments-info', icon: '💳' },
     { label: 'Chit Fund', href: '/admin/chit-fund', icon: '💰' },
     { label: 'Staffs', href: '/admin/staffs', icon: '👨‍💼' },
+    { label: 'Company Info', href: '/admin/company-info', icon: '🏢' },
   ];
 
   const handleLogout = () => {

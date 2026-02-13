@@ -262,7 +262,7 @@ export default function ProductsPage() {
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="e.g., 2½ Kuruvi"
-                  className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-blue-600"
+                  className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-blue-600 text-black"
                   required
                 />
               </div>
@@ -275,7 +275,7 @@ export default function ProductsPage() {
                   onChange={handleInputChange}
                   placeholder="e.g., 100"
                   step="0.01"
-                  className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-blue-600"
+                  className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-blue-600 text-black"
                   required
                 />
               </div>
@@ -287,7 +287,7 @@ export default function ProductsPage() {
                   value={formData.category}
                   onChange={handleInputChange}
                   placeholder="e.g., Sparklers, Bombs"
-                  className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-blue-600"
+                  className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-blue-600 text-black"
                 />
               </div>
               <div>
@@ -298,7 +298,7 @@ export default function ProductsPage() {
                   value={formData.quantity}
                   onChange={handleInputChange}
                   placeholder="e.g., 100"
-                  className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-blue-600"
+                  className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-blue-600 text-black"
                 />
               </div>
               <div className="md:col-span-2">
@@ -309,7 +309,7 @@ export default function ProductsPage() {
                   onChange={handleInputChange}
                   placeholder="Product description"
                   rows="3"
-                  className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-blue-600"
+                  className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-blue-600 text-black"
                 />
               </div>
               <div className="md:col-span-2">
@@ -321,7 +321,7 @@ export default function ProductsPage() {
                       type="file"
                       accept="image/*"
                       onChange={handleImageChange}
-                      className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-blue-600"
+                      className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-blue-600 text-black"
                     />
                     <p className="text-xs text-gray-500 mt-1">Upload JPG, PNG, or GIF (Max 5MB)</p>
                   </div>

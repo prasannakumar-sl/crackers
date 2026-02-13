@@ -264,7 +264,7 @@ export default function AdminDashboard() {
                       value={formData.name}
                       onChange={handleInputChange}
                       placeholder="e.g., Sparklers"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                       required
                     />
                   </div>
@@ -278,7 +278,7 @@ export default function AdminDashboard() {
                       value={formData.price}
                       onChange={handleInputChange}
                       placeholder="e.g., 50"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                       required
                     />
                   </div>
@@ -291,7 +291,7 @@ export default function AdminDashboard() {
                       value={formData.category}
                       onChange={handleInputChange}
                       placeholder="e.g., Sparklers, Bombs"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                     />
                   </div>
 
@@ -303,7 +303,7 @@ export default function AdminDashboard() {
                       value={formData.quantity}
                       onChange={handleInputChange}
                       placeholder="e.g., 100"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                     />
                   </div>
 
@@ -315,7 +315,7 @@ export default function AdminDashboard() {
                       value={formData.image}
                       onChange={handleInputChange}
                       placeholder="https://example.com/image.jpg"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                     />
                   </div>
                 </div>
@@ -328,7 +328,7 @@ export default function AdminDashboard() {
                     onChange={handleInputChange}
                     placeholder="Product description..."
                     rows="3"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                   ></textarea>
                 </div>
 

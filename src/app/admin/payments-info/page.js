@@ -88,7 +88,7 @@ export default function PaymentsInfoPage() {
                   type="text"
                   value={tempPayments.bankAccount.name}
                   onChange={(e) => handleInputChange('bankAccount', 'name', e.target.value)}
-                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-600"
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-600 text-black"
                 />
               </div>
               <div>
@@ -97,7 +97,7 @@ export default function PaymentsInfoPage() {
                   type="text"
                   value={tempPayments.bankAccount.accountNo}
                   onChange={(e) => handleInputChange('bankAccount', 'accountNo', e.target.value)}
-                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-600"
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-600 text-black"
                 />
               </div>
               <div>
@@ -106,7 +106,7 @@ export default function PaymentsInfoPage() {
                   type="text"
                   value={tempPayments.bankAccount.bankName}
                   onChange={(e) => handleInputChange('bankAccount', 'bankName', e.target.value)}
-                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-600"
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-600 text-black"
                 />
               </div>
             </div>
@@ -130,7 +130,7 @@ export default function PaymentsInfoPage() {
                   type="text"
                   value={tempPayments.gpay.name}
                   onChange={(e) => handleInputChange('gpay', 'name', e.target.value)}
-                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-600"
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-600 text-black"
                 />
               </div>
               <div>
@@ -139,7 +139,7 @@ export default function PaymentsInfoPage() {
                   type="text"
                   value={tempPayments.gpay.number}
                   onChange={(e) => handleInputChange('gpay', 'number', e.target.value)}
-                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-600"
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-600 text-black"
                 />
               </div>
             </div>
@@ -162,7 +162,7 @@ export default function PaymentsInfoPage() {
                   type="text"
                   value={tempPayments.upi.name}
                   onChange={(e) => handleInputChange('upi', 'name', e.target.value)}
-                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-600"
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-600 text-black"
                 />
               </div>
               <div>
@@ -171,7 +171,7 @@ export default function PaymentsInfoPage() {
                   type="text"
                   value={tempPayments.upi.id}
                   onChange={(e) => handleInputChange('upi', 'id', e.target.value)}
-                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-600"
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-600 text-black"
                 />
               </div>
             </div>

@@ -153,7 +153,7 @@ export default function CompanyInfoPage() {
               value={formData.company_name}
               onChange={handleInputChange}
               placeholder="e.g., pk crackers"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
               required
             />
             <p className="text-sm text-gray-600 mt-1">This name will appear in the navbar</p>
@@ -168,7 +168,7 @@ export default function CompanyInfoPage() {
               value={formData.phone_number}
               onChange={handleInputChange}
               placeholder="e.g., +91 98765 43210"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
             />
           </div>
 
@@ -181,7 +181,7 @@ export default function CompanyInfoPage() {
               value={formData.gst_number}
               onChange={handleInputChange}
               placeholder="e.g., 27AABFG1234H1Z0"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
             />
           </div>
 
@@ -194,7 +194,7 @@ export default function CompanyInfoPage() {
               value={formData.email}
               onChange={handleInputChange}
               placeholder="e.g., info@pkcrackers.com"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
             />
           </div>
 

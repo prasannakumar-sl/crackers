@@ -2,7 +2,7 @@
 
 import { useCart } from '../context/CartContext';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Snackbar, Alert } from '@mui/material';
 
 export default function CheckoutPage() {
@@ -16,11 +16,39 @@ export default function CheckoutPage() {
     address: '',
   });
 
+  const [payments, setPayments] = useState({
+    bankAccount: {
+      name: 'PK TRADERS',
+      accountNo: '123456789123',
+      bankName: 'BBBB'
+    },
+    gpay: {
+      name: 'xxxx',
+      number: '9354200000'
+    },
+    upi: {
+      name: 'xxxx',
+      id: 'cnjncdjdk'
+    }
+  });
+
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
     severity: 'success',
   });
+
+  useEffect(() => {
+    const savedPayments = localStorage.getItem('adminPayments');
+    if (savedPayments) {
+      try {
+        const parsed = JSON.parse(savedPayments);
+        setPayments(parsed);
+      } catch (error) {
+        console.error('Error parsing payment info:', error);
+      }
+    }
+  }, []);
 
   const handleCloseSnackbar = (event, reason) => {
     if (reason === 'clickaway') return;
@@ -201,7 +229,7 @@ export default function CheckoutPage() {
                     value={formData.name}
                     onChange={handleInputChange}
                     placeholder="Enter your name"
-                    className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-green-600"
+                    className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-green-600 text-black"
                   />
                 </div>
                 <div>
@@ -212,7 +240,7 @@ export default function CheckoutPage() {
                     value={formData.phone}
                     onChange={handleInputChange}
                     placeholder="Enter phone number"
-                    className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-green-600"
+                    className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-green-600 text-black"
                   />
                 </div>
                 <div className="md:col-span-2">
@@ -223,7 +251,7 @@ export default function CheckoutPage() {
                     value={formData.email}
                     onChange={handleInputChange}
                     placeholder="Enter email address"
-                    className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-green-600"
+                    className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-green-600 text-black"
                   />
                 </div>
                 <div className="md:col-span-2">
@@ -234,7 +262,7 @@ export default function CheckoutPage() {
                     onChange={handleInputChange}
                     placeholder="Enter delivery address"
                     rows="3"
-                    className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-green-600"
+                    className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-green-600 text-black"
                   />
                 </div>
               </div>
@@ -252,21 +280,21 @@ export default function CheckoutPage() {
               <div className="p-6 space-y-3">
                 <div className="pb-4 border-b border-gray-200">
                   <h3 className="font-bold text-gray-800 mb-2">Bank Account</h3>
-                  <p className="text-sm text-gray-700">A/C Name: PK TRADERS</p>
-                  <p className="text-sm text-gray-700">A/C No: 123456789123</p>
-                  <p className="text-sm text-gray-700">Bank: BBBB</p>
+                  <p className="text-sm text-gray-700">A/C Name: {payments.bankAccount.name}</p>
+                  <p className="text-sm text-gray-700">A/C No: {payments.bankAccount.accountNo}</p>
+                  <p className="text-sm text-gray-700">Bank: {payments.bankAccount.bankName}</p>
                 </div>
 
                 <div className="pb-4 border-b border-gray-200">
                   <h3 className="font-bold text-gray-800 mb-2">GPay</h3>
-                  <p className="text-sm text-gray-700">Name: xxxx</p>
-                  <p className="text-sm text-gray-700">GPay No: 9354200000</p>
+                  <p className="text-sm text-gray-700">Name: {payments.gpay.name}</p>
+                  <p className="text-sm text-gray-700">GPay No: {payments.gpay.number}</p>
                 </div>
 
                 <div>
                   <h3 className="font-bold text-gray-800 mb-2">UPI</h3>
-                  <p className="text-sm text-gray-700">Name: xxxx</p>
-                  <p className="text-sm text-gray-700">UPI ID: cnjncdjdk</p>
+                  <p className="text-sm text-gray-700">Name: {payments.upi.name}</p>
+                  <p className="text-sm text-gray-700">UPI ID: {payments.upi.id}</p>
                 </div>
               </div>
             </div>

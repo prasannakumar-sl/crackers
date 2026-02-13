@@ -47,9 +47,12 @@ export function CartProvider({ children }) {
 
   const getCartTotal = () => {
     return cart.reduce((total, item) => {
-      const price = typeof item.discount === 'number' 
-        ? item.discount 
-        : parseFloat(item.discount.replace('₹', ''));
+      let price = 0;
+      if (typeof item.discount === 'number') {
+        price = item.discount;
+      } else if (item.discount) {
+        price = parseFloat(item.discount.replace('₹', ''));
+      }
       return total + (price * item.quantity);
     }, 0);
   };

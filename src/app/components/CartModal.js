@@ -70,7 +70,15 @@ export default function CartModal() {
                       }
                     </p>
                     <span className="text-sm font-bold text-red-600">
-                      ₹{((typeof item.discount === 'number' ? item.discount : parseFloat(item.discount.replace('₹', ''))) * item.quantity).toFixed(2)}
+                      ₹{(() => {
+                        let price = 0;
+                        if (typeof item.discount === 'number') {
+                          price = item.discount;
+                        } else if (item.discount) {
+                          price = parseFloat(item.discount.replace('₹', ''));
+                        }
+                        return (price * item.quantity).toFixed(2);
+                      })()}
                     </span>
                   </div>
                 </div>

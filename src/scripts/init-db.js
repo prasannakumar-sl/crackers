@@ -1,4 +1,5 @@
 import { getConnection } from '../lib/db.js';
+import bcrypt from 'bcryptjs';
 
 async function initializeDatabase() {
   try {
@@ -20,7 +21,41 @@ async function initializeDatabase() {
     
     await connection.execute(createTableQuery);
     console.log('✓ Products table created successfully!');
-    
+
+    const createAdminsTableQuery = `
+      CREATE TABLE IF NOT EXISTS admins (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(100) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+
+    await connection.execute(createAdminsTableQuery);
+    console.log('✓ Admins table created successfully!');
+
+    // Check if default admin exists
+    const [rows] = await connection.execute('SELECT * FROM admins WHERE username = ?', ['prasanna']);
+    if (rows.length === 0) {
+      const hashedPassword = await bcrypt.hash('pk160011', 10);
+      await connection.execute(
+        'INSERT INTO admins (username, password) VALUES (?, ?)',
+        ['prasanna', hashedPassword]
+      );
+      console.log('✓ Default admin user created with encryption!');
+    } else {
+      // For existing user, update to encrypted password if it's still plain text
+      const admin = rows[0];
+      if (admin.password === 'pk160011') {
+        const hashedPassword = await bcrypt.hash('pk160011', 10);
+        await connection.execute(
+          'UPDATE admins SET password = ? WHERE username = ?',
+          [hashedPassword, 'prasanna']
+        );
+        console.log('✓ Admin password updated with encryption!');
+      }
+    }
+
     await connection.end();
   } catch (error) {
     console.error('Error initializing database:', error);

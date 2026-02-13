@@ -6,16 +6,36 @@ export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    // Simple authentication check
-    if (username === 'prasanna' && password === 'pk160011') {
-      // Store admin token/session
-      localStorage.setItem('adminUser', username);
-      // Redirect to admin panel using hash-based routing
-      window.location.href = '/#/admin/dashboard';
-    } else {
-      setError('Invalid username or password');
+  const handleLogin = async () => {
+    try {
+      setLoading(true);
+      setError('');
+
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        // Store admin token/session
+        localStorage.setItem('adminUser', data.username);
+        // Redirect to admin panel using hash-based routing
+        window.location.href = '/#/admin/dashboard';
+      } else {
+        setError(data.error || 'Invalid username or password');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -79,9 +99,10 @@ export default function LoginPage() {
           {/* Login Button */}
           <button
             onClick={handleLogin}
-            className="w-full bg-blue-500 text-white font-bold py-3 rounded hover:bg-blue-600 transition-colors"
+            disabled={loading}
+            className="w-full bg-blue-500 text-white font-bold py-3 rounded hover:bg-blue-600 transition-colors disabled:bg-blue-300"
           >
-            Login
+            {loading ? 'Logging in...' : 'Login'}
           </button>
         </div>
 

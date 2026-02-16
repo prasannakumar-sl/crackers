@@ -95,6 +95,20 @@ async function initializeDatabase() {
     await connection.execute(createSectionProductsTableQuery);
     console.log('✓ Section Products table created successfully!');
 
+    const createCarouselImagesTableQuery = `
+      CREATE TABLE IF NOT EXISTS carousel_images (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        image_url LONGTEXT NOT NULL,
+        display_order INT DEFAULT 0,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      )
+    `;
+
+    await connection.execute(createCarouselImagesTableQuery);
+    console.log('✓ Carousel Images table created successfully!');
+
     // Check if default admin exists
     const [rows] = await connection.execute('SELECT * FROM admins WHERE username = ?', ['prasanna']);
     if (rows.length === 0) {

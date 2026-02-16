@@ -7,22 +7,43 @@ export default function Home() {
   const { addToCart, getCartItemCount, getCartTotal } = useCart();
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [carouselImages, setCarouselImages] = useState([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
-    const fetchSections = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('/api/sections');
-        const data = await response.json();
-        setSections(data);
+        const [sectionsRes, carouselRes] = await Promise.all([
+          fetch('/api/sections'),
+          fetch('/api/carousel'),
+        ]);
+        const sectionsData = await sectionsRes.json();
+        const carouselData = await carouselRes.json();
+
+        setSections(Array.isArray(sectionsData) ? sectionsData : []);
+        setCarouselImages(Array.isArray(carouselData) ? carouselData : []);
       } catch (error) {
-        console.error('Error fetching sections:', error);
+        console.error('Error fetching data:', error);
+        setSections([]);
+        setCarouselImages([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchSections();
+    fetchData();
   }, []);
+
+  // Auto-scroll carousel every 3 seconds
+  useEffect(() => {
+    if (carouselImages.length === 0) return;
+
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % carouselImages.length);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [carouselImages]);
 
   const brands = ['Renu Crackers', 'Mightloads', 'Sri Aravind', 'Ramesh'];
   const blogPosts = [
@@ -57,46 +78,38 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Diwali Promo Banner */}
-      <section className="relative bg-gradient-to-r from-red-700 to-red-900 text-white py-8 px-6 overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 opacity-10">
-          <svg viewBox="0 0 100 100" className="w-full h-full">
-            <path d="M50,10 L61,40 L92,40 L67,60 L78,90 L50,70 L22,90 L33,60 L8,40 L39,40 Z" fill="currentColor" />
-          </svg>
-        </div>
-
-        <div className="max-w-7xl mx-auto grid grid-cols-2 gap-8 relative z-10">
-          {/* Left - Promo Text */}
-          <div>
-            <h2 className="text-5xl font-bold mb-4">DIWALI 2026</h2>
-            <p className="text-2xl font-bold text-yellow-300 mb-2">CELEBRATE THE FESTIVAL OF LIGHTS</p>
-            <p className="mb-4">CRACKERS FOR 11 MONTH</p>
-            <p className="text-sm opacity-90">11 MONTH (NOV 23 TO SEP 24)</p>
-          </div>
-
-          {/* Right - Pricing Table */}
-          <div className="bg-white bg-opacity-10 rounded-lg p-6 backdrop-blur-sm">
-            <h3 className="font-bold text-lg mb-4">Special Offers</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between text-sm">
-                <span>₹5,000 - ₹10,000</span>
-                <span className="font-bold">₹2,500</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>₹10,000 - ₹20,000</span>
-                <span className="font-bold">₹5,000</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>₹20,000 - ₹50,000</span>
-                <span className="font-bold">₹10,000</span>
-              </div>
-              <div className="flex justify-between text-sm border-t pt-3">
-                <span className="font-bold">50% Discount</span>
-                <span className="font-bold text-yellow-300">Available</span>
-              </div>
+      {/* Carousel Banner */}
+      <section className="w-full relative overflow-hidden bg-gray-200">
+        {carouselImages.length > 0 ? (
+          <div className="relative w-full h-96 flex items-center justify-center">
+            <img
+              key={carouselImages[currentImageIndex]?.id}
+              src={carouselImages[currentImageIndex]?.image_url}
+              alt={`Carousel ${currentImageIndex + 1}`}
+              className="w-full h-full object-cover transition-opacity duration-500"
+              onError={(e) => {
+                e.target.src = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23ddd%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-size=%2220%22 fill=%22%23999%22%3EImage Failed to Load%3C/text%3E%3C/svg%3E';
+              }}
+            />
+            {/* Carousel Indicators */}
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
+              {carouselImages.map((_, idx) => (
+                <div
+                  key={idx}
+                  className={`w-3 h-3 rounded-full transition-colors ${
+                    idx === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                  }`}
+                />
+              ))}
             </div>
           </div>
-        </div>
+        ) : (
+          <img
+            src="https://cdn.builder.io/api/v1/image/assets%2Fe0b97a868c7a4760bf7ee5c2ab73e471%2F674b44a28ad6493891cab41238680c55?format=webp&width=1200&height=500"
+            alt="Diwali Crackers Special"
+            className="w-full h-auto object-cover"
+          />
+        )}
       </section>
 
       {/* Products Section */}
@@ -126,7 +139,7 @@ export default function Home() {
                           <div className="flex gap-3 mb-4">
                             <span className="text-gray-800 font-bold">₹{parseFloat(product.price).toFixed(2)}</span>
                           </div>
-                          <button onClick={() => addToCart(product)} className="w-full bg-red-500 text-white py-2 rounded font-semibold hover:bg-red-600 transition-colors">
+                          <button onClick={() => addToCart({ ...product, quantity: 1 })} className="w-full bg-red-500 text-white py-2 rounded font-semibold hover:bg-red-600 transition-colors">
                             ADD TO CART
                           </button>
                         </div>

@@ -14,6 +14,7 @@ export default function AdminLayout({ children }) {
     { label: 'Chit Fund', href: '/admin/chit-fund', icon: '💰' },
     { label: 'Staffs', href: '/admin/staffs', icon: '👨‍💼' },
     { label: 'Company Info', href: '/admin/company-info', icon: '🏢' },
+    { label: 'Appearance', href: '/admin/appearance', icon: '🎨' },
   ];
 
   const handleLogout = () => {

@@ -64,18 +64,18 @@ export default function CartModal() {
                       </button>
                     </div>
                     <p className="text-xs text-gray-600 mb-2">
-                      {item.discount && typeof item.discount === 'number'
-                        ? `₹${item.discount.toFixed(2)}`
-                        : item.discount
+                      {item.price && typeof item.price === 'number'
+                        ? `₹${item.price.toFixed(2)}`
+                        : item.price
                       }
                     </p>
                     <span className="text-sm font-bold text-red-600">
                       ₹{(() => {
                         let price = 0;
-                        if (typeof item.discount === 'number') {
-                          price = item.discount;
-                        } else if (item.discount) {
-                          price = parseFloat(item.discount.replace('₹', ''));
+                        if (typeof item.price === 'number') {
+                          price = item.price;
+                        } else if (item.price) {
+                          price = parseFloat(item.price.replace('₹', ''));
                         }
                         return (price * item.quantity).toFixed(2);
                       })()}

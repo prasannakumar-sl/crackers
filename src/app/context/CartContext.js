@@ -48,10 +48,10 @@ export function CartProvider({ children }) {
   const getCartTotal = () => {
     return cart.reduce((total, item) => {
       let price = 0;
-      if (typeof item.discount === 'number') {
-        price = item.discount;
-      } else if (item.discount) {
-        price = parseFloat(item.discount.replace('₹', ''));
+      if (typeof item.price === 'number') {
+        price = item.price;
+      } else if (item.price) {
+        price = parseFloat(item.price.replace('₹', ''));
       }
       return total + (price * item.quantity);
     }, 0);

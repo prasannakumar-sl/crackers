@@ -183,12 +183,6 @@ export default function AdminDashboard() {
           >
             Sections Management
           </button>
-          <a
-            href="/#/admin/company-info"
-            className="px-6 py-3 font-semibold transition text-gray-600 hover:text-gray-800"
-          >
-            Company Info
-          </a>
         </div>
       </div>
 

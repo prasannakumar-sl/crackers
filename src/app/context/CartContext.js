@@ -1,12 +1,33 @@
 'use client';
 
-import { createContext, useState, useContext } from 'react';
+import { createContext, useState, useContext, useEffect } from 'react';
 
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Initialize cart from localStorage on mount
+  useEffect(() => {
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) {
+      try {
+        setCart(JSON.parse(savedCart));
+      } catch (error) {
+        console.error('Failed to parse saved cart:', error);
+      }
+    }
+    setIsHydrated(true);
+  }, []);
+
+  // Save cart to localStorage whenever it changes
+  useEffect(() => {
+    if (isHydrated) {
+      localStorage.setItem('cart', JSON.stringify(cart));
+    }
+  }, [cart, isHydrated]);
 
   const addToCart = (product) => {
     setCart(prevCart => {

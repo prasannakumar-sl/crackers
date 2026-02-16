@@ -7,7 +7,15 @@ export async function GET() {
     const [products] = await connection.execute('SELECT * FROM products ORDER BY created_at DESC');
     await connection.end();
 
-    return NextResponse.json(products);
+    // Provide default cracker image for products without images
+    const defaultImage = 'https://cdn.builder.io/api/v1/image/assets%2Fa6d9ccfff1114dfea0a383bcba1a59e7%2F162e599830ba4653ac22ce4d148fff06?format=webp&width=800&height=1200';
+
+    const productsWithImages = products.map(product => ({
+      ...product,
+      image: product.image || defaultImage
+    }));
+
+    return NextResponse.json(productsWithImages);
   } catch (error) {
     console.error('Error fetching products:', error);
     return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });

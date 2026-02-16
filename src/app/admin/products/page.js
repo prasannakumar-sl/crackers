@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Snackbar, Alert, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
@@ -10,6 +11,7 @@ export default function ProductsPage() {
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(null);
+  const [editingId, setEditingId] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -64,6 +66,20 @@ export default function ProductsPage() {
     }
   };
 
+  const handleEditProduct = (product) => {
+    setEditingId(product.id);
+    setFormData({
+      name: product.name,
+      price: product.price,
+      description: product.description || '',
+      category: product.category || '',
+      image: null,
+      quantity: product.quantity || '',
+    });
+    setImagePreview(product.image || null);
+    setShowForm(true);
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -110,23 +126,27 @@ export default function ProductsPage() {
 
     try {
       setSubmitting(true);
-      
+
+      const isEditing = editingId !== null;
       const payload = new FormData();
       payload.append('name', formData.name);
       payload.append('price', parseFloat(formData.price));
       payload.append('description', formData.description);
       payload.append('category', formData.category);
       payload.append('quantity', parseInt(formData.quantity) || 0);
-      
+
       // Add image if selected
       if (formData.image instanceof File) {
         payload.append('image', formData.image);
       }
-      
-      console.log('Submitting product to database');
-      
-      const response = await fetch('/api/products', {
-        method: 'POST',
+
+      const method = isEditing ? 'PATCH' : 'POST';
+      const url = isEditing ? `/api/products/${editingId}` : '/api/products';
+
+      console.log(`${isEditing ? 'Updating' : 'Submitting'} product to database`);
+
+      const response = await fetch(url, {
+        method,
         body: payload,
       });
 
@@ -135,7 +155,7 @@ export default function ProductsPage() {
       console.log('Response data:', responseData);
 
       if (response.ok) {
-        showAlert('✓ Product added successfully to database!', 'success');
+        showAlert(`✓ Product ${isEditing ? 'updated' : 'added'} successfully to database!`, 'success');
 
         // Reset form
         setFormData({
@@ -148,15 +168,16 @@ export default function ProductsPage() {
         });
         setImagePreview(null);
         setShowForm(false);
-        
+        setEditingId(null);
+
         // Fetch fresh data from database
         await fetchProducts();
       } else {
-        showAlert(`Failed to add product: ${responseData.error || 'Unknown error'}`, 'error');
+        showAlert(`Failed to ${isEditing ? 'update' : 'add'} product: ${responseData.error || 'Unknown error'}`, 'error');
       }
     } catch (error) {
-      console.error('Error adding product:', error);
-      showAlert(`Error adding product: ${error.message}`, 'error');
+      console.error('Error:', error);
+      showAlert(`Error: ${error.message}`, 'error');
     } finally {
       setSubmitting(false);
     }
@@ -241,6 +262,17 @@ export default function ProductsPage() {
           onClick={() => {
             setShowForm(!showForm);
             setImagePreview(null);
+            if (showForm) {
+              setEditingId(null);
+              setFormData({
+                name: '',
+                price: '',
+                description: '',
+                category: '',
+                image: null,
+                quantity: '',
+              });
+            }
           }}
           className="bg-blue-600 text-white px-6 py-2 rounded font-semibold hover:bg-blue-700 transition-colors"
         >
@@ -251,7 +283,7 @@ export default function ProductsPage() {
       {/* Add Product Form */}
       {showForm && (
         <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <h3 className="text-lg font-bold text-gray-800 mb-6">Add New Product</h3>
+          <h3 className="text-lg font-bold text-gray-800 mb-6">{editingId ? 'Edit Product' : 'Add New Product'}</h3>
           <form onSubmit={handleAddProduct}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
@@ -350,7 +382,7 @@ export default function ProductsPage() {
               disabled={submitting}
               className="w-full bg-green-600 text-white py-2 rounded font-semibold hover:bg-green-700 transition-colors disabled:bg-gray-400"
             >
-              {submitting ? 'Adding...' : 'Add Product to Database'}
+              {submitting ? (editingId ? 'Updating...' : 'Adding...') : (editingId ? 'Update Product' : 'Add Product to Database')}
             </button>
           </form>
         </div>
@@ -416,6 +448,14 @@ export default function ProductsPage() {
                       )}
                     </td>
                     <td className="px-6 py-3 text-sm">
+                      <IconButton
+                        onClick={() => handleEditProduct(product)}
+                        color="primary"
+                        size="small"
+                        title="Edit Product"
+                      >
+                        <EditIcon />
+                      </IconButton>
                       <IconButton
                         onClick={() => handleDeleteProduct(product.id)}
                         disabled={deleting === product.id}

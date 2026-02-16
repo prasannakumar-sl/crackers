@@ -131,8 +131,16 @@ export default function Home() {
                   {section.products && section.products.length > 0 ? (
                     section.products.map(product => (
                       <div key={product.id} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-                        <div className="bg-purple-100 p-8 text-6xl flex items-center justify-center h-48">
-                          {product.image || '📦'}
+                        <div className="bg-purple-100 h-48 flex items-center justify-center overflow-hidden">
+                          {product.image ? (
+                            <img
+                              src={product.image}
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="text-6xl">📦</div>
+                          )}
                         </div>
                         <div className="p-4">
                           <h3 className="font-bold text-black mb-3">{product.name}</h3>

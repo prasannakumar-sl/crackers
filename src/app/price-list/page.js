@@ -221,8 +221,16 @@ export default function PriceList() {
                           <tr key={product.id} className="border-b hover:bg-gray-50">
                             {/* Image */}
                             <td className="px-4 py-3">
-                              <div className="w-12 h-12 bg-yellow-100 rounded flex items-center justify-center text-lg">
-                                {product.image || '🎆'}
+                              <div className="w-12 h-12 bg-yellow-100 rounded flex items-center justify-center text-lg overflow-hidden">
+                                {product.image ? (
+                                  <img
+                                    src={product.image}
+                                    alt={product.name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  '🎆'
+                                )}
                               </div>
                             </td>
 
@@ -297,8 +305,16 @@ export default function PriceList() {
                       <div key={product.id} className="border-b p-4 hover:bg-gray-50">
                         {/* Image and Product Name */}
                         <div className="flex gap-3 mb-3">
-                          <div className="w-12 h-12 bg-yellow-100 rounded flex items-center justify-center text-lg flex-shrink-0">
-                            {product.image || '🎆'}
+                          <div className="w-12 h-12 bg-yellow-100 rounded flex items-center justify-center text-lg flex-shrink-0 overflow-hidden">
+                            {product.image ? (
+                              <img
+                                src={product.image}
+                                alt={product.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              '🎆'
+                            )}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="font-semibold text-black text-sm">{product.name}</div>

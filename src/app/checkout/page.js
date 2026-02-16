@@ -183,9 +183,11 @@ export default function CheckoutPage() {
                       <p className="text-gray-700">
                         Price:{' '}
                         <span className="font-semibold">
-                          ₹{typeof item.discount === 'number'
-                            ? (item.discount * item.quantity).toFixed(2)
-                            : (parseFloat(item.discount.replace('₹', '')) * item.quantity).toFixed(2)}
+                          ₹{item.discount
+                            ? typeof item.discount === 'number'
+                              ? (item.discount * item.quantity).toFixed(2)
+                              : (parseFloat(item.discount.replace('₹', '')) * item.quantity).toFixed(2)
+                            : '0.00'}
                         </span>
                       </p>
                     </div>

@@ -82,11 +82,13 @@ export default function PriceList() {
         // Add new item to cart
         const product = allProducts.find(p => p.id === productId);
         if (product) {
-          const price = parseFloat(product.price);
+          const originalPrice = parseFloat(product.price);
+          const salePrice = originalPrice / 2;
           addToCart({
             id: product.id,
             name: product.name,
-            discount: price / 2,
+            price: salePrice,
+            discount: salePrice,
             quantity: newQty
           });
         }

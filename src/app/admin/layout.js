@@ -1,9 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function AdminLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [companyName, setCompanyName] = useState('Admin');
+
+  useEffect(() => {
+    fetchCompanyName();
+  }, []);
+
+  const fetchCompanyName = async () => {
+    try {
+      const response = await fetch('/api/company-info', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setCompanyName(data.company_name || 'Admin');
+      }
+    } catch (error) {
+      console.error('Error fetching company name:', error);
+    }
+  };
 
   const navItems = [
     { label: 'Dashboard', href: '/admin', icon: '📊' },
@@ -30,9 +52,9 @@ export default function AdminLayout({ children }) {
         <div className="p-4 border-b border-gray-700 flex items-center justify-between">
           <div className={`flex items-center gap-2 ${!sidebarOpen && 'justify-center w-full'}`}>
             <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center font-bold text-gray-900">
-              P
+              {companyName.charAt(0).toUpperCase()}
             </div>
-            {sidebarOpen && <span className="font-bold">PK Admin</span>}
+            {sidebarOpen && <span className="font-bold">{companyName}</span>}
           </div>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}

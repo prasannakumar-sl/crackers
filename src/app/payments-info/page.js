@@ -1,47 +1,79 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+
 export default function PaymentsInfo() {
+  const [payments, setPayments] = useState({
+    bankAccount: {
+      name: 'PK TRADERS',
+      accountNo: '123456789123',
+      bankName: 'BBBB'
+    },
+    gpay: {
+      name: 'xxxx',
+      number: '9354200000'
+    },
+    upi: {
+      name: 'xxxx',
+      id: 'cnjncdjdk',
+      qrCode: null
+    }
+  });
+
+  useEffect(() => {
+    const savedPayments = localStorage.getItem('adminPayments');
+    if (savedPayments) {
+      const parsed = JSON.parse(savedPayments);
+      setPayments(parsed);
+    }
+  }, []);
+
   return (
     <div className="bg-white">
       {/* Hero Section */}
       <section className="relative bg-teal-900 text-white py-12 px-6">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-4xl font-bold">Payments Information</h1>
-          <p className="text-yellow-300 mt-2">Multiple secure payment options available</p>
+          <p className="text-yellow-300 mt-2">Payment details for your orders</p>
         </div>
       </section>
 
-      {/* Content Section */}
+      {/* Payment Details Section */}
       <section className="py-12 px-6">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-2xl font-bold text-black mb-8">Accepted Payment Methods</h2>
-          
-          <div className="grid grid-cols-2 gap-8">
-            {[
-              { method: 'Credit Card', description: 'All major credit cards accepted (Visa, Mastercard, American Express)' },
-              { method: 'Debit Card', description: 'Bank debit cards for secure transactions' },
-              { method: 'Bank Transfer', description: 'Direct bank transfer for wholesale orders' },
-              { method: 'Cash on Delivery', description: 'Available for selected locations' },
-              { method: 'Digital Wallets', description: 'Google Pay, Apple Pay, and other popular wallets' },
-              { method: 'Cheque', description: 'Accepted for corporate and bulk orders' },
-            ].map((item, idx) => (
-              <div key={idx} className="border border-gray-300 rounded-lg p-6 hover:shadow-lg transition-shadow">
-                <h3 className="font-bold text-black text-lg mb-2">{item.method}</h3>
-                <p className="text-gray-600">{item.description}</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Bank Account */}
+            <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">💳 Bank Account</h3>
+              <div className="space-y-2 text-sm text-gray-700">
+                <p><span className="font-semibold">Name:</span> {payments.bankAccount.name}</p>
+                <p><span className="font-semibold">Account No:</span> {payments.bankAccount.accountNo}</p>
+                <p><span className="font-semibold">Bank:</span> {payments.bankAccount.bankName}</p>
               </div>
-            ))}
-          </div>
+            </div>
 
-          {/* Terms Section */}
-          <div className="mt-12 bg-gray-100 p-8 rounded-lg">
-            <h3 className="text-xl font-bold text-black mb-4">Payment Terms</h3>
-            <ul className="space-y-2 text-gray-700">
-              <li>• Minimum Order: Rs.2000 for Tamilnadu, Rs.3000 for Other States</li>
-              <li>• 50% Discount available on bulk orders</li>
-              <li>• Payment must be completed before delivery</li>
-              <li>• GST applicable as per government norms</li>
-              <li>• Special discounts for wholesale buyers</li>
-            </ul>
+            {/* GPay */}
+            <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">📱 GPay</h3>
+              <div className="space-y-2 text-sm text-gray-700">
+                <p><span className="font-semibold">Name:</span> {payments.gpay.name}</p>
+                <p><span className="font-semibold">GPay No:</span> {payments.gpay.number}</p>
+              </div>
+            </div>
+
+            {/* UPI */}
+            <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">💰 UPI</h3>
+              <div className="space-y-2 text-sm text-gray-700">
+                <p><span className="font-semibold">Name:</span> {payments.upi.name}</p>
+                <p><span className="font-semibold">UPI ID:</span> {payments.upi.id}</p>
+                {payments.upi.qrCode && (
+                  <div className="mt-3">
+                    <img src={payments.upi.qrCode} alt="UPI QR Code" className="w-40 h-40 object-contain border border-gray-300 rounded" />
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </section>

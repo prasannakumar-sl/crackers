@@ -16,7 +16,8 @@ export default function PaymentsInfoPage() {
     },
     upi: {
       name: 'xxxx',
-      id: 'cnjncdjdk'
+      id: 'cnjncdjdk',
+      qrCode: null
     }
   });
 
@@ -55,6 +56,23 @@ export default function PaymentsInfoPage() {
         [field]: value
       }
     }));
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setTempPayments(prev => ({
+          ...prev,
+          upi: {
+            ...prev.upi,
+            qrCode: reader.result
+          }
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSave = () => {
@@ -174,11 +192,31 @@ export default function PaymentsInfoPage() {
                   className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-600 text-black"
                 />
               </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">UPI QR Code Image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-600"
+                />
+                {tempPayments.upi.qrCode && (
+                  <div className="mt-3">
+                    <p className="text-xs text-gray-600 mb-2">Preview:</p>
+                    <img src={tempPayments.upi.qrCode} alt="UPI QR Code" className="w-32 h-32 object-contain border border-gray-300 rounded" />
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
             <div className="space-y-2 text-sm text-gray-700">
               <p><span className="font-semibold">Name:</span> {payments.upi.name}</p>
               <p><span className="font-semibold">UPI ID:</span> {payments.upi.id}</p>
+              {payments.upi.qrCode && (
+                <div className="mt-3">
+                  <img src={payments.upi.qrCode} alt="UPI QR Code" className="w-32 h-32 object-contain border border-gray-300 rounded" />
+                </div>
+              )}
             </div>
           )}
         </div>

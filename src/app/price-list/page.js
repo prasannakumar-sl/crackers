@@ -9,6 +9,7 @@ export default function PriceList() {
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState([]);
+  const [enlargedImage, setEnlargedImage] = useState(null);
 
   // Fetch products from database
   useEffect(() => {
@@ -221,7 +222,10 @@ export default function PriceList() {
                           <tr key={product.id} className="border-b hover:bg-gray-50">
                             {/* Image */}
                             <td className="px-4 py-3">
-                              <div className="w-12 h-12 bg-yellow-100 rounded flex items-center justify-center text-lg overflow-hidden">
+                              <div
+                                className="w-12 h-12 bg-yellow-100 rounded flex items-center justify-center text-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                                onClick={() => product.image && setEnlargedImage(product.image)}
+                              >
                                 {product.image ? (
                                   <img
                                     src={product.image}
@@ -305,7 +309,10 @@ export default function PriceList() {
                       <div key={product.id} className="border-b p-4 hover:bg-gray-50">
                         {/* Image and Product Name */}
                         <div className="flex gap-3 mb-3">
-                          <div className="w-12 h-12 bg-yellow-100 rounded flex items-center justify-center text-lg flex-shrink-0 overflow-hidden">
+                          <div
+                            className="w-12 h-12 bg-yellow-100 rounded flex items-center justify-center text-lg flex-shrink-0 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                            onClick={() => product.image && setEnlargedImage(product.image)}
+                          >
                             {product.image ? (
                               <img
                                 src={product.image}
@@ -376,6 +383,31 @@ export default function PriceList() {
           )}
         </div>
       </section>
+
+      {/* Image Enlargement Modal */}
+      {enlargedImage && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
+          onClick={() => setEnlargedImage(null)}
+        >
+          <div
+            className="relative max-w-3xl max-h-[90vh] bg-white rounded-lg overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setEnlargedImage(null)}
+              className="absolute top-4 right-4 bg-black text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors"
+            >
+              ✕
+            </button>
+            <img
+              src={enlargedImage}
+              alt="Enlarged product"
+              className="w-full h-full object-contain"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

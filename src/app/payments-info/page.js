@@ -41,7 +41,7 @@ export default function PaymentsInfo() {
       {/* Payment Details Section */}
       <section className="py-12 px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             {/* Bank Account */}
             <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
               <h3 className="text-lg font-bold text-gray-800 mb-4">💳 Bank Account</h3>
@@ -61,19 +61,29 @@ export default function PaymentsInfo() {
               </div>
             </div>
 
-            {/* UPI */}
+            {/* UPI Text Only */}
             <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
               <h3 className="text-lg font-bold text-gray-800 mb-4">💰 UPI</h3>
               <div className="space-y-2 text-sm text-gray-700">
                 <p><span className="font-semibold">Name:</span> {payments.upi.name}</p>
                 <p><span className="font-semibold">UPI ID:</span> {payments.upi.id}</p>
-                {payments.upi.qrCode && (
-                  <div className="mt-3">
-                    <img src={payments.upi.qrCode} alt="UPI QR Code" className="w-40 h-40 object-contain border border-gray-300 rounded" />
-                  </div>
-                )}
               </div>
             </div>
+          </div>
+
+          {/* UPI QR Code Section */}
+          <div className="bg-white rounded-lg shadow border border-gray-200 p-10 flex flex-col items-center">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">Scan UPI QR Code</h2>
+            {payments.upi.qrCode ? (
+              <>
+                <img src={payments.upi.qrCode} alt="UPI QR Code" className="w-150 h-250 object-contain border-2 border-gray-300 rounded p-4" />
+                <p className="text-center text-gray-600 mt-28 font-semibold">{payments.upi.id}</p>
+              </>
+            ) : (
+              <div className="w-64 h-64 bg-gray-100 border-2 border-gray-300 rounded flex items-center justify-center">
+                <p className="text-gray-500 text-center">QR Code will be displayed here</p>
+              </div>
+            )}
           </div>
         </div>
       </section>

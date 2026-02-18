@@ -391,19 +391,20 @@ export default function PriceList() {
           onClick={() => setEnlargedImage(null)}
         >
           <div
-            className="relative max-w-3xl max-h-[90vh] bg-white rounded-lg overflow-hidden"
+            className="relative rounded-lg"
             onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: '90vw', maxHeight: '90vh' }}
           >
             <button
               onClick={() => setEnlargedImage(null)}
-              className="absolute top-4 right-4 bg-black text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors"
+              className="absolute top-2 right-2 bg-black text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors z-10"
             >
               ✕
             </button>
             <img
               src={enlargedImage}
               alt="Enlarged product"
-              className="w-full h-full object-contain"
+              style={{ maxWidth: '90vw', maxHeight: '90vh', objectFit: 'contain' }}
             />
           </div>
         </div>

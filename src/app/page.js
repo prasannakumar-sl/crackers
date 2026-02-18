@@ -9,6 +9,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [carouselImages, setCarouselImages] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -131,12 +132,12 @@ export default function Home() {
                   {section.products && section.products.length > 0 ? (
                     section.products.map(product => (
                       <div key={product.id} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-                        <div className="bg-purple-100 h-48 flex items-center justify-center overflow-hidden">
+                        <div className="bg-purple-100 h-48 flex items-center justify-center overflow-hidden cursor-pointer" onClick={() => product.image && setSelectedImage(product.image)}>
                           {product.image ? (
                             <img
                               src={product.image}
                               alt={product.name}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                             />
                           ) : (
                             <div className="text-6xl">📦</div>
@@ -221,6 +222,25 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Image Lightbox Modal */}
+      {selectedImage && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4" onClick={() => setSelectedImage(null)}>
+          <div className="relative max-w-4xl max-h-96 w-full h-full flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={selectedImage}
+              alt="Product preview"
+              className="max-w-full max-h-full object-contain"
+            />
+            <button
+              onClick={() => setSelectedImage(null)}
+              className="absolute top-4 right-4 bg-white rounded-full w-10 h-10 flex items-center justify-center text-black font-bold text-lg hover:bg-gray-200 transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
 
     </div>
   );

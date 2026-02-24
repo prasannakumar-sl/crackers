@@ -14,7 +14,12 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
 
   // Edit form state
   const [editFormData, setEditFormData] = useState({
-    customerDetails: {},
+    customerDetails: {
+      customer_name: '',
+      phone: '',
+      email: '',
+      address: ''
+    },
     items: [],
     paymentStatus: 'Unpaid',
     status: 'Pending'
@@ -55,7 +60,8 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
           product_id: item.product_id,
           product_name: item.product_name,
           quantity: item.quantity,
-          price: parseFloat(item.price)
+          price: parseFloat(item.price),
+          discount: parseFloat(item.discount) || 0
         })),
         paymentStatus: orderData.order.payment_status || 'Unpaid',
         status: orderData.order.status || 'Pending'
@@ -97,7 +103,8 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
           product_id: item.product_id,
           product_name: item.product_name,
           quantity: parseInt(item.quantity),
-          price: parseFloat(item.price)
+          price: parseFloat(item.price),
+          discount: parseFloat(item.discount) || 0
         }))
       };
 
@@ -137,7 +144,8 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
         product_id: null,
         product_name: '',
         quantity: 1,
-        price: 0
+        price: 0,
+        discount: 0
       }]
     }));
   };
@@ -191,7 +199,9 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
 
   const calculateTotal = () => {
     return editFormData.items.reduce((sum, item) => {
-      return sum + (parseFloat(item.price) * parseInt(item.quantity));
+      const basePrice = parseFloat(item.price) * parseInt(item.quantity);
+      const discount = parseFloat(item.discount) || 0;
+      return sum + (basePrice - discount);
     }, 0).toFixed(2);
   };
 
@@ -332,13 +342,16 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
                           <th>Item Name</th>
                           <th>Quantity</th>
                           <th>Price</th>
+                          <th>Discount</th>
                           <th>Amount</th>
                           <th>Action</th>
                         </tr>
                       </thead>
                       <tbody>
                         {editFormData.items.map((item, index) => {
-                          const itemAmount = (parseFloat(item.price) * parseInt(item.quantity)).toFixed(2);
+                          const baseAmount = parseFloat(item.price) * parseInt(item.quantity);
+                          const discountAmount = parseFloat(item.discount) || 0;
+                          const itemAmount = (baseAmount - discountAmount).toFixed(2);
                           return (
                             <tr key={index}>
                               <td>
@@ -391,6 +404,16 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
                                   min="0"
                                 />
                               </td>
+                              <td>
+                                <input
+                                  type="number"
+                                  value={item.discount || 0}
+                                  onChange={(e) => handleItemChange(index, 'discount', e.target.value)}
+                                  className="form-input"
+                                  step="0.01"
+                                  min="0"
+                                />
+                              </td>
                               <td className="amount-cell">₹{itemAmount}</td>
                               <td>
                                 <button
@@ -425,16 +448,19 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
                     </thead>
                     <tbody>
                       {orderData.items.map((item, index) => {
-                        const itemAmount = parseFloat(item.price) * item.quantity;
+                        const baseAmount = parseFloat(item.price) * item.quantity;
+                        const discount = parseFloat(item.discount) || 0;
+                        const finalAmount = baseAmount - discount;
+                        const discountedPrice = parseFloat(item.price) - (discount / item.quantity);
                         return (
                           <tr key={item.id || index}>
                             <td>{index + 1}</td>
                             <td>{item.product_name}</td>
                             <td>₹{parseFloat(item.price).toFixed(2)}</td>
-                            <td>—</td>
-                            <td>₹{parseFloat(item.price).toFixed(2)}</td>
+                            <td>₹{discount > 0 ? discount.toFixed(2) : '—'}</td>
+                            <td>₹{discountedPrice > 0 ? discountedPrice.toFixed(2) : parseFloat(item.price).toFixed(2)}</td>
                             <td>{item.quantity}</td>
-                            <td>₹{itemAmount.toFixed(2)}</td>
+                            <td>₹{finalAmount.toFixed(2)}</td>
                           </tr>
                         );
                       })}

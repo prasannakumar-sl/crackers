@@ -112,14 +112,19 @@ export async function PATCH(request) {
 
       // Insert updated items
       for (const item of items) {
+        const discount = item.discount || 0;
         await connection.execute(
-          'INSERT INTO order_items (order_id, product_id, product_name, quantity, price) VALUES (?, ?, ?, ?, ?)',
-          [orderId, item.product_id || null, item.product_name, item.quantity, item.price]
+          'INSERT INTO order_items (order_id, product_id, product_name, quantity, price, discount) VALUES (?, ?, ?, ?, ?, ?)',
+          [orderId, item.product_id || null, item.product_name, item.quantity, item.price, discount]
         );
       }
 
-      // Recalculate total amount if items changed
-      const itemTotal = items.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
+      // Recalculate total amount if items changed (price - discount)
+      const itemTotal = items.reduce((sum, item) => {
+        const basePrice = parseFloat(item.price) * item.quantity;
+        const discount = parseFloat(item.discount) || 0;
+        return sum + (basePrice - discount);
+      }, 0);
       await connection.execute('UPDATE orders SET total_amount = ? WHERE id = ?', [itemTotal, orderId]);
     }
 

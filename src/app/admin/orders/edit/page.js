@@ -61,12 +61,13 @@ export default function EditOrderPage() {
             address: data.order.address
           },
           items: data.items.map(item => ({
-            id: item.id,
-            product_id: item.product_id,
-            product_name: item.product_name,
-            quantity: item.quantity,
-            price: parseFloat(item.price)
-          })),
+          id: item.id,
+          product_id: item.product_id,
+          product_name: item.product_name,
+          quantity: item.quantity,
+          price: parseFloat(item.price),
+          discount: parseFloat(item.discount) || 0
+        })),
           paymentStatus: data.order.payment_status || 'Unpaid',
           status: data.order.status || 'Pending'
         });
@@ -96,7 +97,8 @@ export default function EditOrderPage() {
           product_id: item.product_id,
           product_name: item.product_name,
           quantity: parseInt(item.quantity),
-          price: parseFloat(item.price)
+          price: parseFloat(item.price),
+          discount: parseFloat(item.discount) || 0
         }))
       };
 
@@ -140,7 +142,8 @@ export default function EditOrderPage() {
         product_id: null,
         product_name: '',
         quantity: 1,
-        price: 0
+        price: 0,
+        discount: 0
       }]
     }));
   };
@@ -195,7 +198,9 @@ export default function EditOrderPage() {
 
   const calculateTotal = () => {
     return editFormData.items.reduce((sum, item) => {
-      return sum + (parseFloat(item.price) * parseInt(item.quantity));
+      const basePrice = parseFloat(item.price) * parseInt(item.quantity);
+      const discount = parseFloat(item.discount) || 0;
+      return sum + (basePrice - discount);
     }, 0).toFixed(2);
   };
 
@@ -315,13 +320,16 @@ export default function EditOrderPage() {
                     <th>Item Name</th>
                     <th>Quantity</th>
                     <th>Price</th>
+                    <th>Discount</th>
                     <th>Amount</th>
                     <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {editFormData.items.map((item, index) => {
-                    const itemAmount = (parseFloat(item.price) * parseInt(item.quantity)).toFixed(2);
+                    const baseAmount = parseFloat(item.price) * parseInt(item.quantity);
+                    const discountAmount = parseFloat(item.discount) || 0;
+                    const itemAmount = (baseAmount - discountAmount).toFixed(2);
                     return (
                       <tr key={index}>
                         <td>
@@ -369,6 +377,16 @@ export default function EditOrderPage() {
                             type="number"
                             value={item.price}
                             onChange={(e) => handleItemChange(index, 'price', e.target.value)}
+                            className="form-input"
+                            step="0.01"
+                            min="0"
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            value={item.discount || 0}
+                            onChange={(e) => handleItemChange(index, 'discount', e.target.value)}
                             className="form-input"
                             step="0.01"
                             min="0"

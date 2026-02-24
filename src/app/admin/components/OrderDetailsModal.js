@@ -2,16 +2,48 @@
 
 import { useState, useEffect } from 'react';
 
-export default function OrderDetailsModal({ orderId, isOpen, onClose }) {
+export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode = false }) {
   const [orderData, setOrderData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isEditing, setIsEditing] = useState(editMode);
+  const [saving, setSaving] = useState(false);
+  
+  // Edit form state
+  const [editFormData, setEditFormData] = useState({
+    customerDetails: {},
+    items: [],
+    paymentStatus: 'Unpaid',
+    status: 'Pending'
+  });
 
   useEffect(() => {
     if (isOpen && orderId) {
       fetchOrderDetails();
     }
   }, [isOpen, orderId]);
+
+  useEffect(() => {
+    if (orderData && isEditing) {
+      setEditFormData({
+        customerDetails: {
+          customer_name: orderData.order.customer_name,
+          phone: orderData.order.phone,
+          email: orderData.order.email,
+          address: orderData.order.address
+        },
+        items: orderData.items.map(item => ({
+          id: item.id,
+          product_id: item.product_id,
+          product_name: item.product_name,
+          quantity: item.quantity,
+          price: parseFloat(item.price)
+        })),
+        paymentStatus: orderData.order.payment_status || 'Unpaid',
+        status: orderData.order.status || 'Pending'
+      });
+    }
+  }, [isEditing, orderData]);
 
   const fetchOrderDetails = async () => {
     try {
@@ -33,14 +65,95 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose }) {
     }
   };
 
+  const handleSaveChanges = async () => {
+    try {
+      setSaving(true);
+      setError(null);
+
+      const payload = {
+        orderId,
+        customerDetails: editFormData.customerDetails,
+        paymentStatus: editFormData.paymentStatus,
+        status: editFormData.status,
+        items: editFormData.items.map(item => ({
+          product_id: item.product_id,
+          product_name: item.product_name,
+          quantity: parseInt(item.quantity),
+          price: parseFloat(item.price)
+        }))
+      };
+
+      const response = await fetch('/api/orders', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        setIsEditing(false);
+        await fetchOrderDetails();
+      } else {
+        const data = await response.json();
+        setError(data.error || 'Failed to save changes');
+      }
+    } catch (err) {
+      setError(err.message || 'Error saving changes');
+      console.error('Error saving changes:', err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleRemoveItem = (index) => {
+    setEditFormData(prev => ({
+      ...prev,
+      items: prev.items.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleItemChange = (index, field, value) => {
+    setEditFormData(prev => {
+      const newItems = [...prev.items];
+      newItems[index] = { ...newItems[index], [field]: value };
+      return { ...prev, items: newItems };
+    });
+  };
+
+  const handleCustomerChange = (field, value) => {
+    setEditFormData(prev => ({
+      ...prev,
+      customerDetails: { ...prev.customerDetails, [field]: value }
+    }));
+  };
+
   if (!isOpen) return null;
+
+  const calculateTotal = () => {
+    return editFormData.items.reduce((sum, item) => {
+      return sum + (parseFloat(item.price) * parseInt(item.quantity));
+    }, 0).toFixed(2);
+  };
+
+  const currentTotal = orderData ? parseFloat(orderData.order.total_amount).toFixed(2) : '0.00';
+  const displayTotal = isEditing ? calculateTotal() : currentTotal;
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Order Details - Invoice</h2>
-          <button className="close-button" onClick={onClose}>×</button>
+          <h2>{isEditing ? 'Edit Order' : 'Order Details - Invoice'}</h2>
+          <div className="header-actions">
+            {!isEditing && (
+              <button 
+                className="icon-button edit-button" 
+                onClick={() => setIsEditing(true)}
+                title="Edit order"
+              >
+                ✏️
+              </button>
+            )}
+            <button className="close-button" onClick={onClose}>×</button>
+          </div>
         </div>
 
         <div className="modal-body">
@@ -54,7 +167,7 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose }) {
               <button onClick={fetchOrderDetails} className="retry-button">Retry</button>
             </div>
           ) : orderData ? (
-            <div className="invoice-container">
+            <div className="invoice-container a4-sheet">
               {/* Header Section */}
               <div className="invoice-header">
                 <div className="company-section">
@@ -82,7 +195,20 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose }) {
                     </div>
                     <div className="meta-row">
                       <span className="meta-label">Payment:</span>
-                      <span className="meta-value">UnPaid</span>
+                      {isEditing ? (
+                        <select
+                          value={editFormData.paymentStatus}
+                          onChange={(e) => setEditFormData(prev => ({ ...prev, paymentStatus: e.target.value }))}
+                          className="payment-select"
+                        >
+                          <option value="Unpaid">Unpaid</option>
+                          <option value="Paid">Paid</option>
+                        </select>
+                      ) : (
+                        <span className="meta-value payment-badge" data-status={editFormData.paymentStatus || 'Unpaid'}>
+                          {editFormData.paymentStatus || 'Unpaid'}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -92,55 +218,152 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose }) {
               <div className="customer-section">
                 <div className="customer-block">
                   <h4 className="section-title">Billed To:</h4>
-                  <p className="customer-name">{orderData.order.customer_name}</p>
-                  {orderData.order.phone && <p>Phone: {orderData.order.phone}</p>}
-                  {orderData.order.email && <p>Email: {orderData.order.email}</p>}
-                  {orderData.order.address && <p>Address: {orderData.order.address}</p>}
+                  {isEditing ? (
+                    <div className="edit-customer-form">
+                      <input
+                        type="text"
+                        placeholder="Customer Name"
+                        value={editFormData.customerDetails.customer_name}
+                        onChange={(e) => handleCustomerChange('customer_name', e.target.value)}
+                        className="form-input"
+                      />
+                      <input
+                        type="tel"
+                        placeholder="Phone"
+                        value={editFormData.customerDetails.phone}
+                        onChange={(e) => handleCustomerChange('phone', e.target.value)}
+                        className="form-input"
+                      />
+                      <input
+                        type="email"
+                        placeholder="Email"
+                        value={editFormData.customerDetails.email}
+                        onChange={(e) => handleCustomerChange('email', e.target.value)}
+                        className="form-input"
+                      />
+                      <textarea
+                        placeholder="Address"
+                        value={editFormData.customerDetails.address}
+                        onChange={(e) => handleCustomerChange('address', e.target.value)}
+                        className="form-textarea"
+                        rows="2"
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <p className="customer-name">{orderData.order.customer_name}</p>
+                      {orderData.order.phone && <p>Phone: {orderData.order.phone}</p>}
+                      {orderData.order.email && <p>Email: {orderData.order.email}</p>}
+                      {orderData.order.address && <p>Address: {orderData.order.address}</p>}
+                    </>
+                  )}
                 </div>
               </div>
 
               {/* Items Table */}
               <div className="items-table-wrapper">
-                <table className="items-table">
-                  <thead>
-                    <tr>
-                      <th>S.No</th>
-                      <th>Item Name</th>
-                      <th>Price</th>
-                      <th>Discount</th>
-                      <th>Discounted Price</th>
-                      <th>Quantity</th>
-                      <th>Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {orderData.items.map((item, index) => {
-                      const itemAmount = parseFloat(item.price) * item.quantity;
-                      return (
-                        <tr key={item.id || index}>
-                          <td>{index + 1}</td>
-                          <td>{item.product_name}</td>
-                          <td>₹{parseFloat(item.price).toFixed(2)}</td>
-                          <td>—</td>
-                          <td>₹{parseFloat(item.price).toFixed(2)}</td>
-                          <td>{item.quantity}</td>
-                          <td>₹{itemAmount.toFixed(2)}</td>
+                {isEditing ? (
+                  <div className="edit-items-form">
+                    <h4 className="section-title">Order Items:</h4>
+                    <table className="items-table edit-table">
+                      <thead>
+                        <tr>
+                          <th>Item Name</th>
+                          <th>Price</th>
+                          <th>Quantity</th>
+                          <th>Amount</th>
+                          <th>Action</th>
                         </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                      </thead>
+                      <tbody>
+                        {editFormData.items.map((item, index) => {
+                          const itemAmount = (parseFloat(item.price) * parseInt(item.quantity)).toFixed(2);
+                          return (
+                            <tr key={index}>
+                              <td>
+                                <input
+                                  type="text"
+                                  value={item.product_name}
+                                  onChange={(e) => handleItemChange(index, 'product_name', e.target.value)}
+                                  className="form-input"
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  type="number"
+                                  value={item.price}
+                                  onChange={(e) => handleItemChange(index, 'price', e.target.value)}
+                                  className="form-input"
+                                  step="0.01"
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  type="number"
+                                  value={item.quantity}
+                                  onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
+                                  className="form-input"
+                                  min="1"
+                                />
+                              </td>
+                              <td className="amount-cell">₹{itemAmount}</td>
+                              <td>
+                                <button
+                                  onClick={() => handleRemoveItem(index)}
+                                  className="remove-item-btn"
+                                  title="Remove item"
+                                >
+                                  ✕
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <table className="items-table">
+                    <thead>
+                      <tr>
+                        <th>S.No</th>
+                        <th>Item Name</th>
+                        <th>Price</th>
+                        <th>Discount</th>
+                        <th>Discounted Price</th>
+                        <th>Quantity</th>
+                        <th>Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {orderData.items.map((item, index) => {
+                        const itemAmount = parseFloat(item.price) * item.quantity;
+                        return (
+                          <tr key={item.id || index}>
+                            <td>{index + 1}</td>
+                            <td>{item.product_name}</td>
+                            <td>₹{parseFloat(item.price).toFixed(2)}</td>
+                            <td>—</td>
+                            <td>₹{parseFloat(item.price).toFixed(2)}</td>
+                            <td>{item.quantity}</td>
+                            <td>₹{itemAmount.toFixed(2)}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                )}
               </div>
 
               {/* Total Section */}
               <div className="total-section">
                 <div className="total-row">
                   <span>Total Items:</span>
-                  <span>{orderData.items.length}</span>
+                  <span>{editFormData.items.length}</span>
                 </div>
                 <div className="total-row total-amount">
                   <span>Total Amount:</span>
-                  <span>₹{parseFloat(orderData.order.total_amount).toFixed(2)}</span>
+                  <span>₹{displayTotal}</span>
                 </div>
               </div>
 
@@ -156,8 +379,19 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose }) {
         </div>
 
         <div className="modal-footer">
-          <button onClick={onClose} className="close-modal-button">Close</button>
-          <button onClick={() => window.print()} className="print-button">Print</button>
+          {isEditing ? (
+            <>
+              <button onClick={() => setIsEditing(false)} className="cancel-button">Cancel</button>
+              <button onClick={handleSaveChanges} className="save-button" disabled={saving}>
+                {saving ? 'Saving...' : 'Save Changes'}
+              </button>
+            </>
+          ) : (
+            <>
+              <button onClick={onClose} className="close-modal-button">Close</button>
+              <button onClick={() => window.print()} className="print-button">Print A4</button>
+            </>
+          )}
         </div>
       </div>
 
@@ -199,6 +433,27 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose }) {
           font-size: 20px;
           font-weight: 600;
           color: #1f2937;
+        }
+
+        .header-actions {
+          display: flex;
+          gap: 10px;
+          align-items: center;
+        }
+
+        .icon-button {
+          background: none;
+          border: 1px solid #d1d5db;
+          padding: 6px 12px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 16px;
+          transition: all 0.2s;
+        }
+
+        .icon-button:hover {
+          background: #f3f4f6;
+          border-color: #9ca3af;
         }
 
         .close-button {
@@ -247,6 +502,15 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose }) {
 
         .retry-button:hover {
           background: #2563eb;
+        }
+
+        /* A4 Sheet Styles */
+        .a4-sheet {
+          background: white;
+          width: 100%;
+          padding: 40px;
+          margin: 0 auto;
+          box-sizing: border-box;
         }
 
         /* Invoice Styles */
@@ -299,6 +563,7 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose }) {
           justify-content: space-between;
           margin-bottom: 8px;
           min-width: 200px;
+          align-items: center;
         }
 
         .meta-label {
@@ -308,6 +573,32 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose }) {
 
         .meta-value {
           text-align: right;
+        }
+
+        .payment-badge {
+          padding: 4px 12px;
+          border-radius: 4px;
+          font-weight: 600;
+          display: inline-block;
+        }
+
+        .payment-badge[data-status="Paid"] {
+          background: #d1fae5;
+          color: #065f46;
+        }
+
+        .payment-badge[data-status="Unpaid"] {
+          background: #fef3c7;
+          color: #92400e;
+        }
+
+        .payment-select {
+          padding: 6px 12px;
+          border: 1px solid #d1d5db;
+          border-radius: 4px;
+          font-size: 13px;
+          background: white;
+          cursor: pointer;
         }
 
         .customer-section {
@@ -342,9 +633,35 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose }) {
           color: #374151;
         }
 
+        .edit-customer-form {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .form-input,
+        .form-textarea {
+          padding: 8px 12px;
+          border: 1px solid #d1d5db;
+          border-radius: 4px;
+          font-size: 14px;
+          font-family: inherit;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+          outline: none;
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
         .items-table-wrapper {
           margin-bottom: 30px;
           overflow-x: auto;
+        }
+
+        .edit-items-form {
+          margin-bottom: 30px;
         }
 
         .items-table {
@@ -383,6 +700,41 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose }) {
 
         .items-table tbody tr:hover {
           background: #f9fafb;
+        }
+
+        .edit-table input {
+          width: 100%;
+          padding: 6px 8px;
+          border: 1px solid #d1d5db;
+          border-radius: 3px;
+          font-size: 12px;
+        }
+
+        .edit-table input:focus {
+          outline: none;
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+
+        .amount-cell {
+          text-align: right;
+          font-weight: 600;
+          color: #047857;
+        }
+
+        .remove-item-btn {
+          background: #fee2e2;
+          border: none;
+          color: #991b1b;
+          padding: 4px 8px;
+          border-radius: 3px;
+          cursor: pointer;
+          font-weight: 600;
+          transition: background 0.2s;
+        }
+
+        .remove-item-btn:hover {
+          background: #fecaca;
         }
 
         .total-section {
@@ -438,7 +790,9 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose }) {
         }
 
         .close-modal-button,
-        .print-button {
+        .print-button,
+        .save-button,
+        .cancel-button {
           padding: 10px 20px;
           border: none;
           border-radius: 4px;
@@ -465,6 +819,29 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose }) {
           background: #065f46;
         }
 
+        .save-button {
+          background: #3b82f6;
+          color: white;
+        }
+
+        .save-button:hover:not(:disabled) {
+          background: #2563eb;
+        }
+
+        .save-button:disabled {
+          background: #93c5fd;
+          cursor: not-allowed;
+        }
+
+        .cancel-button {
+          background: #e5e7eb;
+          color: #1f2937;
+        }
+
+        .cancel-button:hover {
+          background: #d1d5db;
+        }
+
         @media print {
           .modal-overlay {
             background: transparent;
@@ -485,6 +862,15 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose }) {
 
           .modal-body {
             padding: 0;
+          }
+
+          .a4-sheet {
+            padding: 20px;
+          }
+
+          @page {
+            size: A4;
+            margin: 0;
           }
         }
       `}</style>

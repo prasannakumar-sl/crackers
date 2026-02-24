@@ -44,6 +44,7 @@ async function initializeDatabase() {
         total_amount DECIMAL(10, 2) NOT NULL,
         item_count INT NOT NULL,
         status VARCHAR(50) DEFAULT 'Pending',
+        payment_status VARCHAR(50) DEFAULT 'Unpaid',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;

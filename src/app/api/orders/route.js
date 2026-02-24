@@ -51,6 +51,92 @@ export async function POST(request) {
   }
 }
 
+export async function PATCH(request) {
+  let connection;
+  try {
+    const { orderId, status, paymentStatus, customerDetails, items } = await request.json();
+
+    if (!orderId) {
+      return NextResponse.json({ error: 'Order ID is required' }, { status: 400 });
+    }
+
+    connection = await getConnection();
+    await connection.beginTransaction();
+
+    // Update order status and payment status
+    if (status || paymentStatus || customerDetails) {
+      let updateQuery = 'UPDATE orders SET';
+      const updateValues = [];
+      const updateFields = [];
+
+      if (status) {
+        updateFields.push('status = ?');
+        updateValues.push(status);
+      }
+
+      if (paymentStatus) {
+        updateFields.push('payment_status = ?');
+        updateValues.push(paymentStatus);
+      }
+
+      if (customerDetails) {
+        if (customerDetails.customer_name) {
+          updateFields.push('customer_name = ?');
+          updateValues.push(customerDetails.customer_name);
+        }
+        if (customerDetails.phone) {
+          updateFields.push('phone = ?');
+          updateValues.push(customerDetails.phone);
+        }
+        if (customerDetails.email) {
+          updateFields.push('email = ?');
+          updateValues.push(customerDetails.email);
+        }
+        if (customerDetails.address) {
+          updateFields.push('address = ?');
+          updateValues.push(customerDetails.address);
+        }
+      }
+
+      if (updateFields.length > 0) {
+        updateQuery += ' ' + updateFields.join(', ') + ' WHERE id = ?';
+        updateValues.push(orderId);
+        await connection.execute(updateQuery, updateValues);
+      }
+    }
+
+    // Update order items if provided
+    if (items && items.length > 0) {
+      // Delete existing items
+      await connection.execute('DELETE FROM order_items WHERE order_id = ?', [orderId]);
+
+      // Insert updated items
+      for (const item of items) {
+        await connection.execute(
+          'INSERT INTO order_items (order_id, product_id, product_name, quantity, price) VALUES (?, ?, ?, ?, ?)',
+          [orderId, item.product_id || null, item.product_name, item.quantity, item.price]
+        );
+      }
+
+      // Recalculate total amount if items changed
+      const itemTotal = items.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
+      await connection.execute('UPDATE orders SET total_amount = ? WHERE id = ?', [itemTotal, orderId]);
+    }
+
+    await connection.commit();
+    await connection.end();
+
+    return NextResponse.json({ success: true, message: 'Order updated successfully' });
+  } catch (error) {
+    if (connection) {
+      await connection.rollback();
+      await connection.end();
+    }
+    console.error('Error updating order:', error);
+    return NextResponse.json({ error: `Failed to update order: ${error.message}` }, { status: 500 });
+  }
+}
+
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);

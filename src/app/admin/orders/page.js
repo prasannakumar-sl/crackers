@@ -8,6 +8,7 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editMode, setEditMode] = useState(false);
 
   // Load orders from database
   useEffect(() => {
@@ -16,12 +17,22 @@ export default function OrdersPage() {
 
   const handleViewDetails = (orderId) => {
     setSelectedOrderId(orderId);
+    setEditMode(false);
+    setIsModalOpen(true);
+  };
+
+  const handleEditDetails = (orderId) => {
+    setSelectedOrderId(orderId);
+    setEditMode(true);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedOrderId(null);
+    setEditMode(false);
+    // Refresh orders after closing modal (in case changes were made)
+    fetchOrders();
   };
 
   const fetchOrders = async () => {
@@ -90,13 +101,20 @@ export default function OrdersPage() {
                     <td className="px-6 py-3 text-sm text-gray-600">
                       {new Date(order.created_at).toLocaleDateString()}
                     </td>
-                    <td className="px-6 py-3 text-sm">
+                    <td className="px-6 py-3 text-sm action-buttons">
                       <button
                         onClick={() => handleViewDetails(order.id)}
                         className="action-button"
                         title="View order details"
                       >
                         👁️
+                      </button>
+                      <button
+                        onClick={() => handleEditDetails(order.id)}
+                        className="action-button"
+                        title="Edit order"
+                      >
+                        ✏️
                       </button>
                     </td>
                   </tr>
@@ -111,21 +129,31 @@ export default function OrdersPage() {
         orderId={selectedOrderId}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
+        editMode={editMode}
       />
 
       <style jsx>{`
+        .action-buttons {
+          display: flex;
+          gap: 8px;
+        }
+
         .action-button {
           background: none;
-          border: none;
+          border: 1px solid #d1d5db;
           cursor: pointer;
-          font-size: 18px;
-          padding: 4px 8px;
+          font-size: 16px;
+          padding: 6px 10px;
           border-radius: 4px;
-          transition: background-color 0.2s;
+          transition: all 0.2s;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
         }
 
         .action-button:hover {
           background-color: #f3f4f6;
+          border-color: #9ca3af;
         }
 
         .action-button:active {

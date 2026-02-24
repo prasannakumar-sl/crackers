@@ -14,6 +14,7 @@ import ChitFundPage from '../admin/chit-fund/page';
 import StaffsPage from '../admin/staffs/page';
 import CompanyInfoPage from '../admin/company-info/page';
 import AppearancePage from '../admin/appearance/page';
+import EditOrderPage from '../admin/orders/edit/page';
 
 export default function HashRouter({ children }) {
   const [hash, setHash] = useState('');
@@ -36,7 +37,11 @@ export default function HashRouter({ children }) {
 
   // Admin routes - check if user is authorized
   const adminRoutes = ['/admin', '/admin/dashboard', '/admin/products', '/admin/orders', '/admin/customers', '/admin/payments-info', '/admin/chit-fund', '/admin/staffs', '/admin/company-info', '/admin/appearance'];
-  const isAdminRoute = adminRoutes.includes(route);
+
+  // Check for dynamic routes
+  const orderEditMatch = route.match(/^\/admin\/orders\/(\d+)$/);
+
+  const isAdminRoute = adminRoutes.includes(route) || orderEditMatch;
   const adminUser = typeof window !== 'undefined' ? localStorage.getItem('adminUser') : null;
 
   // If admin route but not logged in, show login
@@ -56,6 +61,8 @@ export default function HashRouter({ children }) {
       pageContent = <ProductsPage />;
     } else if (route === '/admin/orders') {
       pageContent = <OrdersPage />;
+    } else if (orderEditMatch) {
+      pageContent = <EditOrderPage orderId={orderEditMatch[1]} />;
     } else if (route === '/admin/customers') {
       pageContent = <CustomersPage />;
     } else if (route === '/admin/payments-info') {

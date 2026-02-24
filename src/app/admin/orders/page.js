@@ -22,9 +22,7 @@ export default function OrdersPage() {
   };
 
   const handleEditDetails = (orderId) => {
-    setSelectedOrderId(orderId);
-    setEditMode(true);
-    setIsModalOpen(true);
+    window.location.hash = `#/admin/orders/${orderId}`;
   };
 
   const handleCloseModal = () => {

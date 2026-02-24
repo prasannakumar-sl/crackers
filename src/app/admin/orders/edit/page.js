@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 
-export default function EditOrderPage() {
-  const [orderId, setOrderId] = useState(null);
+export default function EditOrderPage({ orderId: propOrderId }) {
+  const [orderId, setOrderId] = useState(propOrderId || null);
   const [orderData, setOrderData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -22,15 +22,14 @@ export default function EditOrderPage() {
   });
 
   useEffect(() => {
-    // Get order ID from URL query parameter
-    const urlParams = new URLSearchParams(window.location.search);
-    const id = urlParams.get('id');
-    if (id) {
-      setOrderId(id);
+    // If orderId is provided as a prop, use it. Otherwise look in URL search params.
+    const finalId = propOrderId || new URLSearchParams(window.location.search).get('id');
+    if (finalId) {
+      setOrderId(finalId);
       fetchProducts();
-      fetchOrderDetails(id);
+      fetchOrderDetails(finalId);
     }
-  }, []);
+  }, [propOrderId]);
 
   const fetchProducts = async () => {
     try {
@@ -217,6 +216,11 @@ export default function EditOrderPage() {
   return (
     <div className="edit-order-container">
       <div className="edit-page-header">
+        <div className="header-top">
+          <button onClick={handleCancel} className="back-button">
+            ← Back to Orders
+          </button>
+        </div>
         <h2>Edit Order #{orderId}</h2>
       </div>
 
@@ -452,6 +456,29 @@ export default function EditOrderPage() {
           margin-bottom: 30px;
           border-bottom: 2px solid #e5e7eb;
           padding-bottom: 20px;
+        }
+
+        .header-top {
+          margin-bottom: 15px;
+        }
+
+        .back-button {
+          background: none;
+          border: none;
+          color: #3b82f6;
+          font-weight: 600;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 0;
+          font-size: 15px;
+          transition: color 0.2s;
+        }
+
+        .back-button:hover {
+          color: #1d4ed8;
+          text-decoration: underline;
         }
 
         .edit-page-header h2 {

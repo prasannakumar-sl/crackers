@@ -27,13 +27,23 @@ export async function POST(request) {
 
     // Insert into order_items table
     for (const item of items) {
-      const price = typeof item.discount === 'number' 
-        ? item.discount 
+      // Use originalPrice if available (from price-list), otherwise calculate from discount
+      const originalPrice = item.originalPrice
+        ? parseFloat(item.originalPrice)
+        : typeof item.discount === 'number'
+          ? item.discount * 2  // Assume 50% discount, so original = current * 2
+          : parseFloat(item.discount.replace('₹', '')) * 2;
+
+      const discountedPrice = typeof item.discount === 'number'
+        ? item.discount
         : parseFloat(item.discount.replace('₹', ''));
-        
+
+      // Calculate discount percentage
+      const discountPercent = ((originalPrice - discountedPrice) / originalPrice * 100).toFixed(2);
+
       await connection.execute(
-        'INSERT INTO order_items (order_id, product_id, product_name, quantity, price) VALUES (?, ?, ?, ?, ?)',
-        [orderId, item.id || null, item.name, item.quantity, price]
+        'INSERT INTO order_items (order_id, product_id, product_name, quantity, price, discount) VALUES (?, ?, ?, ?, ?, ?)',
+        [orderId, item.id || null, item.name, item.quantity, originalPrice, discountPercent]
       );
     }
 
@@ -119,11 +129,13 @@ export async function PATCH(request) {
         );
       }
 
-      // Recalculate total amount if items changed (price - discount)
+      // Recalculate total amount if items changed (price with percentage discount × quantity)
       const itemTotal = items.reduce((sum, item) => {
-        const basePrice = parseFloat(item.price) * item.quantity;
-        const discount = parseFloat(item.discount) || 0;
-        return sum + (basePrice - discount);
+        const price = parseFloat(item.price);
+        const discountPercent = parseFloat(item.discount) || 0;
+        const quantity = item.quantity;
+        const discountedPrice = price * (1 - discountPercent / 100);
+        return sum + (discountedPrice * quantity);
       }, 0);
       await connection.execute('UPDATE orders SET total_amount = ? WHERE id = ?', [itemTotal, orderId]);
     }

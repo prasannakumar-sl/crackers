@@ -199,9 +199,11 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
 
   const calculateTotal = () => {
     return editFormData.items.reduce((sum, item) => {
-      const basePrice = parseFloat(item.price) * parseInt(item.quantity);
-      const discount = parseFloat(item.discount) || 0;
-      return sum + (basePrice - discount);
+      const price = parseFloat(item.price);
+      const discountPercent = parseFloat(item.discount) || 0;
+      const quantity = parseInt(item.quantity);
+      const discountedPrice = price * (1 - discountPercent / 100);
+      return sum + (discountedPrice * quantity);
     }, 0).toFixed(2);
   };
 
@@ -349,9 +351,11 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
                       </thead>
                       <tbody>
                         {editFormData.items.map((item, index) => {
-                          const baseAmount = parseFloat(item.price) * parseInt(item.quantity);
-                          const discountAmount = parseFloat(item.discount) || 0;
-                          const itemAmount = (baseAmount - discountAmount).toFixed(2);
+                          const price = parseFloat(item.price);
+                          const discountPercent = parseFloat(item.discount) || 0;
+                          const quantity = parseInt(item.quantity);
+                          const discountedPrice = price * (1 - discountPercent / 100);
+                          const itemAmount = (discountedPrice * quantity).toFixed(2);
                           return (
                             <tr key={index}>
                               <td>
@@ -439,7 +443,7 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
                       <tr>
                         <th>S.No</th>
                         <th>Item Name</th>
-                        <th>Price</th>
+                        <th>Original Price</th>
                         <th>Discount</th>
                         <th>Discounted Price</th>
                         <th>Quantity</th>
@@ -448,18 +452,19 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
                     </thead>
                     <tbody>
                       {orderData.items.map((item, index) => {
-                        const baseAmount = parseFloat(item.price) * item.quantity;
-                        const discount = parseFloat(item.discount) || 0;
-                        const finalAmount = baseAmount - discount;
-                        const discountedPrice = parseFloat(item.price) - (discount / item.quantity);
+                        const price = parseFloat(item.price);
+                        const discountPercent = parseFloat(item.discount) || 0;
+                        const quantity = item.quantity;
+                        const discountedPrice = price * (1 - discountPercent / 100);
+                        const finalAmount = discountedPrice * quantity;
                         return (
                           <tr key={item.id || index}>
                             <td>{index + 1}</td>
                             <td>{item.product_name}</td>
-                            <td>₹{parseFloat(item.price).toFixed(2)}</td>
-                            <td>₹{discount > 0 ? discount.toFixed(2) : '—'}</td>
-                            <td>₹{discountedPrice > 0 ? discountedPrice.toFixed(2) : parseFloat(item.price).toFixed(2)}</td>
-                            <td>{item.quantity}</td>
+                            <td><span className="original-price">₹{price.toFixed(2)}</span></td>
+                            <td>{discountPercent > 0 ? `${discountPercent.toFixed(2)}%` : '—'}</td>
+                            <td><span className="discounted-price">₹{discountedPrice.toFixed(2)}</span></td>
+                            <td>{quantity}</td>
                             <td>₹{finalAmount.toFixed(2)}</td>
                           </tr>
                         );
@@ -810,6 +815,17 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
 
         .items-table td:last-child {
           border-right: none;
+        }
+
+        .original-price {
+          text-decoration: line-through;
+          color: #9ca3af;
+          font-size: 12px;
+        }
+
+        .discounted-price {
+          color: #dc2626;
+          font-weight: 600;
         }
 
         .items-table tbody tr:hover {

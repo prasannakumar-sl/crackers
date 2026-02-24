@@ -198,9 +198,11 @@ export default function EditOrderPage() {
 
   const calculateTotal = () => {
     return editFormData.items.reduce((sum, item) => {
-      const basePrice = parseFloat(item.price) * parseInt(item.quantity);
-      const discount = parseFloat(item.discount) || 0;
-      return sum + (basePrice - discount);
+      const price = parseFloat(item.price);
+      const discountPercent = parseFloat(item.discount) || 0;
+      const quantity = parseInt(item.quantity);
+      const discountedPrice = price * (1 - discountPercent / 100);
+      return sum + (discountedPrice * quantity);
     }, 0).toFixed(2);
   };
 
@@ -327,9 +329,11 @@ export default function EditOrderPage() {
                 </thead>
                 <tbody>
                   {editFormData.items.map((item, index) => {
-                    const baseAmount = parseFloat(item.price) * parseInt(item.quantity);
-                    const discountAmount = parseFloat(item.discount) || 0;
-                    const itemAmount = (baseAmount - discountAmount).toFixed(2);
+                    const price = parseFloat(item.price);
+                    const discountPercent = parseFloat(item.discount) || 0;
+                    const quantity = parseInt(item.quantity);
+                    const discountedPrice = price * (1 - discountPercent / 100);
+                    const itemAmount = (discountedPrice * quantity).toFixed(2);
                     return (
                       <tr key={index}>
                         <td>

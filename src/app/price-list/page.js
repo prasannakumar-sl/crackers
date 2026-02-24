@@ -88,6 +88,7 @@ export default function PriceList() {
           addToCart({
             id: product.id,
             name: product.name,
+            originalPrice: originalPrice,
             price: salePrice,
             discount: salePrice,
             quantity: newQty

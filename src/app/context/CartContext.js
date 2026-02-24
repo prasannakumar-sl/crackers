@@ -79,7 +79,7 @@ export function CartProvider({ children }) {
   };
 
   const getCartItemCount = () => {
-    return cart.reduce((total, item) => total + item.quantity, 0);
+    return cart.length;
   };
 
   const value = {

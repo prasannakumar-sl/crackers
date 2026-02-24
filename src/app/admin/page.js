@@ -338,7 +338,7 @@ export default function AdminDashboard() {
           )}
 
           {/* Products Table */}
-          <div className="bg-white rounded-lg shadow p-6">
+          {/* <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-xl font-bold text-gray-800 mb-4">Products List</h3>
 
             {loading ? (
@@ -383,7 +383,7 @@ export default function AdminDashboard() {
                 </table>
               </div>
             )}
-          </div>
+          </div> */}
         </div>
       )}
 

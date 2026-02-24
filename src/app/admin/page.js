@@ -19,6 +19,9 @@ export default function AdminDashboard() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('products');
+  const [showImport, setShowImport] = useState(false);
+  const [importingFile, setImportingFile] = useState(false);
+  const [importResults, setImportResults] = useState(null);
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -115,6 +118,40 @@ export default function AdminDashboard() {
       showAlert(`Error adding product: ${error.message}`, 'error');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleImportFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setImportingFile(true);
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/products/import', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setImportResults(data);
+        const message = `✓ Import completed: ${data.successCount} added, ${data.duplicateCount || 0} duplicates skipped${data.errorCount > 0 ? `, ${data.errorCount} errors` : ''}`;
+        showAlert(message, 'success');
+        fetchProducts();
+        setShowImport(false);
+      } else {
+        showAlert(`Import failed: ${data.error || 'Unknown error'}`, 'error');
+      }
+    } catch (error) {
+      console.error('Error importing products:', error);
+      showAlert(`Error importing products: ${error.message}`, 'error');
+    } finally {
+      setImportingFile(false);
+      e.target.value = '';
     }
   };
 
@@ -234,15 +271,88 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Add Product Button */}
-          <div className="mb-6">
+          {/* Action Buttons */}
+          <div className="mb-6 flex gap-3">
             <button
               onClick={() => setShowForm(!showForm)}
               className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
             >
               {showForm ? 'Cancel' : '+ Add New Product'}
             </button>
+            <button
+              onClick={() => setShowImport(!showImport)}
+              className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition"
+            >
+              {showImport ? 'Cancel' : '📥 Import from Excel'}
+            </button>
           </div>
+
+          {/* Import File Form */}
+          {showImport && (
+            <div className="bg-white rounded-lg shadow p-6 mb-8">
+              <h3 className="text-xl font-bold text-gray-800 mb-4">Import Products from Excel</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">Select Excel File</label>
+                  <input
+                    type="file"
+                    accept=".xlsx,.xls,.csv"
+                    onChange={handleImportFile}
+                    disabled={importingFile}
+                    className="block w-full text-sm text-gray-500
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded-lg file:border-0
+                      file:text-sm file:font-semibold
+                      file:bg-blue-50 file:text-blue-700
+                      hover:file:bg-blue-100
+                      disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                  <p className="text-sm text-gray-500 mt-2">
+                    Excel file should have columns: Name, Price, Category, Quantity, Description
+                  </p>
+                </div>
+
+                {importingFile && (
+                  <p className="text-blue-600">Importing products...</p>
+                )}
+
+                {importResults && (
+                  <div className="bg-gray-50 rounded p-4 space-y-2">
+                    <p className="font-semibold text-gray-800">Import Results:</p>
+                    <p className="text-green-600">✓ Successfully added: {importResults.successCount}</p>
+                    {importResults.duplicateCount > 0 && (
+                      <p className="text-orange-600">⊘ Duplicates skipped: {importResults.duplicateCount}</p>
+                    )}
+                    {importResults.errorCount > 0 && (
+                      <p className="text-red-600">✕ Errors: {importResults.errorCount}</p>
+                    )}
+
+                    {importResults.duplicates && importResults.duplicates.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-gray-300">
+                        <p className="text-sm font-semibold text-gray-700 mb-2">Duplicate Products (not added):</p>
+                        <ul className="text-sm text-gray-600 space-y-1">
+                          {importResults.duplicates.map((dup, idx) => (
+                            <li key={idx}>• {dup}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {importResults.errors && importResults.errors.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-gray-300">
+                        <p className="text-sm font-semibold text-gray-700 mb-2">Errors:</p>
+                        <ul className="text-sm text-red-600 space-y-1">
+                          {importResults.errors.map((err, idx) => (
+                            <li key={idx}>• {err}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Add Product Form */}
           {showForm && (

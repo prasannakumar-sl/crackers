@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import { Snackbar, Alert, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import FileUploadIcon from '@mui/icons-material/FileUpload';
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
@@ -29,6 +31,8 @@ export default function ProductsPage() {
   });
 
   const fileInputRef = useRef(null);
+  const importFileInputRef = useRef(null);
+  const [importing, setImporting] = useState(false);
 
   const handleCloseSnackbar = (event, reason) => {
     if (reason === 'clickaway') return;
@@ -254,30 +258,123 @@ export default function ProductsPage() {
     }
   };
 
+  const handleExportProducts = async () => {
+    try {
+      const response = await fetch('/api/products/export');
+
+      if (!response.ok) {
+        throw new Error('Failed to export products');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `products_${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      showAlert('✓ Products exported successfully', 'success');
+    } catch (error) {
+      console.error('Error exporting products:', error);
+      showAlert(`Error exporting products: ${error.message}`, 'error');
+    }
+  };
+
+  const handleImportProducts = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setImporting(true);
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/products/import', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        showAlert(
+          `✓ Import completed! Added ${data.successCount} product(s)${data.errorCount > 0 ? `, ${data.errorCount} error(s)` : ''}`,
+          data.errorCount > 0 ? 'warning' : 'success'
+        );
+
+        if (data.errors && data.errors.length > 0) {
+          console.warn('Import errors:', data.errors);
+        }
+
+        // Refresh products list
+        await fetchProducts();
+      } else {
+        showAlert(`Failed to import products: ${data.error || 'Unknown error'}`, 'error');
+      }
+    } catch (error) {
+      console.error('Error importing products:', error);
+      showAlert(`Error importing products: ${error.message}`, 'error');
+    } finally {
+      setImporting(false);
+      if (importFileInputRef.current) {
+        importFileInputRef.current.value = '';
+      }
+    }
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-3xl font-bold text-gray-800">Products</h2>
-        <button
-          onClick={() => {
-            setShowForm(!showForm);
-            setImagePreview(null);
-            if (showForm) {
-              setEditingId(null);
-              setFormData({
-                name: '',
-                price: '',
-                description: '',
-                category: '',
-                image: null,
-                quantity: '',
-              });
-            }
-          }}
-          className="bg-blue-600 text-white px-6 py-2 rounded font-semibold hover:bg-blue-700 transition-colors"
-        >
-          {showForm ? '✕ Cancel' : '+ Add Product'}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleExportProducts}
+            className="bg-green-600 text-white px-4 py-2 rounded font-semibold hover:bg-green-700 transition-colors flex items-center gap-2"
+            title="Export products to Excel"
+          >
+            <FileDownloadIcon fontSize="small" />
+            Export
+          </button>
+          <button
+            onClick={() => importFileInputRef.current?.click()}
+            disabled={importing}
+            className="bg-orange-600 text-white px-4 py-2 rounded font-semibold hover:bg-orange-700 transition-colors flex items-center gap-2 disabled:bg-gray-400"
+            title="Import products from Excel"
+          >
+            <FileUploadIcon fontSize="small" />
+            {importing ? 'Importing...' : 'Import'}
+          </button>
+          <input
+            ref={importFileInputRef}
+            type="file"
+            accept=".xlsx,.xls"
+            onChange={handleImportProducts}
+            style={{ display: 'none' }}
+          />
+          <button
+            onClick={() => {
+              setShowForm(!showForm);
+              setImagePreview(null);
+              if (showForm) {
+                setEditingId(null);
+                setFormData({
+                  name: '',
+                  price: '',
+                  description: '',
+                  category: '',
+                  image: null,
+                  quantity: '',
+                });
+              }
+            }}
+            className="bg-blue-600 text-white px-6 py-2 rounded font-semibold hover:bg-blue-700 transition-colors"
+          >
+            {showForm ? '✕ Cancel' : '+ Add Product'}
+          </button>
+        </div>
       </div>
 
       {/* Add Product Form */}

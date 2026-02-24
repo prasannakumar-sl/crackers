@@ -132,16 +132,15 @@ export default function Home() {
                   {section.products && section.products.length > 0 ? (
                     section.products.map(product => (
                       <div key={product.id} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-                        <div className="bg-purple-100 h-48 flex items-center justify-center overflow-hidden cursor-pointer" onClick={() => product.image && setSelectedImage(product.image)}>
-                          {product.image ? (
-                            <img
-                              src={product.image}
-                              alt={product.name}
-                              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                            />
-                          ) : (
-                            <div className="text-6xl">📦</div>
-                          )}
+                        <div className="bg-purple-100 h-48 flex items-center justify-center overflow-hidden cursor-pointer" onClick={() => (product.image || 'https://cdn.builder.io/api/v1/image/assets%2Fa8b7ea913e4d4cbb918cc3633423e9fa%2Fcf0b1bff048f4f4aa4c2904d1907c926') && setSelectedImage(product.image || 'https://cdn.builder.io/api/v1/image/assets%2Fa8b7ea913e4d4cbb918cc3633423e9fa%2Fcf0b1bff048f4f4aa4c2904d1907c926')}>
+                          <img
+                            src={product.image || 'https://cdn.builder.io/api/v1/image/assets%2Fa8b7ea913e4d4cbb918cc3633423e9fa%2Fcf0b1bff048f4f4aa4c2904d1907c926'}
+                            alt={product.name}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                            onError={(e) => {
+                              e.target.src = 'https://cdn.builder.io/api/v1/image/assets%2Fa8b7ea913e4d4cbb918cc3633423e9fa%2Fcf0b1bff048f4f4aa4c2904d1907c926';
+                            }}
+                          />
                         </div>
                         <div className="p-4">
                           <h3 className="font-bold text-black mb-3">{product.name}</h3>

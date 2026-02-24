@@ -8,7 +8,7 @@ export async function GET() {
     await connection.end();
 
     // Provide default cracker image for products without images
-    const defaultImage = 'https://cdn.builder.io/api/v1/image/assets%2Fa6d9ccfff1114dfea0a383bcba1a59e7%2F162e599830ba4653ac22ce4d148fff06?format=webp&width=800&height=1200';
+    const defaultImage = 'https://cdn.builder.io/api/v1/image/assets%2Fa8b7ea913e4d4cbb918cc3633423e9fa%2Fcf0b1bff048f4f4aa4c2904d1907c926?format=webp&width=800&height=1200';
 
     const productsWithImages = products.map(product => ({
       ...product,

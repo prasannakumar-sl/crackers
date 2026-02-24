@@ -8,7 +8,10 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(editMode);
   const [saving, setSaving] = useState(false);
-  
+  const [products, setProducts] = useState([]);
+  const [searchQuery, setSearchQuery] = useState({});
+  const [showSuggestions, setShowSuggestions] = useState({});
+
   // Edit form state
   const [editFormData, setEditFormData] = useState({
     customerDetails: {},
@@ -18,10 +21,25 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
   });
 
   useEffect(() => {
-    if (isOpen && orderId) {
-      fetchOrderDetails();
+    if (isOpen) {
+      fetchProducts();
+      if (orderId) {
+        fetchOrderDetails();
+      }
     }
   }, [isOpen, orderId]);
+
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch('/api/products');
+      const data = await response.json();
+      if (response.ok) {
+        setProducts(data);
+      }
+    } catch (err) {
+      console.error('Error fetching products:', err);
+    }
+  };
 
   useEffect(() => {
     if (orderData && isEditing) {
@@ -111,12 +129,55 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
     }));
   };
 
+  const handleAddItem = () => {
+    setEditFormData(prev => ({
+      ...prev,
+      items: [...prev.items, {
+        id: null,
+        product_id: null,
+        product_name: '',
+        quantity: 1,
+        price: 0
+      }]
+    }));
+  };
+
   const handleItemChange = (index, field, value) => {
     setEditFormData(prev => {
       const newItems = [...prev.items];
       newItems[index] = { ...newItems[index], [field]: value };
       return { ...prev, items: newItems };
     });
+
+    // Show suggestions when typing in product name field
+    if (field === 'product_name') {
+      setSearchQuery(prev => ({ ...prev, [index]: value }));
+      setShowSuggestions(prev => ({ ...prev, [index]: value.length > 0 }));
+    }
+  };
+
+  const handleSelectProduct = (index, product) => {
+    setEditFormData(prev => {
+      const newItems = [...prev.items];
+      newItems[index] = {
+        ...newItems[index],
+        product_id: product.id,
+        product_name: product.name,
+        price: product.price,
+        quantity: 1
+      };
+      return { ...prev, items: newItems };
+    });
+    setShowSuggestions(prev => ({ ...prev, [index]: false }));
+    setSearchQuery(prev => ({ ...prev, [index]: '' }));
+  };
+
+  const getFilteredProducts = (index) => {
+    const query = searchQuery[index] || '';
+    if (!query) return [];
+    return products.filter(p =>
+      p.name.toLowerCase().includes(query.toLowerCase())
+    ).slice(0, 5);
   };
 
   const handleCustomerChange = (field, value) => {
@@ -269,8 +330,8 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
                       <thead>
                         <tr>
                           <th>Item Name</th>
-                          <th>Price</th>
                           <th>Quantity</th>
+                          <th>Price</th>
                           <th>Amount</th>
                           <th>Action</th>
                         </tr>
@@ -281,11 +342,43 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
                           return (
                             <tr key={index}>
                               <td>
+                                <div className="autocomplete-wrapper">
+                                  <input
+                                    type="text"
+                                    value={item.product_name}
+                                    onChange={(e) => handleItemChange(index, 'product_name', e.target.value)}
+                                    className="form-input"
+                                    placeholder="Product name"
+                                  />
+                                  {showSuggestions[index] && (
+                                    <div className="autocomplete-suggestions">
+                                      {getFilteredProducts(index).length > 0 ? (
+                                        getFilteredProducts(index).map(product => (
+                                          <div
+                                            key={product.id}
+                                            className="autocomplete-item"
+                                            onClick={() => handleSelectProduct(index, product)}
+                                          >
+                                            <span className="item-name">{product.name}</span>
+                                            <span className="item-price">₹{parseFloat(product.price).toFixed(2)}</span>
+                                          </div>
+                                        ))
+                                      ) : (
+                                        <div className="autocomplete-item no-results">
+                                          No products found
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              </td>
+                              <td>
                                 <input
-                                  type="text"
-                                  value={item.product_name}
-                                  onChange={(e) => handleItemChange(index, 'product_name', e.target.value)}
+                                  type="number"
+                                  value={item.quantity}
+                                  onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
                                   className="form-input"
+                                  min="1"
                                 />
                               </td>
                               <td>
@@ -295,15 +388,7 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
                                   onChange={(e) => handleItemChange(index, 'price', e.target.value)}
                                   className="form-input"
                                   step="0.01"
-                                />
-                              </td>
-                              <td>
-                                <input
-                                  type="number"
-                                  value={item.quantity}
-                                  onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
-                                  className="form-input"
-                                  min="1"
+                                  min="0"
                                 />
                               </td>
                               <td className="amount-cell">₹{itemAmount}</td>
@@ -321,6 +406,9 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
                         })}
                       </tbody>
                     </table>
+                    <button onClick={handleAddItem} className="add-item-button">
+                      + Add Item
+                    </button>
                   </div>
                 ) : (
                   <table className="items-table">
@@ -735,6 +823,77 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
 
         .remove-item-btn:hover {
           background: #fecaca;
+        }
+
+        .add-item-button {
+          background: #3b82f6;
+          color: white;
+          border: none;
+          padding: 10px 16px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-weight: 500;
+          margin-top: 12px;
+          transition: background 0.2s;
+        }
+
+        .add-item-button:hover {
+          background: #2563eb;
+        }
+
+        .autocomplete-wrapper {
+          position: relative;
+        }
+
+        .autocomplete-suggestions {
+          position: absolute;
+          top: 100%;
+          left: 0;
+          right: 0;
+          background: white;
+          border: 1px solid #d1d5db;
+          border-top: none;
+          border-radius: 0 0 4px 4px;
+          max-height: 200px;
+          overflow-y: auto;
+          z-index: 1000;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .autocomplete-item {
+          padding: 10px 12px;
+          cursor: pointer;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 10px;
+          border-bottom: 1px solid #f3f4f6;
+        }
+
+        .autocomplete-item:hover:not(.no-results) {
+          background: #f3f4f6;
+        }
+
+        .autocomplete-item:last-child {
+          border-bottom: none;
+        }
+
+        .autocomplete-item.no-results {
+          color: #9ca3af;
+          cursor: default;
+          justify-content: center;
+        }
+
+        .item-name {
+          font-weight: 500;
+          color: #1f2937;
+          flex: 1;
+        }
+
+        .item-price {
+          color: #047857;
+          font-weight: 600;
+          white-space: nowrap;
         }
 
         .total-section {

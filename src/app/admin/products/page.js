@@ -521,15 +521,11 @@ export default function ProductsPage() {
                       {product.image ? (
                         <div className="flex items-center gap-2">
                           <div className="relative group">
-                            {product.image.startsWith('data:') || product.image.startsWith('/uploads') ? (
-                              <img
-                                src={product.image}
-                                alt={product.name}
-                                className="w-10 h-10 object-cover rounded border border-gray-200"
-                              />
-                            ) : (
-                              <span className="text-2xl">{product.image}</span>
-                            )}
+                            <img
+                              src={product.image}
+                              alt={product.name}
+                              className="w-10 h-10 object-cover rounded border border-gray-200"
+                            />
                             <button
                               onClick={() => handleDeleteImage(product.id)}
                               disabled={deleting === product.id}

@@ -4,6 +4,7 @@ import { useCart } from '../context/CartContext';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Snackbar, Alert } from '@mui/material';
+import { generateInvoicePDF } from '../../lib/generateInvoice';
 
 export default function CheckoutPage() {
   const { cart, getCartTotal, clearCart } = useCart();
@@ -98,6 +99,14 @@ export default function CheckoutPage() {
 
       if (response.ok) {
         showAlert('✓ Order confirmed! Thank you for your order.', 'success');
+
+        // Generate and download invoice PDF
+        try {
+          generateInvoicePDF(orderData, data.invoiceNumber || `invno_${String(data.orderId || '00000001').padStart(8, '0')}`);
+        } catch (pdfError) {
+          console.error('Error generating PDF:', pdfError);
+        }
+
         clearCart();
         // Redirect or show success message
         setTimeout(() => {

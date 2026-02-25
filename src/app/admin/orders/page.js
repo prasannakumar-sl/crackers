@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 import OrderDetailsModal from '../components/OrderDetailsModal';
 import InvoicePrint from '../components/InvoicePrint';
-import html2pdf from 'html2pdf.js';
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
@@ -60,6 +59,9 @@ export default function OrdersPage() {
         // Give React a moment to render the hidden invoice
         setTimeout(async () => {
           if (invoiceRef.current) {
+            // Dynamically import html2pdf only when needed
+            const html2pdf = (await import('html2pdf.js')).default;
+
             const filename = `Invoice-${data.order.invoice_number || orderId}.pdf`;
             const options = {
               margin: [5, 5, 5, 5],

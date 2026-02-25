@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import html2pdf from 'html2pdf.js';
 import InvoicePrint from './InvoicePrint';
 
 export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode = false }) {
@@ -97,6 +96,9 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
     try {
       if (!invoiceRef.current) return;
       setDownloading(true);
+
+      // Dynamically import html2pdf only when needed
+      const html2pdf = (await import('html2pdf.js')).default;
 
       const element = invoiceRef.current;
       const filename = `Invoice-${orderData.order.invoice_number || orderId}.pdf`;

@@ -163,6 +163,11 @@ export default function InvoicePrint({ orderData, company, containerRef, payment
           <div className="upi-box">
             {payments.upi?.name && <p className="font-bold">UPI Name: {payments.upi.name}</p>}
             {payments.upi?.id && <p>UPI ID: {payments.upi.id}</p>}
+            {payments.upi?.qrCode && (
+              <div className="upi-qr-container">
+                <img src={payments.upi.qrCode} alt="UPI QR Code" className="upi-qr-image" />
+              </div>
+            )}
           </div>
         </div>
 
@@ -411,6 +416,21 @@ export default function InvoicePrint({ orderData, company, containerRef, payment
         }
 
         .mt-auto { margin-top: auto; }
+
+        .upi-qr-container {
+          margin-top: 8px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .upi-qr-image {
+          width: 50px;
+          height: 50px;
+          object-fit: contain;
+          border: 1px solid #000;
+          padding: 2px;
+        }
 
         @media print {
           .invoice-print-container {

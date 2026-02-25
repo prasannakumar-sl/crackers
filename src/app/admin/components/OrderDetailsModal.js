@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { toPng } from 'html-to-image';
+import html2pdf from 'html2pdf.js';
 import InvoicePrint from './InvoicePrint';
 
 export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode = false }) {
@@ -97,18 +97,27 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
     try {
       if (!invoiceRef.current) return;
       setDownloading(true);
-      const dataUrl = await toPng(invoiceRef.current, {
-        quality: 0.95,
-        backgroundColor: '#fff',
-        pixelRatio: 2
-      });
-      const link = document.createElement('a');
-      link.download = `Invoice-${orderData.order.invoice_number || orderId}.png`;
-      link.href = dataUrl;
-      link.click();
+
+      const element = invoiceRef.current;
+      const filename = `Invoice-${orderData.order.invoice_number || orderId}.pdf`;
+
+      const options = {
+        margin: [5, 5, 5, 5],
+        filename: filename,
+        image: { type: 'jpeg', quality: 0.95 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff'
+        },
+        jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+      };
+
+      await html2pdf().set(options).from(element).save();
     } catch (err) {
-      console.error('Error downloading image:', err);
-      alert('Error occurred while downloading image');
+      console.error('Error downloading PDF:', err);
+      alert('Error occurred while downloading PDF');
     } finally {
       setDownloading(false);
     }
@@ -471,7 +480,7 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
             <>
               <button onClick={onClose} className="close-modal-button">Close</button>
               <button onClick={handleDownloadImage} className="save-button" disabled={downloading}>
-                {downloading ? 'Preparing...' : 'Download Image'}
+                {downloading ? 'Preparing...' : 'Download PDF'}
               </button>
               <button onClick={() => window.print()} className="print-button">Print A4</button>
             </>

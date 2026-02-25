@@ -23,12 +23,31 @@ function amountToWords(amount) {
   return result.charAt(0).toUpperCase() + result.slice(1) + " only";
 }
 
-export default function InvoicePrint({ orderData, company, containerRef }) {
+export default function InvoicePrint({ orderData, company, containerRef, paymentMethods = null }) {
   if (!orderData) return null;
 
   const { order, items } = orderData;
   const totalQty = items.reduce((sum, item) => sum + item.quantity, 0);
   const subTotal = parseFloat(order.total_amount);
+
+  // Get payment methods from props or localStorage
+  const getPaymentMethods = () => {
+    if (paymentMethods) return paymentMethods;
+
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('adminPayments');
+      if (saved) return JSON.parse(saved);
+    }
+
+    // Default fallback
+    return {
+      bankAccount: { name: '', accountNo: '', bankName: '' },
+      gpay: { name: '', number: '' },
+      upi: { name: '', id: '' }
+    };
+  };
+
+  const payments = getPaymentMethods();
 
   return (
     <div ref={containerRef} className="invoice-print-container">
@@ -38,15 +57,17 @@ export default function InvoicePrint({ orderData, company, containerRef }) {
         {/* Header Section */}
         <div className="header-section">
           <div className="company-info">
-            <div className="logo-box">
-              <img src="https://cdn.builder.io/api/v1/image/assets%2F59dca2fe43f0459b9386969f352d866f%2F820bedae531b4989ac72e5578deb9000?format=webp&width=100" alt="logo" className="logo-img" />
-            </div>
+            {company?.logo && (
+              <div className="logo-box">
+                <img src={company.logo} alt="logo" className="logo-img" />
+              </div>
+            )}
             <div className="details-box">
-              <h1 className="company-name">{company?.company_name || 'Cobra Crackers'}</h1>
-              <p>{company?.address || '4/1434-27,sattur main road, Thayilpatti, Sivakasi - 626189.'}</p>
-              <p>Gmail: {company?.email || 'cobracrackers33@gmail.com'}</p>
-              <p>Website: {company?.website || 'www.cobracrackers.in'}</p>
-              <p>Mob: {company?.phone_number || '96778 33372, 93425 93442'}</p>
+              <h1 className="company-name">{company?.company_name || 'Your Company Name'}</h1>
+              {company?.address && <p>{company.address}</p>}
+              {company?.email && <p>Gmail: {company.email}</p>}
+              {company?.website && <p>Website: {company.website}</p>}
+              {company?.phone_number && <p>Mob: {company.phone_number}</p>}
             </div>
           </div>
           <div className="bill-info">
@@ -131,19 +152,17 @@ export default function InvoicePrint({ orderData, company, containerRef }) {
         {/* Footer Grid */}
         <div className="footer-info-grid">
           <div className="bank-box">
-            <p className="font-bold">A/C Name: COBRA TRADERS</p>
-            <p>Bank Name: State Bank of India</p>
-            <p>Current A/C No: 41813993341</p>
-            <p>Branch : Sivakasi</p>
-            <p>IFSC: SBIN 0000975</p>
+            {payments.bankAccount?.name && <p className="font-bold">A/C Name: {payments.bankAccount.name}</p>}
+            {payments.bankAccount?.bankName && <p>Bank Name: {payments.bankAccount.bankName}</p>}
+            {payments.bankAccount?.accountNo && <p>Current A/C No: {payments.bankAccount.accountNo}</p>}
           </div>
           <div className="gpay-box">
-            <p className="font-bold">Name: Soundharya</p>
-            <p>G-Pay No: 9344746164</p>
+            {payments.gpay?.name && <p className="font-bold">Name: {payments.gpay.name}</p>}
+            {payments.gpay?.number && <p>G-Pay No: {payments.gpay.number}</p>}
           </div>
           <div className="upi-box">
-            <p className="font-bold">UPI Name: Harisudhan</p>
-            <p>UPI ID: 9677833372@paytm</p>
+            {payments.upi?.name && <p className="font-bold">UPI Name: {payments.upi.name}</p>}
+            {payments.upi?.id && <p>UPI ID: {payments.upi.id}</p>}
           </div>
         </div>
 
@@ -153,7 +172,7 @@ export default function InvoicePrint({ orderData, company, containerRef }) {
             <div className="label-top">Declaration</div>
           </div>
           <div className="signature">
-            <div className="for-company">for {company?.company_name || 'Cobra Crackers'}</div>
+            <div className="for-company">for {company?.company_name || 'Your Company'}</div>
             <div className="sign-label">Authorised Signatory</div>
           </div>
         </div>
@@ -162,46 +181,52 @@ export default function InvoicePrint({ orderData, company, containerRef }) {
       <style jsx>{`
         .invoice-print-container {
           background: white;
-          width: 800px;
+          width: 210mm;
+          height: 297mm;
           margin: 0 auto;
           color: black;
           font-family: Arial, sans-serif;
           font-size: 11px;
-          padding: 20px;
+          padding: 10mm;
+          box-sizing: border-box;
         }
 
         .invoice-outer-border {
           border: 1px solid #000;
+          box-sizing: border-box;
         }
 
         .main-title {
           text-align: center;
           border-bottom: 1px solid #000;
           margin: 0;
-          padding: 5px;
-          font-size: 14px;
+          padding: 8px;
+          font-size: 16px;
           font-weight: bold;
         }
 
         .header-section {
           display: grid;
-          grid-template-columns: 1fr 250px;
+          grid-template-columns: 2fr 1fr;
           border-bottom: 1px solid #000;
+          min-height: 70px;
         }
 
         .company-info {
           display: flex;
           border-right: 1px solid #000;
-          padding: 10px;
-          gap: 15px;
+          padding: 8px;
+          gap: 10px;
+          align-items: flex-start;
         }
 
         .logo-box {
-          width: 60px;
-          height: 60px;
+          width: 50px;
+          height: 50px;
           display: flex;
           align-items: center;
           justify-content: center;
+          flex-shrink: 0;
         }
 
         .logo-img {
@@ -211,45 +236,51 @@ export default function InvoicePrint({ orderData, company, containerRef }) {
         }
 
         .details-box h1 {
-          font-size: 16px;
-          margin: 0 0 5px 0;
+          font-size: 14px;
+          margin: 0 0 3px 0;
           font-weight: bold;
         }
 
         .details-box p {
-          margin: 2px 0;
+          margin: 1px 0;
           line-height: 1.2;
+          font-size: 9px;
         }
 
         .bill-info {
-          padding: 10px;
+          padding: 8px;
+          font-size: 10px;
         }
 
         .bill-info .row {
           display: flex;
-          margin-bottom: 8px;
+          margin-bottom: 6px;
+          gap: 5px;
         }
 
         .bill-info .label {
-          width: 70px;
+          width: 60px;
+          font-weight: bold;
         }
 
         .client-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
           border-bottom: 1px solid #000;
-          min-height: 80px;
+          min-height: 70px;
         }
 
         .billed-to {
           padding: 8px;
           border-right: 1px solid #000;
+          font-size: 10px;
         }
 
         .transporter {
           padding: 8px;
           display: flex;
           flex-direction: column;
+          font-size: 10px;
         }
 
         .label-top {
@@ -259,25 +290,32 @@ export default function InvoicePrint({ orderData, company, containerRef }) {
         }
 
         .client-name {
-          font-size: 14px;
+          font-size: 12px;
           font-weight: bold;
-          margin-bottom: 3px;
+          margin-bottom: 2px;
         }
 
         .items-table {
           width: 100%;
           border-collapse: collapse;
+          margin: 0;
         }
 
         .items-table th, .items-table td {
           border: 1px solid #000;
-          padding: 5px 8px;
+          padding: 6px 5px;
+          vertical-align: middle;
         }
 
         .items-table th {
           background: #fff;
           font-weight: bold;
           text-align: center;
+          font-size: 10px;
+        }
+
+        .items-table tbody tr {
+          page-break-inside: avoid;
         }
 
         .text-center { text-align: center; }
@@ -292,27 +330,35 @@ export default function InvoicePrint({ orderData, company, containerRef }) {
 
         .total-row {
           background: #fff;
+          font-weight: bold;
         }
 
         .grand-total {
           background: #fff;
+          font-weight: bold;
         }
 
         .words-section {
           padding: 8px;
           border-bottom: 1px solid #000;
           text-transform: lowercase;
+          font-size: 10px;
+          min-height: 30px;
+          display: flex;
+          align-items: center;
         }
 
         .footer-info-grid {
           display: grid;
           grid-template-columns: 1fr 1fr 1fr;
           border-bottom: 1px solid #000;
+          min-height: 60px;
         }
 
         .bank-box, .gpay-box, .upi-box {
           padding: 8px;
           border-right: 1px solid #000;
+          font-size: 10px;
         }
 
         .upi-box {
@@ -321,13 +367,14 @@ export default function InvoicePrint({ orderData, company, containerRef }) {
 
         .footer-info-grid p {
           margin: 3px 0;
-          font-size: 10px;
+          font-size: 9px;
+          line-height: 1.3;
         }
 
         .bottom-grid {
           display: grid;
-          grid-template-columns: 1fr 250px;
-          min-height: 100px;
+          grid-template-columns: 1fr 1fr;
+          min-height: 80px;
         }
 
         .declaration {
@@ -345,17 +392,38 @@ export default function InvoicePrint({ orderData, company, containerRef }) {
 
         .for-company {
           font-weight: bold;
+          font-size: 10px;
+          margin-top: auto;
         }
 
         .sign-label {
           font-weight: bold;
+          font-size: 9px;
         }
 
         .t-row {
           margin-bottom: 5px;
+          font-size: 10px;
+        }
+
+        .t-label {
+          font-weight: bold;
         }
 
         .mt-auto { margin-top: auto; }
+
+        @media print {
+          .invoice-print-container {
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            height: auto;
+          }
+
+          .invoice-outer-border {
+            box-shadow: none;
+          }
+        }
       `}</style>
     </div>
   );

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import OrderDetailsModal from '../components/OrderDetailsModal';
 import InvoicePrint from '../components/InvoicePrint';
-import { toPng } from 'html-to-image';
+import html2pdf from 'html2pdf.js';
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
@@ -48,20 +48,33 @@ export default function OrdersPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setDownloadOrderData(data);
+        // Get payment methods from localStorage
+        let paymentMethods = null;
+        if (typeof window !== 'undefined') {
+          const saved = localStorage.getItem('adminPayments');
+          if (saved) paymentMethods = JSON.parse(saved);
+        }
+
+        setDownloadOrderData({ ...data, paymentMethods });
 
         // Give React a moment to render the hidden invoice
         setTimeout(async () => {
           if (invoiceRef.current) {
-            const dataUrl = await toPng(invoiceRef.current, {
-              quality: 0.95,
-              backgroundColor: '#fff',
-              pixelRatio: 2 // High resolution
-            });
-            const link = document.createElement('a');
-            link.download = `Invoice-${data.order.invoice_number || orderId}.png`;
-            link.href = dataUrl;
-            link.click();
+            const filename = `Invoice-${data.order.invoice_number || orderId}.pdf`;
+            const options = {
+              margin: [5, 5, 5, 5],
+              filename: filename,
+              image: { type: 'jpeg', quality: 0.95 },
+              html2canvas: {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#ffffff'
+              },
+              jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+            };
+
+            await html2pdf().set(options).from(invoiceRef.current).save();
 
             // Clean up
             setDownloadOrderData(null);
@@ -190,8 +203,12 @@ export default function OrdersPage() {
         {downloadOrderData && (
           <InvoicePrint
             containerRef={invoiceRef}
-            orderData={downloadOrderData}
+            orderData={{
+              order: downloadOrderData.order,
+              items: downloadOrderData.items
+            }}
             company={downloadOrderData.company}
+            paymentMethods={downloadOrderData.paymentMethods}
           />
         )}
       </div>

@@ -21,7 +21,7 @@ export async function GET() {
 export async function PUT(request) {
   try {
     const data = await request.json();
-    const { company_name, phone_number, gst_number, email, logo } = data;
+    const { company_name, phone_number, gst_number, email, address, website, logo } = data;
 
     const connection = await getConnection();
 
@@ -31,10 +31,10 @@ export async function PUT(request) {
     if (rows.length === 0) {
       // Insert if doesn't exist
       const query = `
-        INSERT INTO company_info (company_name, phone_number, gst_number, email, logo)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO company_info (company_name, phone_number, gst_number, email, address, website, logo)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
       `;
-      const [result] = await connection.execute(query, [company_name, phone_number, gst_number, email, logo]);
+      const [result] = await connection.execute(query, [company_name, phone_number, gst_number, email, address, website, logo]);
       await connection.end();
 
       return NextResponse.json({
@@ -43,16 +43,18 @@ export async function PUT(request) {
         phone_number,
         gst_number,
         email,
+        address,
+        website,
         logo,
       }, { status: 201 });
     } else {
       // Update existing
       const query = `
-        UPDATE company_info 
-        SET company_name = ?, phone_number = ?, gst_number = ?, email = ?, logo = ?
+        UPDATE company_info
+        SET company_name = ?, phone_number = ?, gst_number = ?, email = ?, address = ?, website = ?, logo = ?
         WHERE id = ?
       `;
-      await connection.execute(query, [company_name, phone_number, gst_number, email, logo, rows[0].id]);
+      await connection.execute(query, [company_name, phone_number, gst_number, email, address, website, logo, rows[0].id]);
       await connection.end();
 
       return NextResponse.json({
@@ -61,6 +63,8 @@ export async function PUT(request) {
         phone_number,
         gst_number,
         email,
+        address,
+        website,
         logo,
       }, { status: 200 });
     }

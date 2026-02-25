@@ -9,6 +9,8 @@ export default function CompanyInfoPage() {
     phone_number: '',
     gst_number: '',
     email: '',
+    address: '',
+    website: '',
     logo: null,
   });
   const [logoPreview, setLogoPreview] = useState('');
@@ -51,6 +53,8 @@ export default function CompanyInfoPage() {
           phone_number: data.phone_number || '',
           gst_number: data.gst_number || '',
           email: data.email || '',
+          address: data.address || '',
+          website: data.website || '',
           logo: null,
         });
         if (data.logo) {
@@ -108,6 +112,8 @@ export default function CompanyInfoPage() {
         phone_number: formData.phone_number,
         gst_number: formData.gst_number,
         email: formData.email,
+        address: formData.address,
+        website: formData.website,
         logo: logoPreview,
       };
 
@@ -194,6 +200,32 @@ export default function CompanyInfoPage() {
               value={formData.email}
               onChange={handleInputChange}
               placeholder="e.g., info@pkcrackers.com"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+            />
+          </div>
+
+          {/* Address */}
+          <div>
+            <label className="block text-gray-700 font-medium mb-2">Address</label>
+            <textarea
+              name="address"
+              value={formData.address}
+              onChange={handleInputChange}
+              placeholder="e.g., 4/1434-27, Sattur Main Road, Thayilpatti, Sivakasi - 626189"
+              rows="3"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+            />
+          </div>
+
+          {/* Website */}
+          <div>
+            <label className="block text-gray-700 font-medium mb-2">Website</label>
+            <input
+              type="url"
+              name="website"
+              value={formData.website}
+              onChange={handleInputChange}
+              placeholder="e.g., www.pkcrackers.com"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
             />
           </div>

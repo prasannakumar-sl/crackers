@@ -272,7 +272,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Action Buttons */}
-          <div className="mb-6 flex gap-3">
+          {/* <div className="mb-6 flex gap-3">
             <button
               onClick={() => setShowForm(!showForm)}
               className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
@@ -285,10 +285,10 @@ export default function AdminDashboard() {
             >
               {showImport ? 'Cancel' : '📥 Import from Excel'}
             </button>
-          </div>
+          </div> */}
 
           {/* Import File Form */}
-          {showImport && (
+          {/* {showImport && (
             <div className="bg-white rounded-lg shadow p-6 mb-8">
               <h3 className="text-xl font-bold text-gray-800 mb-4">Import Products from Excel</h3>
               <div className="space-y-4">
@@ -352,10 +352,10 @@ export default function AdminDashboard() {
                 )}
               </div>
             </div>
-          )}
+          )} */}
 
           {/* Add Product Form */}
-          {showForm && (
+          {/* {showForm && (
             <div className="bg-white rounded-lg shadow p-6 mb-8">
               <h3 className="text-xl font-bold text-gray-800 mb-6">Add New Product</h3>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -445,7 +445,7 @@ export default function AdminDashboard() {
                 </button>
               </form>
             </div>
-          )}
+          )} */}
 
           {/* Products Table */}
           {/* <div className="bg-white rounded-lg shadow p-6">

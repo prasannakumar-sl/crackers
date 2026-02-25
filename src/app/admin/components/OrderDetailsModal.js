@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { toPng } from 'html-to-image';
+import InvoicePrint from './InvoicePrint';
 
 export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode = false }) {
   const [orderData, setOrderData] = useState(null);
@@ -8,6 +10,8 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(editMode);
   const [saving, setSaving] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const invoiceRef = useRef(null);
   const [products, setProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState({});
   const [showSuggestions, setShowSuggestions] = useState({});
@@ -86,6 +90,27 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
       console.error('Error fetching order details:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDownloadImage = async () => {
+    try {
+      if (!invoiceRef.current) return;
+      setDownloading(true);
+      const dataUrl = await toPng(invoiceRef.current, {
+        quality: 0.95,
+        backgroundColor: '#fff',
+        pixelRatio: 2
+      });
+      const link = document.createElement('a');
+      link.download = `Invoice-${orderData.order.invoice_number || orderId}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error('Error downloading image:', err);
+      alert('Error occurred while downloading image');
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -241,258 +266,195 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
             </div>
           ) : orderData ? (
             <div className="invoice-container a4-sheet">
-              {/* Header Section */}
-              <div className="invoice-header">
-                <div className="company-section">
-                  <h3 className="company-name">{orderData.company?.company_name || 'PK Crackers'}</h3>
-                  <div className="company-details">
-                    {orderData.company?.address && <p>{orderData.company.address}</p>}
-                    {orderData.company?.phone_number && <p>Phone: {orderData.company.phone_number}</p>}
-                    {orderData.company?.email && <p>Email: {orderData.company.email}</p>}
-                    {orderData.company?.gst_number && <p>GST: {orderData.company.gst_number}</p>}
-                  </div>
-                </div>
-
-                <div className="invoice-info">
-                  <h2 className="invoice-title">BILL</h2>
-                  <div className="invoice-meta">
-                    <div className="meta-row">
-                      <span className="meta-label">Bill No:</span>
-                      <span className="meta-value">{orderData.order.invoice_number || `invno_${String(orderData.order.id).padStart(8, '0')}`}</span>
-                    </div>
-                    <div className="meta-row">
-                      <span className="meta-label">Date:</span>
-                      <span className="meta-value">
-                        {new Date(orderData.order.created_at).toLocaleDateString('en-IN')}
-                      </span>
-                    </div>
-                    <div className="meta-row">
-                      <span className="meta-label">Payment:</span>
-                      {isEditing ? (
-                        <select
-                          value={editFormData.paymentStatus}
-                          onChange={(e) => setEditFormData(prev => ({ ...prev, paymentStatus: e.target.value }))}
-                          className="payment-select"
-                        >
-                          <option value="Unpaid">Unpaid</option>
-                          <option value="Paid">Paid</option>
-                        </select>
-                      ) : (
-                        <span className="meta-value payment-badge" data-status={editFormData.paymentStatus || 'Unpaid'}>
-                          {editFormData.paymentStatus || 'Unpaid'}
-                        </span>
-                      )}
+              {/* Original Invoice Modal View */}
+              {isEditing ? (
+                <div className="edit-view-content">
+                  <div className="customer-section">
+                    <div className="customer-block">
+                      <h4 className="section-title">Order Status & Payment:</h4>
+                      <div className="edit-customer-form grid-cols-2">
+                        <div className="form-group">
+                          <label className="text-xs font-bold text-gray-600 mb-1 block">Payment Status</label>
+                          <select
+                            value={editFormData.paymentStatus}
+                            onChange={(e) => setEditFormData(prev => ({ ...prev, paymentStatus: e.target.value }))}
+                            className="form-input w-full"
+                          >
+                            <option value="Unpaid">Unpaid</option>
+                            <option value="Paid">Paid</option>
+                          </select>
+                        </div>
+                        <div className="form-group">
+                          <label className="text-xs font-bold text-gray-600 mb-1 block">Order Status</label>
+                          <select
+                            value={editFormData.status}
+                            onChange={(e) => setEditFormData(prev => ({ ...prev, status: e.target.value }))}
+                            className="form-input w-full"
+                          >
+                            <option value="Pending">Pending</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                          </select>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
 
-              {/* Customer Details Section */}
-              <div className="customer-section">
-                <div className="customer-block">
-                  <h4 className="section-title">Billed To:</h4>
-                  {isEditing ? (
-                    <div className="edit-customer-form">
-                      <input
-                        type="text"
-                        placeholder="Customer Name"
-                        value={editFormData.customerDetails.customer_name}
-                        onChange={(e) => handleCustomerChange('customer_name', e.target.value)}
-                        className="form-input"
-                      />
-                      <input
-                        type="tel"
-                        placeholder="Phone"
-                        value={editFormData.customerDetails.phone}
-                        onChange={(e) => handleCustomerChange('phone', e.target.value)}
-                        className="form-input"
-                      />
-                      <input
-                        type="email"
-                        placeholder="Email"
-                        value={editFormData.customerDetails.email}
-                        onChange={(e) => handleCustomerChange('email', e.target.value)}
-                        className="form-input"
-                      />
-                      <textarea
-                        placeholder="Address"
-                        value={editFormData.customerDetails.address}
-                        onChange={(e) => handleCustomerChange('address', e.target.value)}
-                        className="form-textarea"
-                        rows="2"
-                      />
+                  <div className="customer-section">
+                    <div className="customer-block">
+                      <h4 className="section-title">Billed To:</h4>
+                      <div className="edit-customer-form">
+                        <input
+                          type="text"
+                          placeholder="Customer Name"
+                          value={editFormData.customerDetails.customer_name}
+                          onChange={(e) => handleCustomerChange('customer_name', e.target.value)}
+                          className="form-input"
+                        />
+                        <input
+                          type="tel"
+                          placeholder="Phone"
+                          value={editFormData.customerDetails.phone}
+                          onChange={(e) => handleCustomerChange('phone', e.target.value)}
+                          className="form-input"
+                        />
+                        <input
+                          type="email"
+                          placeholder="Email"
+                          value={editFormData.customerDetails.email}
+                          onChange={(e) => handleCustomerChange('email', e.target.value)}
+                          className="form-input"
+                        />
+                        <textarea
+                          placeholder="Address"
+                          value={editFormData.customerDetails.address}
+                          onChange={(e) => handleCustomerChange('address', e.target.value)}
+                          className="form-textarea"
+                          rows="2"
+                        />
+                      </div>
                     </div>
-                  ) : (
-                    <>
-                      <p className="customer-name">{orderData.order.customer_name}</p>
-                      {orderData.order.phone && <p>Phone: {orderData.order.phone}</p>}
-                      {orderData.order.email && <p>Email: {orderData.order.email}</p>}
-                      {orderData.order.address && <p>Address: {orderData.order.address}</p>}
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {/* Items Table */}
-              <div className="items-table-wrapper">
-                {isEditing ? (
-                  <div className="edit-items-form">
-                    <h4 className="section-title">Order Items:</h4>
-                    <table className="items-table edit-table">
-                      <thead>
-                        <tr>
-                          <th>Item Name</th>
-                          <th>Quantity</th>
-                          <th>Price</th>
-                          <th>Discount</th>
-                          <th>Amount</th>
-                          <th>Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {editFormData.items.map((item, index) => {
-                          const price = parseFloat(item.price);
-                          const discountPercent = parseFloat(item.discount) || 0;
-                          const quantity = parseInt(item.quantity);
-                          const discountedPrice = price * (1 - discountPercent / 100);
-                          const itemAmount = (discountedPrice * quantity).toFixed(2);
-                          return (
-                            <tr key={index}>
-                              <td>
-                                <div className="autocomplete-wrapper">
-                                  <input
-                                    type="text"
-                                    value={item.product_name}
-                                    onChange={(e) => handleItemChange(index, 'product_name', e.target.value)}
-                                    className="form-input"
-                                    placeholder="Product name"
-                                  />
-                                  {showSuggestions[index] && (
-                                    <div className="autocomplete-suggestions">
-                                      {getFilteredProducts(index).length > 0 ? (
-                                        getFilteredProducts(index).map(product => (
-                                          <div
-                                            key={product.id}
-                                            className="autocomplete-item"
-                                            onClick={() => handleSelectProduct(index, product)}
-                                          >
-                                            <span className="item-name">{product.name}</span>
-                                            <span className="item-price">₹{parseFloat(product.price).toFixed(2)}</span>
-                                          </div>
-                                        ))
-                                      ) : (
-                                        <div className="autocomplete-item no-results">
-                                          No products found
-                                        </div>
-                                      )}
-                                    </div>
-                                  )}
-                                </div>
-                              </td>
-                              <td>
-                                <input
-                                  type="number"
-                                  value={item.quantity}
-                                  onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
-                                  className="form-input"
-                                  min="1"
-                                />
-                              </td>
-                              <td>
-                                <input
-                                  type="number"
-                                  value={item.price}
-                                  onChange={(e) => handleItemChange(index, 'price', e.target.value)}
-                                  className="form-input"
-                                  step="0.01"
-                                  min="0"
-                                />
-                              </td>
-                              <td>
-                                <input
-                                  type="number"
-                                  value={item.discount || 0}
-                                  onChange={(e) => handleItemChange(index, 'discount', e.target.value)}
-                                  className="form-input"
-                                  step="0.01"
-                                  min="0"
-                                />
-                              </td>
-                              <td className="amount-cell">₹{itemAmount}</td>
-                              <td>
-                                <button
-                                  onClick={() => handleRemoveItem(index)}
-                                  className="remove-item-btn"
-                                  title="Remove item"
-                                >
-                                  ✕
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                    <button onClick={handleAddItem} className="add-item-button">
-                      + Add Item
-                    </button>
                   </div>
-                ) : (
-                  <table className="items-table">
-                    <thead>
-                      <tr>
-                        <th>S.No</th>
-                        <th>Item Name</th>
-                        <th>Original Price</th>
-                        <th>Discount</th>
-                        <th>Discounted Price</th>
-                        <th>Quantity</th>
-                        <th>Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {orderData.items.map((item, index) => {
-                        const price = parseFloat(item.price);
-                        const discountPercent = parseFloat(item.discount) || 0;
-                        const quantity = item.quantity;
-                        const discountedPrice = price * (1 - discountPercent / 100);
-                        const finalAmount = discountedPrice * quantity;
-                        return (
-                          <tr key={item.id || index}>
-                            <td>{index + 1}</td>
-                            <td>{item.product_name}</td>
-                            <td><span className="original-price">₹{price.toFixed(2)}</span></td>
-                            <td>{discountPercent > 0 ? `${discountPercent.toFixed(2)}%` : '—'}</td>
-                            <td><span className="discounted-price">₹{discountedPrice.toFixed(2)}</span></td>
-                            <td>{quantity}</td>
-                            <td>₹{finalAmount.toFixed(2)}</td>
+
+                  <div className="items-table-wrapper">
+                    <div className="edit-items-form">
+                      <h4 className="section-title">Order Items:</h4>
+                      <table className="items-table edit-table">
+                        <thead>
+                          <tr>
+                            <th>Item Name</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Discount</th>
+                            <th>Amount</th>
+                            <th>Action</th>
                           </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                )}
-              </div>
+                        </thead>
+                        <tbody>
+                          {editFormData.items.map((item, index) => {
+                            const price = parseFloat(item.price);
+                            const discountPercent = parseFloat(item.discount) || 0;
+                            const quantity = parseInt(item.quantity);
+                            const discountedPrice = price * (1 - discountPercent / 100);
+                            const itemAmount = (discountedPrice * quantity).toFixed(2);
+                            return (
+                              <tr key={index}>
+                                <td>
+                                  <div className="autocomplete-wrapper">
+                                    <input
+                                      type="text"
+                                      value={item.product_name}
+                                      onChange={(e) => handleItemChange(index, 'product_name', e.target.value)}
+                                      className="form-input"
+                                      placeholder="Product name"
+                                    />
+                                    {showSuggestions[index] && (
+                                      <div className="autocomplete-suggestions">
+                                        {getFilteredProducts(index).length > 0 ? (
+                                          getFilteredProducts(index).map(product => (
+                                            <div
+                                              key={product.id}
+                                              className="autocomplete-item"
+                                              onClick={() => handleSelectProduct(index, product)}
+                                            >
+                                              <span className="item-name">{product.name}</span>
+                                              <span className="item-price">₹{parseFloat(product.price).toFixed(2)}</span>
+                                            </div>
+                                          ))
+                                        ) : (
+                                          <div className="autocomplete-item no-results">
+                                            No products found
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                </td>
+                                <td>
+                                  <input
+                                    type="number"
+                                    value={item.quantity}
+                                    onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
+                                    className="form-input"
+                                    min="1"
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    type="number"
+                                    value={item.price}
+                                    onChange={(e) => handleItemChange(index, 'price', e.target.value)}
+                                    className="form-input"
+                                    step="0.01"
+                                    min="0"
+                                  />
+                                </td>
+                                <td>
+                                  <input
+                                    type="number"
+                                    value={item.discount || 0}
+                                    onChange={(e) => handleItemChange(index, 'discount', e.target.value)}
+                                    className="form-input"
+                                    step="0.01"
+                                    min="0"
+                                  />
+                                </td>
+                                <td className="amount-cell">₹{itemAmount}</td>
+                                <td>
+                                  <button
+                                    onClick={() => handleRemoveItem(index)}
+                                    className="remove-item-btn"
+                                    title="Remove item"
+                                  >
+                                    ✕
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                      <button onClick={handleAddItem} className="add-item-button">
+                        + Add Item
+                      </button>
+                    </div>
+                  </div>
 
-              {/* Total Section */}
-              <div className="total-section">
-                <div className="total-row">
-                  <span>Total Items:</span>
-                  <span>{editFormData.items.length}</span>
+                  <div className="total-section">
+                    <div className="total-row">
+                      <span>Total Items:</span>
+                      <span>{editFormData.items.length}</span>
+                    </div>
+                    <div className="total-row total-amount">
+                      <span>Total Amount:</span>
+                      <span>₹{calculateTotal()}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="total-row total-amount">
-                  <span>Total Amount:</span>
-                  <span>₹{displayTotal}</span>
-                </div>
-              </div>
-
-              {/* Footer */}
-              <div className="invoice-footer">
-                <div className="footer-text">
-                  <p>Authorized Signature</p>
-                  <p className="footer-company">for {orderData.company?.company_name || 'PK Crackers'}</p>
-                </div>
-              </div>
+              ) : (
+                /* Use the specific design from InvoicePrint in the modal too if not editing */
+                <InvoicePrint orderData={orderData} company={orderData.company} containerRef={invoiceRef} />
+              )}
             </div>
           ) : null}
         </div>
@@ -508,6 +470,9 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
           ) : (
             <>
               <button onClick={onClose} className="close-modal-button">Close</button>
+              <button onClick={handleDownloadImage} className="save-button" disabled={downloading}>
+                {downloading ? 'Preparing...' : 'Download Image'}
+              </button>
               <button onClick={() => window.print()} className="print-button">Print A4</button>
             </>
           )}
@@ -529,11 +494,11 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
         }
 
         .modal-content {
-          background: white;
+          background: #e5e7eb;
           border-radius: 8px;
-          max-width: 900px;
-          width: 90%;
-          max-height: 90vh;
+          max-width: 950px;
+          width: 95%;
+          max-height: 95vh;
           overflow-y: auto;
           box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
         }
@@ -594,13 +559,18 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
         }
 
         .modal-body {
-          padding: 30px;
+          padding: 40px 20px;
+          background: #374151;
+          display: flex;
+          justify-content: center;
+          min-height: 600px;
         }
 
         .loading-state,
         .error-state {
           text-align: center;
           padding: 40px 20px;
+          width: 100%;
         }
 
         .error-message {
@@ -623,105 +593,24 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
           background: #2563eb;
         }
 
-        /* A4 Sheet Styles */
-        .a4-sheet {
-          background: white;
-          width: 100%;
-          padding: 40px;
-          margin: 0 auto;
-          box-sizing: border-box;
-        }
-
-        /* Invoice Styles */
         .invoice-container {
-          font-family: Arial, sans-serif;
-          color: #1f2937;
-        }
-
-        .invoice-header {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 30px;
-          margin-bottom: 30px;
-          padding-bottom: 20px;
-          border-bottom: 2px solid #111827;
-        }
-
-        .company-section h3 {
-          margin: 0 0 10px 0;
-          font-size: 18px;
-          font-weight: 700;
-        }
-
-        .company-details {
-          font-size: 12px;
-          line-height: 1.6;
-        }
-
-        .company-details p {
-          margin: 4px 0;
-        }
-
-        .invoice-info {
-          text-align: right;
-        }
-
-        .invoice-title {
-          font-size: 24px;
-          font-weight: 700;
-          margin: 0 0 15px 0;
-          color: #111827;
-        }
-
-        .invoice-meta {
-          font-size: 13px;
-        }
-
-        .meta-row {
-          display: flex;
-          justify-content: space-between;
-          margin-bottom: 8px;
-          min-width: 200px;
-          align-items: center;
-        }
-
-        .meta-label {
-          font-weight: 600;
-          margin-right: 10px;
-        }
-
-        .meta-value {
-          text-align: right;
-        }
-
-        .payment-badge {
-          padding: 4px 12px;
-          border-radius: 4px;
-          font-weight: 600;
-          display: inline-block;
-        }
-
-        .payment-badge[data-status="Paid"] {
-          background: #d1fae5;
-          color: #065f46;
-        }
-
-        .payment-badge[data-status="Unpaid"] {
-          background: #fef3c7;
-          color: #92400e;
-        }
-
-        .payment-select {
-          padding: 6px 12px;
-          border: 1px solid #d1d5db;
-          border-radius: 4px;
-          font-size: 13px;
+          width: 800px;
           background: white;
-          cursor: pointer;
+          box-shadow: 0 0 20px rgba(0,0,0,0.5);
+          display: flex;
+          justify-content: center;
+          padding: 0;
+        }
+
+        .edit-view-content {
+          width: 100%;
+          background: white;
+          padding: 20px;
+          border-radius: 4px;
         }
 
         .customer-section {
-          margin-bottom: 30px;
+          margin-bottom: 20px;
         }
 
         .customer-block {
@@ -739,23 +628,16 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
           color: #6b7280;
         }
 
-        .customer-name {
-          margin: 0 0 6px 0;
-          font-size: 14px;
-          font-weight: 600;
-          color: #111827;
-        }
-
-        .customer-block p {
-          margin: 4px 0;
-          font-size: 13px;
-          color: #374151;
-        }
-
         .edit-customer-form {
           display: flex;
           flex-direction: column;
           gap: 10px;
+        }
+
+        .grid-cols-2 {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 15px;
         }
 
         .form-input,
@@ -765,22 +647,7 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
           border-radius: 4px;
           font-size: 14px;
           font-family: inherit;
-        }
-
-        .form-input:focus,
-        .form-textarea:focus {
-          outline: none;
-          border-color: #3b82f6;
-          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .items-table-wrapper {
-          margin-bottom: 30px;
-          overflow-x: auto;
-        }
-
-        .edit-items-form {
-          margin-bottom: 30px;
+          width: 100%;
         }
 
         .items-table {
@@ -789,61 +656,17 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
           font-size: 12px;
         }
 
-        .items-table thead {
-          background: #f3f4f6;
-          border-top: 1px solid #d1d5db;
-          border-bottom: 2px solid #111827;
-        }
-
         .items-table th {
           padding: 12px 8px;
           text-align: left;
           font-weight: 600;
-          color: #1f2937;
-          border-right: 1px solid #e5e7eb;
-        }
-
-        .items-table th:last-child {
-          border-right: none;
+          background: #f3f4f6;
+          border-bottom: 2px solid #111827;
         }
 
         .items-table td {
           padding: 10px 8px;
           border-bottom: 1px solid #e5e7eb;
-          border-right: 1px solid #f3f4f6;
-        }
-
-        .items-table td:last-child {
-          border-right: none;
-        }
-
-        .original-price {
-          text-decoration: line-through;
-          color: #9ca3af;
-          font-size: 12px;
-        }
-
-        .discounted-price {
-          color: #dc2626;
-          font-weight: 600;
-        }
-
-        .items-table tbody tr:hover {
-          background: #f9fafb;
-        }
-
-        .edit-table input {
-          width: 100%;
-          padding: 6px 8px;
-          border: 1px solid #d1d5db;
-          border-radius: 3px;
-          font-size: 12px;
-        }
-
-        .edit-table input:focus {
-          outline: none;
-          border-color: #3b82f6;
-          box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
         }
 
         .amount-cell {
@@ -852,35 +675,46 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
           color: #047857;
         }
 
-        .remove-item-btn {
-          background: #fee2e2;
-          border: none;
-          color: #991b1b;
-          padding: 4px 8px;
-          border-radius: 3px;
-          cursor: pointer;
-          font-weight: 600;
-          transition: background 0.2s;
+        .total-section {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          margin-top: 20px;
+          padding: 15px;
+          background: #f9fafb;
+          border-radius: 4px;
         }
 
-        .remove-item-btn:hover {
-          background: #fecaca;
+        .total-row {
+          display: flex;
+          justify-content: space-between;
+          width: 200px;
+          margin-bottom: 5px;
+        }
+
+        .total-amount {
+          font-weight: 700;
+          border-top: 1px solid #000;
+          padding-top: 5px;
         }
 
         .add-item-button {
           background: #3b82f6;
           color: white;
           border: none;
-          padding: 10px 16px;
+          padding: 8px 16px;
           border-radius: 4px;
           cursor: pointer;
-          font-weight: 500;
-          margin-top: 12px;
-          transition: background 0.2s;
+          margin-top: 10px;
         }
 
-        .add-item-button:hover {
-          background: #2563eb;
+        .remove-item-btn {
+          background: #fee2e2;
+          color: #991b1b;
+          border: none;
+          padding: 4px 8px;
+          border-radius: 4px;
+          cursor: pointer;
         }
 
         .autocomplete-wrapper {
@@ -894,91 +728,19 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
           right: 0;
           background: white;
           border: 1px solid #d1d5db;
-          border-top: none;
-          border-radius: 0 0 4px 4px;
-          max-height: 200px;
+          z-index: 10;
+          max-height: 150px;
           overflow-y: auto;
-          z-index: 1000;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
         .autocomplete-item {
-          padding: 10px 12px;
+          padding: 8px 12px;
           cursor: pointer;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 10px;
-          border-bottom: 1px solid #f3f4f6;
         }
 
-        .autocomplete-item:hover:not(.no-results) {
+        .autocomplete-item:hover {
           background: #f3f4f6;
-        }
-
-        .autocomplete-item:last-child {
-          border-bottom: none;
-        }
-
-        .autocomplete-item.no-results {
-          color: #9ca3af;
-          cursor: default;
-          justify-content: center;
-        }
-
-        .item-name {
-          font-weight: 500;
-          color: #1f2937;
-          flex: 1;
-        }
-
-        .item-price {
-          color: #047857;
-          font-weight: 600;
-          white-space: nowrap;
-        }
-
-        .total-section {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-end;
-          margin-bottom: 30px;
-          padding: 20px;
-          background: #f9fafb;
-          border-radius: 4px;
-        }
-
-        .total-row {
-          display: flex;
-          justify-content: space-between;
-          width: 250px;
-          margin-bottom: 8px;
-          font-size: 13px;
-        }
-
-        .total-amount {
-          font-weight: 700;
-          font-size: 16px;
-          color: #047857;
-          border-top: 2px solid #111827;
-          padding-top: 12px;
-          margin-bottom: 0;
-        }
-
-        .invoice-footer {
-          text-align: right;
-          padding-top: 20px;
-          border-top: 1px solid #e5e7eb;
-        }
-
-        .footer-text {
-          font-size: 12px;
-          color: #6b7280;
-        }
-
-        .footer-company {
-          font-weight: 600;
-          color: #1f2937;
         }
 
         .modal-footer {

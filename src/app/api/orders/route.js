@@ -190,7 +190,7 @@ export async function GET(request) {
     } else {
       // Fetch all orders
       const [orders] = await connection.execute(
-        'SELECT * FROM orders ORDER BY created_at DESC'
+        "SELECT * FROM orders ORDER BY status = 'Completed' ASC, created_at DESC"
       );
 
       await connection.end();

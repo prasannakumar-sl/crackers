@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import OrderDetailsModal from '../components/OrderDetailsModal';
+import InvoicePrint from '../components/InvoicePrint';
+import { toPng } from 'html-to-image';
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
@@ -9,6 +11,11 @@ export default function OrdersPage() {
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
+
+  // Download related state
+  const [downloadingOrderId, setDownloadingOrderId] = useState(null);
+  const [downloadOrderData, setDownloadOrderData] = useState(null);
+  const invoiceRef = useRef(null);
 
   // Load orders from database
   useEffect(() => {
@@ -31,6 +38,46 @@ export default function OrdersPage() {
     setEditMode(false);
     // Refresh orders after closing modal (in case changes were made)
     fetchOrders();
+  };
+
+  const handleDownloadInvoice = async (orderId) => {
+    try {
+      setDownloadingOrderId(orderId);
+      // Fetch full order details including company info
+      const response = await fetch(`/api/orders?id=${orderId}`);
+      const data = await response.json();
+
+      if (response.ok) {
+        setDownloadOrderData(data);
+
+        // Give React a moment to render the hidden invoice
+        setTimeout(async () => {
+          if (invoiceRef.current) {
+            const dataUrl = await toPng(invoiceRef.current, {
+              quality: 0.95,
+              backgroundColor: '#fff',
+              pixelRatio: 2 // High resolution
+            });
+            const link = document.createElement('a');
+            link.download = `Invoice-${data.order.invoice_number || orderId}.png`;
+            link.href = dataUrl;
+            link.click();
+
+            // Clean up
+            setDownloadOrderData(null);
+            setDownloadingOrderId(null);
+          }
+        }, 500);
+      } else {
+        console.error('Failed to fetch order details for download:', data.error);
+        alert('Failed to prepare invoice for download');
+        setDownloadingOrderId(null);
+      }
+    } catch (error) {
+      console.error('Error downloading invoice:', error);
+      alert('Error occurred while downloading invoice');
+      setDownloadingOrderId(null);
+    }
   };
 
   const fetchOrders = async () => {
@@ -114,6 +161,14 @@ export default function OrdersPage() {
                       >
                         ✏️
                       </button>
+                      <button
+                        onClick={() => handleDownloadInvoice(order.id)}
+                        className={`action-button ${downloadingOrderId === order.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        title="Download Invoice"
+                        disabled={downloadingOrderId === order.id}
+                      >
+                        {downloadingOrderId === order.id ? '⌛' : '📥'}
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -129,6 +184,17 @@ export default function OrdersPage() {
         onClose={handleCloseModal}
         editMode={editMode}
       />
+
+      {/* Hidden Invoice for downloading */}
+      <div style={{ position: 'absolute', left: '-9999px', top: '-9999px', overflow: 'hidden', height: 0 }}>
+        {downloadOrderData && (
+          <InvoicePrint
+            containerRef={invoiceRef}
+            orderData={downloadOrderData}
+            company={downloadOrderData.company}
+          />
+        )}
+      </div>
 
       <style jsx>{`
         .action-buttons {

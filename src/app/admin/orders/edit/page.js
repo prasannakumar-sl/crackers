@@ -1,5 +1,6 @@
 'use client';
 
+import { TextField,Button } from '@mui/material';
 import { useState, useEffect } from 'react';
 
 export default function EditOrderPage({ orderId: propOrderId }) {
@@ -12,6 +13,7 @@ export default function EditOrderPage({ orderId: propOrderId }) {
   const [searchQuery, setSearchQuery] = useState({});
   const [showSuggestions, setShowSuggestions] = useState({});
   const [successMessage, setSuccessMessage] = useState('');
+  const [discountPercentage, setDiscountPercentage] = useState('');
 
   // Edit form state
   const [editFormData, setEditFormData] = useState({
@@ -195,6 +197,31 @@ export default function EditOrderPage({ orderId: propOrderId }) {
     window.location.hash = '#/admin/orders';
   };
 
+  const handleApplyDiscount = () => {
+    if (discountPercentage === '' || isNaN(discountPercentage)) {
+      setError('Please enter a valid discount percentage');
+      return;
+    }
+
+    const percentage = parseFloat(discountPercentage);
+    if (percentage < 0 || percentage > 100) {
+      setError('Discount percentage must be between 0 and 100');
+      return;
+    }
+
+    setEditFormData(prev => ({
+      ...prev,
+      items: prev.items.map(item => ({
+        ...item,
+        discount: percentage
+      }))
+    }));
+
+    setError(null);
+    setSuccessMessage('Discount applied to all items!');
+    setTimeout(() => setSuccessMessage(''), 2000);
+  };
+
   const calculateTotal = () => {
     return editFormData.items.reduce((sum, item) => {
       const price = parseFloat(item.price);
@@ -318,7 +345,22 @@ export default function EditOrderPage({ orderId: propOrderId }) {
 
           {/* Items Section */}
           <section className="form-section">
+            <div style={{display:"flex"}}>
             <h3 className="section-title">Order Items</h3>
+            <TextField
+              label="Discount percentage"
+              type='number'
+              variant="outlined"
+              className="search-products-field"
+              size="small"
+              value={discountPercentage}
+              onChange={(e) => setDiscountPercentage(e.target.value)}
+              style={{marginLeft:"20px",marginTop:"-10px", width:"200px"}}
+            />
+            <Button variant="contained" onClick={handleApplyDiscount} style={{height:"40px", marginLeft:"20px",marginTop:"-10px", width:"auto", paddingLeft:"16px", paddingRight:"16px"}} size='small'>
+              Apply
+            </Button>
+            </div>
             <div className="items-table-wrapper">
               <table className="items-table">
                 <thead>

@@ -23,6 +23,13 @@ export default function AdminDashboard() {
   const [importingFile, setImportingFile] = useState(false);
   const [importResults, setImportResults] = useState(null);
 
+  const [dashboardMetrics, setDashboardMetrics] = useState({
+    totalOrders: 0,
+    totalCustomers: 0,
+    totalRevenue: 0,
+    topSellingProducts: [],
+  });
+
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
@@ -40,6 +47,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchProducts();
+    fetchDashboardMetrics();
   }, []);
 
   const fetchProducts = async () => {
@@ -61,6 +69,22 @@ export default function AdminDashboard() {
       showAlert(`Error fetching products: ${error.message}`, 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchDashboardMetrics = async () => {
+    try {
+      const response = await fetch('/api/admin/dashboard', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+        }
+      });
+      const data = await response.json();
+      console.log('Dashboard metrics:', data);
+      setDashboardMetrics(data);
+    } catch (error) {
+      console.error('Error fetching dashboard metrics:', error);
     }
   };
 
@@ -193,8 +217,6 @@ export default function AdminDashboard() {
     }
   };
 
-  const totalRevenue = products.reduce((sum, product) => sum + (product.price * product.quantity), 0);
-
   return (
     <div>
       {/* Tabs */}
@@ -244,7 +266,7 @@ export default function AdminDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600 text-sm">Total Orders</p>
-                  <p className="text-3xl font-bold text-gray-800">0</p>
+                  <p className="text-3xl font-bold text-gray-800">{dashboardMetrics.totalOrders}</p>
                 </div>
                 <span className="text-4xl">📋</span>
               </div>
@@ -254,7 +276,7 @@ export default function AdminDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600 text-sm">Total Customers</p>
-                  <p className="text-3xl font-bold text-gray-800">0</p>
+                  <p className="text-3xl font-bold text-gray-800">{dashboardMetrics.totalCustomers}</p>
                 </div>
                 <span className="text-4xl">👥</span>
               </div>
@@ -264,12 +286,52 @@ export default function AdminDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600 text-sm">Total Revenue</p>
-                  <p className="text-3xl font-bold text-gray-800">₹{totalRevenue.toFixed(2)}</p>
+                  <p className="text-3xl font-bold text-gray-800">₹{dashboardMetrics.totalRevenue.toFixed(2)}</p>
                 </div>
                 <span className="text-4xl">💰</span>
               </div>
             </div>
           </div>
+
+          {/* Top Selling Products */}
+          {dashboardMetrics.topSellingProducts && dashboardMetrics.topSellingProducts.length > 0 && (
+            <div className="mb-8">
+              <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <span>🏆</span> Top Selling Products
+              </h3>
+              <div className="space-y-4">
+                {dashboardMetrics.topSellingProducts.map((product, index) => (
+                  <div key={index} className={`rounded-lg p-6 border-l-4 ${
+                    index === 0 ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-400' :
+                    index === 1 ? 'bg-gradient-to-r from-gray-50 to-slate-50 border-gray-400' :
+                    index === 2 ? 'bg-gradient-to-r from-orange-50 to-amber-50 border-orange-400' :
+                    'bg-white border-blue-400'
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4 flex-1">
+                        <div className={`text-4xl font-bold ${
+                          index === 0 ? 'text-yellow-600' :
+                          index === 1 ? 'text-gray-600' :
+                          index === 2 ? 'text-orange-600' :
+                          'text-blue-600'
+                        }`}>
+                          #{index + 1}
+                        </div>
+                        <div>
+                          <p className="text-lg font-bold text-gray-800">{product.name}</p>
+                          <div className="flex gap-6 mt-2 text-sm text-gray-600">
+                            <span>📊 Sold: <strong>{product.totalQuantity}</strong> units</span>
+                            <span>🛒 In <strong>{product.soldInOrders}</strong> orders</span>
+                            <span>💵 Avg Price: <strong>₹{product.avgPrice}</strong></span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Action Buttons */}
           {/* <div className="mb-6 flex gap-3">

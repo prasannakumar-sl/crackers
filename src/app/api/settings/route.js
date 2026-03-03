@@ -62,22 +62,33 @@ export async function POST(request) {
     }
 
     // Update home page decoration if provided
-    if (homePageDecoration) {
+    if (homePageDecoration !== undefined) {
       const [existing] = await connection.execute(
         'SELECT id FROM settings WHERE setting_key = ? LIMIT 1',
         ['home_page_decoration']
       );
 
-      if (existing.length > 0) {
-        await connection.execute(
-          'UPDATE settings SET setting_value = ? WHERE setting_key = ?',
-          [homePageDecoration, 'home_page_decoration']
-        );
+      if (homePageDecoration === null) {
+        // Delete the setting
+        if (existing.length > 0) {
+          await connection.execute(
+            'DELETE FROM settings WHERE setting_key = ?',
+            ['home_page_decoration']
+          );
+        }
       } else {
-        await connection.execute(
-          'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)',
-          ['home_page_decoration', homePageDecoration]
-        );
+        // Update or insert
+        if (existing.length > 0) {
+          await connection.execute(
+            'UPDATE settings SET setting_value = ? WHERE setting_key = ?',
+            [homePageDecoration, 'home_page_decoration']
+          );
+        } else {
+          await connection.execute(
+            'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)',
+            ['home_page_decoration', homePageDecoration]
+          );
+        }
       }
     }
 

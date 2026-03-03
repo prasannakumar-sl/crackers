@@ -139,6 +139,33 @@ export default function AppearancePage() {
     }
   };
 
+  const handleDeleteDecoration = async () => {
+    if (!confirm('Are you sure you want to delete the decoration image?')) {
+      return;
+    }
+
+    try {
+      setDecorationLoading(true);
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ homePageDecoration: null }),
+      });
+
+      if (response.ok) {
+        await fetchSettings();
+        showAlert('✓ Decoration image deleted successfully!', 'success');
+      } else {
+        showAlert('Failed to delete decoration image', 'error');
+      }
+    } catch (error) {
+      console.error('Error deleting decoration:', error);
+      showAlert('Error deleting decoration image', 'error');
+    } finally {
+      setDecorationLoading(false);
+    }
+  };
+
   const fetchCarouselImages = async () => {
     try {
       setLoading(true);
@@ -363,12 +390,24 @@ export default function AppearancePage() {
           <div className="mb-6">
             <h4 className="text-lg font-semibold text-gray-800 mb-4">Current Decoration Image</h4>
             <div className="bg-white p-4 rounded-lg border border-gray-300">
-              <img
-                src={homePageDecoration}
-                alt="Home page decoration"
-                className="max-w-xs max-h-64 object-contain rounded"
-              />
-              <p className="text-xs text-gray-600 mt-3">This image will appear on the top left and right corners of the home page</p>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <img
+                    src={homePageDecoration}
+                    alt="Home page decoration"
+                    className="max-w-xs max-h-64 object-contain rounded"
+                  />
+                  <p className="text-xs text-gray-600 mt-3">This image will appear on the top left and right corners of the home page</p>
+                </div>
+                <IconButton
+                  onClick={handleDeleteDecoration}
+                  color="error"
+                  disabled={decorationLoading}
+                  title="Delete decoration image"
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </div>
             </div>
           </div>
         )}

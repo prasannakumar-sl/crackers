@@ -10,23 +10,28 @@ export default function Home() {
   const [carouselImages, setCarouselImages] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [homePageDecoration, setHomePageDecoration] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [sectionsRes, carouselRes] = await Promise.all([
+        const [sectionsRes, carouselRes, settingsRes] = await Promise.all([
           fetch('/api/sections'),
           fetch('/api/carousel'),
+          fetch('/api/settings'),
         ]);
         const sectionsData = await sectionsRes.json();
         const carouselData = await carouselRes.json();
+        const settingsData = await settingsRes.json();
 
         setSections(Array.isArray(sectionsData) ? sectionsData : []);
         setCarouselImages(Array.isArray(carouselData) ? carouselData : []);
+        setHomePageDecoration(settingsData.homePageDecoration || null);
       } catch (error) {
         console.error('Error fetching data:', error);
         setSections([]);
         setCarouselImages([]);
+        setHomePageDecoration(null);
       } finally {
         setLoading(false);
       }
@@ -58,7 +63,28 @@ export default function Home() {
   const cartItemsCount = getCartItemCount();
 
   return (
-    <div className="bg-white">
+    <div className="bg-white relative">
+      {/* Decoration - Top Left Corner */}
+      {homePageDecoration && (
+        <div className="fixed top-4 left-4 z-10 pointer-events-none">
+          <img
+            src={homePageDecoration}
+            alt="Page Decoration"
+            className="w-24 h-24 md:w-32 md:h-32 object-contain"
+          />
+        </div>
+      )}
+
+      {/* Decoration - Top Right Corner */}
+      {homePageDecoration && (
+        <div className="fixed top-4 right-4 z-10 pointer-events-none">
+          <img
+            src={homePageDecoration}
+            alt="Page Decoration"
+            className="w-24 h-24 md:w-32 md:h-32 object-contain"
+          />
+        </div>
+      )}
       {/* Festival Banners */}
       <section className="py-6 px-6 bg-white">
         <div className="max-w-7xl mx-auto">

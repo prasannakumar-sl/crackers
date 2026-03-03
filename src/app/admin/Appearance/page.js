@@ -15,7 +15,10 @@ export default function AppearancePage() {
   const [submitting, setSubmitting] = useState(false);
   const [priceListStyle, setPriceListStyle] = useState(null);
   const [styleLoading, setStyleLoading] = useState(true);
+  const [homePageDecoration, setHomePageDecoration] = useState(null);
+  const [decorationLoading, setDecorationLoading] = useState(false);
   const fileInputRef = useRef(null);
+  const decorationInputRef = useRef(null);
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -34,19 +37,21 @@ export default function AppearancePage() {
 
   useEffect(() => {
     fetchCarouselImages();
-    fetchPriceListStyle();
+    fetchSettings();
   }, []);
 
-  const fetchPriceListStyle = async () => {
+  const fetchSettings = async () => {
     try {
       setStyleLoading(true);
       const response = await fetch('/api/settings');
       const data = await response.json();
       const selectedOption = styleOptions.find(opt => opt.value === data.style);
       setPriceListStyle(selectedOption || styleOptions[1]); // Default to 'table'
+      setHomePageDecoration(data.homePageDecoration || null);
     } catch (error) {
-      console.error('Error fetching price list style:', error);
+      console.error('Error fetching settings:', error);
       setPriceListStyle(styleOptions[1]); // Default to 'table'
+      setHomePageDecoration(null);
     } finally {
       setStyleLoading(false);
     }
@@ -68,12 +73,69 @@ export default function AppearancePage() {
         showAlert('✓ Price-list style updated successfully!', 'success');
       } else {
         showAlert('Failed to update price-list style', 'error');
-        fetchPriceListStyle(); // Revert to previous value on error
+        fetchSettings(); // Revert to previous value on error
       }
     } catch (error) {
       console.error('Error updating price list style:', error);
       showAlert('Error updating price-list style', 'error');
-      fetchPriceListStyle(); // Revert to previous value on error
+      fetchSettings(); // Revert to previous value on error
+    }
+  };
+
+  const handleDecorationFileSelect = async (e) => {
+    const file = e.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      showAlert('Please select a valid image file', 'error');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      showAlert('Image size must be less than 5MB', 'error');
+      return;
+    }
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const base64Data = event.target?.result;
+
+        setDecorationLoading(true);
+        const response = await fetch('/api/settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ homePageDecoration: base64Data }),
+        });
+
+        if (response.ok) {
+          await fetchSettings();
+          showAlert('✓ Home page decoration updated successfully!', 'success');
+          // Reset file input
+          if (decorationInputRef.current) {
+            decorationInputRef.current.value = '';
+          }
+        } else {
+          showAlert('Failed to update home page decoration', 'error');
+        }
+        setDecorationLoading(false);
+      };
+
+      reader.onerror = () => {
+        showAlert('Failed to read file', 'error');
+        setDecorationLoading(false);
+      };
+
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Error uploading decoration:', error);
+      showAlert('Error uploading decoration', 'error');
+      setDecorationLoading(false);
     }
   };
 
@@ -278,6 +340,38 @@ export default function AppearancePage() {
               />
           </div>
         </div>
+      </div>
+
+        <div className="bg-white rounded-lg shadow p-6" style={{ marginTop: '2rem' }}>
+        <h3 className="text-2xl font-bold text-gray-800 mb-6">Home Page Design</h3>
+        <p className="text-gray-600 mb-6">Upload a decoration image (GIF or image) to display on the home page corners.</p>
+
+        <div className="bg-gray-50 rounded-lg p-6 mb-8">
+          <label className="block text-gray-700 font-medium mb-2">Upload Decoration Image</label>
+          <input
+            ref={decorationInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleDecorationFileSelect}
+            disabled={decorationLoading}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+          />
+          <p className="text-sm text-gray-500 mt-2">Supported formats: JPG, PNG, GIF, WebP (Max 5MB)</p>
+        </div>
+
+        {homePageDecoration && (
+          <div className="mb-6">
+            <h4 className="text-lg font-semibold text-gray-800 mb-4">Current Decoration Image</h4>
+            <div className="bg-white p-4 rounded-lg border border-gray-300">
+              <img
+                src={homePageDecoration}
+                alt="Home page decoration"
+                className="max-w-xs max-h-64 object-contain rounded"
+              />
+              <p className="text-xs text-gray-600 mt-3">This image will appear on the top left and right corners of the home page</p>
+            </div>
+          </div>
+        )}
       </div>
 
       <Snackbar

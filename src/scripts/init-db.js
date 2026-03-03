@@ -114,7 +114,7 @@ async function initializeDatabase() {
       CREATE TABLE IF NOT EXISTS settings (
         id INT AUTO_INCREMENT PRIMARY KEY,
         setting_key VARCHAR(255) NOT NULL UNIQUE,
-        setting_value VARCHAR(255) NOT NULL,
+        setting_value LONGTEXT NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       )

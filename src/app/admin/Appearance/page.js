@@ -1,13 +1,20 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Snackbar, Alert, IconButton } from '@mui/material';
+import { Snackbar, Alert, IconButton, TextField, Autocomplete } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+
+const styleOptions = [
+  { label: 'Cards', value: 'cards' },
+  { label: 'Table', value: 'table' },
+];
 
 export default function AppearancePage() {
   const [carouselImages, setCarouselImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [priceListStyle, setPriceListStyle] = useState(null);
+  const [styleLoading, setStyleLoading] = useState(true);
   const fileInputRef = useRef(null);
 
   const [snackbar, setSnackbar] = useState({
@@ -27,7 +34,48 @@ export default function AppearancePage() {
 
   useEffect(() => {
     fetchCarouselImages();
+    fetchPriceListStyle();
   }, []);
+
+  const fetchPriceListStyle = async () => {
+    try {
+      setStyleLoading(true);
+      const response = await fetch('/api/settings');
+      const data = await response.json();
+      const selectedOption = styleOptions.find(opt => opt.value === data.style);
+      setPriceListStyle(selectedOption || styleOptions[1]); // Default to 'table'
+    } catch (error) {
+      console.error('Error fetching price list style:', error);
+      setPriceListStyle(styleOptions[1]); // Default to 'table'
+    } finally {
+      setStyleLoading(false);
+    }
+  };
+
+  const handlePriceListStyleChange = async (event, newValue) => {
+    if (!newValue) return;
+
+    setPriceListStyle(newValue);
+
+    try {
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ style: newValue.value }),
+      });
+
+      if (response.ok) {
+        showAlert('✓ Price-list style updated successfully!', 'success');
+      } else {
+        showAlert('Failed to update price-list style', 'error');
+        fetchPriceListStyle(); // Revert to previous value on error
+      }
+    } catch (error) {
+      console.error('Error updating price list style:', error);
+      showAlert('Error updating price-list style', 'error');
+      fetchPriceListStyle(); // Revert to previous value on error
+    }
+  };
 
   const fetchCarouselImages = async () => {
     try {
@@ -213,6 +261,23 @@ export default function AppearancePage() {
             </div>
           </div>
         )}
+      </div>
+
+        <div className="bg-white rounded-lg shadow p-6" style={{ marginTop: '2rem' }}>
+        <h3 className="text-2xl font-bold text-gray-800 mb-6">Price-List Page Design</h3>
+        <div style={{display:"flex", gap: "1rem", alignItems: "flex-start"}}>
+          <div style={{ flex: 1, maxWidth: "300px" }}>
+           
+              <Autocomplete
+                options={styleOptions}
+                value={priceListStyle}
+                onChange={handlePriceListStyleChange}
+                getOptionLabel={(option) => option.label}
+                isOptionEqualToValue={(option, value) => option.value === value.value}
+                renderInput={(params) => <TextField {...params} label="Style Settings" />}
+              />
+          </div>
+        </div>
       </div>
 
       <Snackbar

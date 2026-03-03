@@ -110,6 +110,19 @@ async function initializeDatabase() {
     await connection.execute(createCarouselImagesTableQuery);
     console.log('✓ Carousel Images table created successfully!');
 
+    const createSettingsTableQuery = `
+      CREATE TABLE IF NOT EXISTS settings (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        setting_key VARCHAR(255) NOT NULL UNIQUE,
+        setting_value VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      )
+    `;
+
+    await connection.execute(createSettingsTableQuery);
+    console.log('✓ Settings table created successfully!');
+
     // Check if default admin exists
     const [rows] = await connection.execute('SELECT * FROM admins WHERE username = ?', ['prasanna']);
     if (rows.length === 0) {

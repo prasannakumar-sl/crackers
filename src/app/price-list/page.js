@@ -10,6 +10,23 @@ export default function PriceList() {
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState([]);
   const [enlargedImage, setEnlargedImage] = useState(null);
+  const [displayStyle, setDisplayStyle] = useState('table');
+
+  // Fetch display style from settings
+  useEffect(() => {
+    const fetchDisplayStyle = async () => {
+      try {
+        const response = await fetch('/api/settings');
+        const data = await response.json();
+        setDisplayStyle(data.style || 'table');
+      } catch (error) {
+        console.error('Error fetching display style:', error);
+        setDisplayStyle('table');
+      }
+    };
+
+    fetchDisplayStyle();
+  }, []);
 
   // Fetch products from database
   useEffect(() => {
@@ -200,118 +217,120 @@ export default function PriceList() {
                   {catIdx + 1}. {category.name.toUpperCase()} ({category.discount})
                 </div>
 
-                {/* Products Table - Desktop */}
-                <div className="hidden md:block bg-white border border-purple-400 rounded-b-lg overflow-hidden shadow-md">
-                  <table className="w-full">
-                    <thead className="bg-purple-300 text-black font-semibold">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs">Image</th>
-                        <th className="px-4 py-3 text-left text-xs">Product</th>
-                        <th className="px-4 py-3 text-left text-xs">Size</th>
-                        <th className="px-4 py-3 text-left text-xs">Price</th>
-                        <th className="px-4 py-3 text-left text-xs">Discount</th>
-                        <th className="px-4 py-3 text-center text-xs">Quantity</th>
-                        <th className="px-4 py-3 text-right text-xs">Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {category.products.map((product) => {
-                        const qty = getQuantity(product.id);
-                        const total = calculateTotal(product.discount, qty);
+                {/* Table View */}
+                {displayStyle === 'table' && (
+                  <div className="bg-white border border-purple-400 rounded-b-lg overflow-hidden shadow-md">
+                    <table className="w-full">
+                      <thead className="bg-purple-300 text-black font-semibold">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs">Image</th>
+                          <th className="px-4 py-3 text-left text-xs">Product</th>
+                          <th className="px-4 py-3 text-left text-xs">Size</th>
+                          <th className="px-4 py-3 text-left text-xs">Price</th>
+                          <th className="px-4 py-3 text-left text-xs">Discount</th>
+                          <th className="px-4 py-3 text-center text-xs">Quantity</th>
+                          <th className="px-4 py-3 text-right text-xs">Total</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {category.products.map((product) => {
+                          const qty = getQuantity(product.id);
+                          const total = calculateTotal(product.discount, qty);
 
-                        return (
-                          <tr key={product.id} className="border-b hover:bg-gray-50">
-                            {/* Image */}
-                            <td className="px-4 py-3">
-                              <div
-                                className="w-12 h-12 bg-yellow-100 rounded flex items-center justify-center text-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
-                                onClick={() => product.image && setEnlargedImage(product.image)}
-                              >
-                                {product.image ? (
-                                  <img
-                                    src={product.image}
-                                    alt={product.name}
-                                    className="w-full h-full object-cover"
+                          return (
+                            <tr key={product.id} className="border-b hover:bg-gray-50">
+                              {/* Image */}
+                              <td className="px-4 py-3">
+                                <div
+                                  className="w-12 h-12 bg-yellow-100 rounded flex items-center justify-center text-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                                  onClick={() => product.image && setEnlargedImage(product.image)}
+                                >
+                                  {product.image ? (
+                                    <img
+                                      src={product.image}
+                                      alt={product.name}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    '🎆'
+                                  )}
+                                </div>
+                              </td>
+
+                              {/* Product Name */}
+                              <td className="px-4 py-3">
+                                <div className="text-sm font-semibold text-black">{product.name}</div>
+                                <div className="text-xs text-gray-500">{product.description}</div>
+                              </td>
+
+                              {/* Size */}
+                              <td className="px-4 py-3 text-sm text-black">{product.size}</td>
+
+                              {/* Original Price */}
+                              <td className="px-4 py-3">
+                                <span className="text-sm line-through text-gray-600">₹{product.originalPrice.toFixed(2)}</span>
+                              </td>
+
+                              {/* Discount Price */}
+                              <td className="px-4 py-3">
+                                <span className="text-sm font-bold text-red-600">₹{product.discount.toFixed(2)}</span>
+                              </td>
+
+                              {/* Quantity Controls */}
+                              <td className="px-4 py-3">
+                                <div className="flex items-center justify-center gap-2">
+                                  <button
+                                    onClick={() => setQuantity(product.id, qty - 1)}
+                                    className="bg-red-500 text-white w-7 h-7 rounded font-bold hover:bg-red-600 transition-colors"
+                                  >
+                                    −
+                                  </button>
+                                  <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    value={qty}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      if (val === '' || /^\d+$/.test(val)) {
+                                        setQuantity(product.id, val);
+                                      }
+                                    }}
+                                    className="w-10 text-center border border-gray-300 rounded py-1 text-sm font-semibold"
                                   />
-                                ) : (
-                                  '🎆'
-                                )}
-                              </div>
-                            </td>
+                                  <button
+                                    onClick={() => setQuantity(product.id, qty + 1)}
+                                    className="bg-green-600 text-white w-7 h-7 rounded font-bold hover:bg-green-700 transition-colors"
+                                  >
+                                    +
+                                  </button>
+                                </div>
+                              </td>
 
-                            {/* Product Name */}
-                            <td className="px-4 py-3">
-                              <div className="text-sm font-semibold text-black">{product.name}</div>
-                              <div className="text-xs text-gray-500">{product.description}</div>
-                            </td>
+                              {/* Total */}
+                              <td className="px-4 py-3 text-right">
+                                <span className="font-bold text-black">₹{total}</span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
 
-                            {/* Size */}
-                            <td className="px-4 py-3 text-sm text-black">{product.size}</td>
+                {/* Cards View */}
+                {displayStyle === 'cards' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-white border border-purple-400 rounded-b-lg overflow-hidden shadow-md p-4">
+                    {category.products.map((product) => {
+                      const qty = getQuantity(product.id);
+                      const total = calculateTotal(product.discount, qty);
 
-                            {/* Original Price */}
-                            <td className="px-4 py-3">
-                              <span className="text-sm line-through text-gray-600">₹{product.originalPrice.toFixed(2)}</span>
-                            </td>
-
-                            {/* Discount Price */}
-                            <td className="px-4 py-3">
-                              <span className="text-sm font-bold text-red-600">₹{product.discount.toFixed(2)}</span>
-                            </td>
-
-                            {/* Quantity Controls */}
-                            <td className="px-4 py-3">
-                              <div className="flex items-center justify-center gap-2">
-                                <button
-                                  onClick={() => setQuantity(product.id, qty - 1)}
-                                  className="bg-red-500 text-white w-7 h-7 rounded font-bold hover:bg-red-600 transition-colors"
-                                >
-                                  −
-                                </button>
-                                <input
-                                  type="text"
-                                  inputMode="numeric"
-                                  pattern="[0-9]*"
-                                  value={qty}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    if (val === '' || /^\d+$/.test(val)) {
-                                      setQuantity(product.id, val);
-                                    }
-                                  }}
-                                  className="w-10 text-center border border-gray-300 rounded py-1 text-sm font-semibold"
-                                />
-                                <button
-                                  onClick={() => setQuantity(product.id, qty + 1)}
-                                  className="bg-green-600 text-white w-7 h-7 rounded font-bold hover:bg-green-700 transition-colors"
-                                >
-                                  +
-                                </button>
-                              </div>
-                            </td>
-
-                            {/* Total */}
-                            <td className="px-4 py-3 text-right">
-                              <span className="font-bold text-black">₹{total}</span>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Products Cards - Mobile */}
-                <div className="md:hidden bg-white border border-purple-400 rounded-b-lg overflow-hidden shadow-md">
-                  {category.products.map((product) => {
-                    const qty = getQuantity(product.id);
-                    const total = calculateTotal(product.discount, qty);
-
-                    return (
-                      <div key={product.id} className="border-b p-4 hover:bg-gray-50">
-                        {/* Image and Product Name */}
-                        <div className="flex gap-3 mb-3">
+                      return (
+                        <div key={product.id} className="border border-purple-300 rounded-lg p-4 hover:shadow-lg transition-shadow">
+                          {/* Product Image */}
                           <div
-                            className="w-12 h-12 bg-yellow-100 rounded flex items-center justify-center text-lg flex-shrink-0 overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                            className="w-full h-40 bg-yellow-100 rounded flex items-center justify-center text-3xl overflow-hidden cursor-pointer hover:opacity-80 transition-opacity mb-3"
                             onClick={() => product.image && setEnlargedImage(product.image)}
                           >
                             {product.image ? (
@@ -324,61 +343,63 @@ export default function PriceList() {
                               '🎆'
                             )}
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-semibold text-black text-sm">{product.name}</div>
-                            <div className="text-xs text-gray-500">{product.description}</div>
-                            <div className="text-xs text-gray-600 mt-1">{product.size}</div>
-                          </div>
-                        </div>
 
-                        {/* Prices */}
-                        <div className="grid grid-cols-3 gap-2 mb-3 text-center">
-                          <div>
-                            <div className="text-xs text-gray-600">Original</div>
-                            <div className="text-xs line-through text-gray-500">₹{product.originalPrice.toFixed(2)}</div>
+                          {/* Product Info */}
+                          <div className="mb-3">
+                            <h3 className="text-sm font-semibold text-black mb-1">{product.name}</h3>
+                            <p className="text-xs text-gray-500 mb-2">{product.description}</p>
+                            <p className="text-xs text-gray-600">{product.size}</p>
                           </div>
-                          <div>
-                            <div className="text-xs text-gray-600">Discount</div>
-                            <div className="text-sm font-bold text-red-600">₹{product.discount.toFixed(2)}</div>
-                          </div>
-                          <div>
-                            <div className="text-xs text-gray-600">Total</div>
-                            <div className="font-bold text-black">₹{total}</div>
-                          </div>
-                        </div>
 
-                        {/* Quantity Controls */}
-                        <div className="flex items-center justify-center gap-2">
-                          <button
-                            onClick={() => setQuantity(product.id, qty - 1)}
-                            className="bg-red-500 text-white w-7 h-7 rounded font-bold hover:bg-red-600 transition-colors"
-                          >
-                            −
-                          </button>
-                          <input
-                            type="text"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
-                            value={qty}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              if (val === '' || /^\d+$/.test(val)) {
-                                setQuantity(product.id, val);
-                              }
-                            }}
-                            className="w-10 text-center border border-gray-300 rounded py-1 text-sm font-semibold"
-                          />
-                          <button
-                            onClick={() => setQuantity(product.id, qty + 1)}
-                            className="bg-green-600 text-white w-7 h-7 rounded font-bold hover:bg-green-700 transition-colors"
-                          >
-                            +
-                          </button>
+                          {/* Prices */}
+                          <div className="mb-3 space-y-1">
+                            <div className="flex justify-between text-xs">
+                              <span className="text-gray-600">Original:</span>
+                              <span className="line-through text-gray-600">₹{product.originalPrice.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between text-xs">
+                              <span className="text-gray-600">Discount:</span>
+                              <span className="font-bold text-red-600">₹{product.discount.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="font-semibold text-black">Total:</span>
+                              <span className="font-bold text-black">₹{total}</span>
+                            </div>
+                          </div>
+
+                          {/* Quantity Controls */}
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => setQuantity(product.id, qty - 1)}
+                              className="bg-red-500 text-white w-7 h-7 rounded font-bold hover:bg-red-600 transition-colors"
+                            >
+                              −
+                            </button>
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              value={qty}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                if (val === '' || /^\d+$/.test(val)) {
+                                  setQuantity(product.id, val);
+                                }
+                              }}
+                              className="w-10 text-center border border-gray-300 rounded py-1 text-sm font-semibold"
+                            />
+                            <button
+                              onClick={() => setQuantity(product.id, qty + 1)}
+                              className="bg-green-600 text-white w-7 h-7 rounded font-bold hover:bg-green-700 transition-colors"
+                            >
+                              +
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             ))
           )}

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getConnection } from '@/lib/db';
+import { resizeAndConvertToBase64 } from '@/lib/imageProcessor';
 
 export async function DELETE(request, { params }) {
   try {
@@ -79,8 +80,7 @@ export async function PATCH(request, { params }) {
 
       if (imageFile && imageFile.size > 0) {
         const buffer = await imageFile.arrayBuffer();
-        const base64 = Buffer.from(buffer).toString('base64');
-        imageData = `data:${imageFile.type};base64,${base64}`;
+        imageData = await resizeAndConvertToBase64(Buffer.from(buffer), imageFile.type);
       }
     }
 

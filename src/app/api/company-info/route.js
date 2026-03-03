@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getConnection } from '@/lib/db';
+import { resizeAndConvertToBase64 } from '@/lib/imageProcessor';
 
 export async function GET() {
   try {
@@ -21,7 +22,12 @@ export async function GET() {
 export async function PUT(request) {
   try {
     const data = await request.json();
-    const { company_name, phone_number, gst_number, email, address, website, logo } = data;
+    let { company_name, phone_number, gst_number, email, address, website, logo } = data;
+
+    // Resize logo to standardized size (300x300)
+    if (logo && typeof logo === 'string') {
+      logo = await resizeAndConvertToBase64(logo, 'image/jpeg', 300, 300);
+    }
 
     const connection = await getConnection();
 

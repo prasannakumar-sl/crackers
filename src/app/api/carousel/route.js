@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getConnection } from '@/lib/db';
+import { resizeAndConvertToBase64 } from '@/lib/imageProcessor';
 
 export async function GET() {
   try {
@@ -19,11 +20,14 @@ export async function GET() {
 export async function POST(request) {
   try {
     const data = await request.json();
-    const { imageUrl, displayOrder = 0 } = data;
+    let { imageUrl, displayOrder = 0 } = data;
 
     if (!imageUrl) {
       return NextResponse.json({ error: 'Image URL is required' }, { status: 400 });
     }
+
+    // Resize image to standardized size
+    imageUrl = await resizeAndConvertToBase64(imageUrl);
 
     const connection = await getConnection();
     const query = 'INSERT INTO carousel_images (image_url, display_order) VALUES (?, ?)';

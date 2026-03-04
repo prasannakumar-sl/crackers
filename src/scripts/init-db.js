@@ -12,7 +12,7 @@ async function initializeDatabase() {
         price DECIMAL(10, 2) NOT NULL,
         description TEXT,
         category VARCHAR(100),
-        image VARCHAR(500),
+        image LONGTEXT,
         quantity INT DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

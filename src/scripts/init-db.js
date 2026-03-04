@@ -43,6 +43,7 @@ async function initializeDatabase() {
         address TEXT NOT NULL,
         total_amount DECIMAL(10, 2) NOT NULL,
         item_count INT NOT NULL,
+        invoice_number VARCHAR(50),
         status VARCHAR(50) DEFAULT 'Pending',
         payment_status VARCHAR(50) DEFAULT 'Unpaid',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -60,6 +61,7 @@ async function initializeDatabase() {
         product_name VARCHAR(255) NOT NULL,
         quantity INT NOT NULL,
         price DECIMAL(10, 2) NOT NULL,
+        discount DECIMAL(5, 2) DEFAULT 0,
         FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
       )
     `;
@@ -122,6 +124,34 @@ async function initializeDatabase() {
 
     await connection.execute(createSettingsTableQuery);
     console.log('✓ Settings table created successfully!');
+
+    const createCompanyInfoTableQuery = `
+      CREATE TABLE IF NOT EXISTS company_info (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        company_name VARCHAR(255) NOT NULL,
+        phone_number VARCHAR(20),
+        gst_number VARCHAR(50),
+        email VARCHAR(255),
+        logo LONGTEXT,
+        address TEXT,
+        website VARCHAR(255),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      )
+    `;
+
+    await connection.execute(createCompanyInfoTableQuery);
+    console.log('✓ Company Info table created successfully!');
+
+    // Insert default company info if table is empty
+    const [companyInfo] = await connection.execute('SELECT COUNT(*) as count FROM company_info');
+    if (companyInfo[0].count === 0) {
+      await connection.execute(
+        'INSERT INTO company_info (company_name, phone_number, gst_number, email) VALUES (?, ?, ?, ?)',
+        ['pk crackers', '', '', '']
+      );
+      console.log('✓ Default company info inserted');
+    }
 
     // Check if default admin exists
     const [rows] = await connection.execute('SELECT * FROM admins WHERE username = ?', ['prasanna']);

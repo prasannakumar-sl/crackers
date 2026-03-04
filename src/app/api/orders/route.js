@@ -27,23 +27,28 @@ export async function POST(request) {
 
     // Insert into order_items table
     for (const item of items) {
-      // Use originalPrice if available (from price-list), otherwise calculate from discount
-      const originalPrice = item.originalPrice
-        ? parseFloat(item.originalPrice)
-        : typeof item.discount === 'number'
-          ? item.discount * 2  // Assume 50% discount, so original = current * 2
-          : parseFloat(item.discount.replace('₹', '')) * 2;
+      // Use price or discount to determine the item price
+      let itemPrice = 0;
 
-      const discountedPrice = typeof item.discount === 'number'
-        ? item.discount
-        : parseFloat(item.discount.replace('₹', ''));
+      if (typeof item.price === 'number') {
+        itemPrice = item.price;
+      } else if (item.price && typeof item.price === 'string') {
+        itemPrice = parseFloat(item.price.replace('₹', ''));
+      } else if (typeof item.discount === 'number') {
+        itemPrice = item.discount;
+      } else if (item.discount && typeof item.discount === 'string') {
+        itemPrice = parseFloat(item.discount.replace('₹', ''));
+      }
 
-      // Calculate discount percentage
-      const discountPercent = ((originalPrice - discountedPrice) / originalPrice * 100).toFixed(2);
+      // Calculate discount percentage (default to 0 if not available)
+      let discountPercent = 0;
+      if (item.discountPercent !== undefined) {
+        discountPercent = item.discountPercent;
+      }
 
       await connection.execute(
         'INSERT INTO order_items (order_id, product_id, product_name, quantity, price, discount) VALUES (?, ?, ?, ?, ?, ?)',
-        [orderId, item.id || null, item.name, item.quantity, originalPrice, discountPercent]
+        [orderId, item.id || null, item.name, item.quantity, itemPrice, discountPercent]
       );
     }
 

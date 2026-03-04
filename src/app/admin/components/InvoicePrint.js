@@ -187,7 +187,7 @@ export default function InvoicePrint({ orderData, company, containerRef, payment
         .invoice-print-container {
           background: white;
           width: 210mm;
-          height: 297mm;
+          height: auto;
           margin: 0 auto;
           color: black;
           font-family: Arial, sans-serif;

@@ -59,30 +59,44 @@ export default function OrdersPage() {
         // Give React a moment to render the hidden invoice
         setTimeout(async () => {
           if (invoiceRef.current) {
-            // Dynamically import html2pdf only when needed
-            const html2pdf = (await import('html2pdf.js')).default;
+            try {
+              // Dynamically import html2pdf only when needed
+              const html2pdf = (await import('html2pdf.js')).default;
 
-            const filename = `Invoice-${data.order.invoice_number || orderId}.pdf`;
-            const options = {
-              margin: [5, 5, 5, 5],
-              filename: filename,
-              image: { type: 'jpeg', quality: 0.95 },
-              html2canvas: {
-                scale: 2,
-                useCORS: true,
-                allowTaint: true,
-                backgroundColor: '#ffffff'
-              },
-              jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
-            };
+              const filename = `Invoice-${data.order.invoice_number || orderId}.pdf`;
+              const options = {
+                margin: 0,
+                filename: filename,
+                image: { type: 'jpeg', quality: 0.95 },
+                html2canvas: {
+                  scale: 2,
+                  useCORS: true,
+                  allowTaint: true,
+                  backgroundColor: '#ffffff',
+                  logging: false
+                },
+                jsPDF: {
+                  orientation: 'portrait',
+                  unit: 'mm',
+                  format: 'a4',
+                  compress: true
+                },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+              };
 
-            await html2pdf().set(options).from(invoiceRef.current).save();
+              await html2pdf().set(options).from(invoiceRef.current).save();
 
-            // Clean up
-            setDownloadOrderData(null);
-            setDownloadingOrderId(null);
+              // Clean up
+              setDownloadOrderData(null);
+              setDownloadingOrderId(null);
+            } catch (error) {
+              console.error('Error generating PDF:', error);
+              alert('Error generating PDF. Please try again.');
+              setDownloadOrderData(null);
+              setDownloadingOrderId(null);
+            }
           }
-        }, 500);
+        }, 1000);
       } else {
         console.error('Failed to fetch order details for download:', data.error);
         alert('Failed to prepare invoice for download');
@@ -201,7 +215,7 @@ export default function OrdersPage() {
       />
 
       {/* Hidden Invoice for downloading */}
-      <div style={{ position: 'absolute', left: '-9999px', top: '-9999px', overflow: 'hidden', height: 0 }}>
+      <div style={{ position: 'fixed', visibility: 'hidden', pointerEvents: 'none', width: '210mm', zIndex: -1 }}>
         {downloadOrderData && (
           <InvoicePrint
             containerRef={invoiceRef}

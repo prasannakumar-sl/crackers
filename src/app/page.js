@@ -11,6 +11,7 @@ export default function Home() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedImage, setSelectedImage] = useState(null);
   const [homePageDecoration, setHomePageDecoration] = useState(null);
+  const [banners, setBanners] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -27,11 +28,13 @@ export default function Home() {
         setSections(Array.isArray(sectionsData) ? sectionsData : []);
         setCarouselImages(Array.isArray(carouselData) ? carouselData : []);
         setHomePageDecoration(settingsData.homePageDecoration || null);
+        setBanners(Array.isArray(settingsData.banners) ? settingsData.banners : []);
       } catch (error) {
         console.error('Error fetching data:', error);
         setSections([]);
         setCarouselImages([]);
         setHomePageDecoration(null);
+        setBanners([]);
       } finally {
         setLoading(false);
       }
@@ -89,18 +92,12 @@ export default function Home() {
       <section className="py-6 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-3 gap-4">
-            <div className="bg-gradient-to-r from-green-700 to-green-900 text-white p-6 rounded-lg">
-              <h3 className="font-bold text-lg mb-2">Perfect Collection</h3>
-              <p className="text-sm">Customize & Diwali</p>
-            </div>
-            <div className="bg-gradient-to-r from-yellow-500 to-yellow-700 text-white p-6 rounded-lg">
-              <h3 className="font-bold text-lg mb-2">Festival</h3>
-              <p className="text-sm">Sale on All Items</p>
-            </div>
-            <div className="bg-gradient-to-r from-orange-500 to-orange-700 text-white p-6 rounded-lg">
-              <h3 className="font-bold text-lg mb-2">Special Offer</h3>
-              <p className="text-sm">Limited Time Only</p>
-            </div>
+            {banners.map((banner) => (
+              <div key={banner.id} className={`bg-gradient-to-r ${banner.gradientFrom} ${banner.gradientTo} text-white p-6 rounded-lg`}>
+                <h3 className="font-bold text-lg mb-2">{banner.title}</h3>
+                <p className="text-sm">{banner.subtitle}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -131,11 +128,7 @@ export default function Home() {
             </div>
           </div>
         ) : (
-          <img
-            src="https://cdn.builder.io/api/v1/image/assets%2Fe0b97a868c7a4760bf7ee5c2ab73e471%2F674b44a28ad6493891cab41238680c55?format=webp&width=1200&height=500"
-            alt="Diwali Crackers Special"
-            className="w-full h-auto object-cover"
-          />
+          <div style={{padding:"15%"}}/>
         )}
       </section>
 

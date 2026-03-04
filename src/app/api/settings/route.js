@@ -5,14 +5,37 @@ export async function GET() {
   try {
     const connection = await getConnection();
     const [settings] = await connection.execute(
-      'SELECT * FROM settings WHERE setting_key IN (?, ?)',
-      ['price_list_style', 'home_page_decoration']
+      'SELECT * FROM settings WHERE setting_key IN (?, ?, ?)',
+      ['price_list_style', 'home_page_decoration', 'home_page_banners']
     );
     await connection.end();
 
     const result = {
       style: 'table',
       homePageDecoration: null,
+      banners: [
+        {
+          id: 1,
+          title: 'Perfect Collection',
+          subtitle: 'Customize & Diwali',
+          gradientFrom: 'from-green-700',
+          gradientTo: 'to-green-900',
+        },
+        {
+          id: 2,
+          title: 'Festival',
+          subtitle: 'Sale on All Items',
+          gradientFrom: 'from-yellow-500',
+          gradientTo: 'to-yellow-700',
+        },
+        {
+          id: 3,
+          title: 'Special Offer',
+          subtitle: 'Limited Time Only',
+          gradientFrom: 'from-orange-500',
+          gradientTo: 'to-orange-700',
+        },
+      ],
     };
 
     settings.forEach(setting => {
@@ -20,20 +43,52 @@ export async function GET() {
         result.style = setting.setting_value;
       } else if (setting.setting_key === 'home_page_decoration') {
         result.homePageDecoration = setting.setting_value;
+      } else if (setting.setting_key === 'home_page_banners') {
+        try {
+          result.banners = JSON.parse(setting.setting_value);
+        } catch (e) {
+          console.error('Error parsing banners JSON:', e);
+        }
       }
     });
 
     return NextResponse.json(result);
   } catch (error) {
     console.error('Error fetching settings:', error);
-    return NextResponse.json({ style: 'table', homePageDecoration: null });
+    return NextResponse.json({
+      style: 'table',
+      homePageDecoration: null,
+      banners: [
+        {
+          id: 1,
+          title: 'Perfect Collection',
+          subtitle: 'Customize & Diwali',
+          gradientFrom: 'from-green-700',
+          gradientTo: 'to-green-900',
+        },
+        {
+          id: 2,
+          title: 'Festival',
+          subtitle: 'Sale on All Items',
+          gradientFrom: 'from-yellow-500',
+          gradientTo: 'to-yellow-700',
+        },
+        {
+          id: 3,
+          title: 'Special Offer',
+          subtitle: 'Limited Time Only',
+          gradientFrom: 'from-orange-500',
+          gradientTo: 'to-orange-700',
+        },
+      ],
+    });
   }
 }
 
 export async function POST(request) {
   try {
     const data = await request.json();
-    const { style, homePageDecoration } = data;
+    const { style, homePageDecoration, banners } = data;
 
     const connection = await getConnection();
 
@@ -92,9 +147,30 @@ export async function POST(request) {
       }
     }
 
+    // Update banners if provided
+    if (banners !== undefined) {
+      const bannersJSON = JSON.stringify(banners);
+      const [existing] = await connection.execute(
+        'SELECT id FROM settings WHERE setting_key = ? LIMIT 1',
+        ['home_page_banners']
+      );
+
+      if (existing.length > 0) {
+        await connection.execute(
+          'UPDATE settings SET setting_value = ? WHERE setting_key = ?',
+          [bannersJSON, 'home_page_banners']
+        );
+      } else {
+        await connection.execute(
+          'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)',
+          ['home_page_banners', bannersJSON]
+        );
+      }
+    }
+
     await connection.end();
 
-    return NextResponse.json({ style, homePageDecoration }, { status: 200 });
+    return NextResponse.json({ style, homePageDecoration, banners }, { status: 200 });
   } catch (error) {
     console.error('Error updating settings:', error);
     return NextResponse.json({ error: 'Failed to update settings' }, { status: 500 });

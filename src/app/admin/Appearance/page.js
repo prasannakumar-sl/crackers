@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Snackbar, Alert, IconButton, TextField, Autocomplete } from '@mui/material';
+import { Snackbar, Alert, IconButton, TextField, Autocomplete, Button } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 
 const styleOptions = [
   { label: 'Cards', value: 'cards' },
@@ -17,6 +18,10 @@ export default function AppearancePage() {
   const [styleLoading, setStyleLoading] = useState(true);
   const [homePageDecoration, setHomePageDecoration] = useState(null);
   const [decorationLoading, setDecorationLoading] = useState(false);
+  const [banners, setBanners] = useState([]);
+  const [bannersLoading, setBannersLoading] = useState(true);
+  const [editingBannerId, setEditingBannerId] = useState(null);
+  const [editBannerData, setEditBannerData] = useState({});
   const fileInputRef = useRef(null);
   const decorationInputRef = useRef(null);
 
@@ -38,6 +43,7 @@ export default function AppearancePage() {
   useEffect(() => {
     fetchCarouselImages();
     fetchSettings();
+    fetchBanners();
   }, []);
 
   const fetchSettings = async () => {
@@ -54,6 +60,62 @@ export default function AppearancePage() {
       setHomePageDecoration(null);
     } finally {
       setStyleLoading(false);
+    }
+  };
+
+  const fetchBanners = async () => {
+    try {
+      setBannersLoading(true);
+      const response = await fetch('/api/settings');
+      const data = await response.json();
+      setBanners(data.banners || []);
+    } catch (error) {
+      console.error('Error fetching banners:', error);
+      setBanners([]);
+      showAlert('Failed to load banners', 'error');
+    } finally {
+      setBannersLoading(false);
+    }
+  };
+
+  const handleEditBanner = (banner) => {
+    setEditingBannerId(banner.id);
+    setEditBannerData({ ...banner });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingBannerId(null);
+    setEditBannerData({});
+  };
+
+  const handleSaveBanner = async () => {
+    if (!editBannerData.title || !editBannerData.subtitle) {
+      showAlert('Please fill in all fields', 'error');
+      return;
+    }
+
+    const updatedBanners = banners.map(b =>
+      b.id === editingBannerId ? editBannerData : b
+    );
+
+    try {
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ banners: updatedBanners }),
+      });
+
+      if (response.ok) {
+        setBanners(updatedBanners);
+        setEditingBannerId(null);
+        setEditBannerData({});
+        showAlert('✓ Banner updated successfully!', 'success');
+      } else {
+        showAlert('Failed to update banner', 'error');
+      }
+    } catch (error) {
+      console.error('Error updating banner:', error);
+      showAlert('Error updating banner', 'error');
     }
   };
 
@@ -409,6 +471,81 @@ export default function AppearancePage() {
                 </IconButton>
               </div>
             </div>
+          </div>
+        )}
+      </div>
+
+      <div className="bg-white rounded-lg shadow p-6" style={{ marginTop: '2rem' }}>
+        <h3 className="text-2xl font-bold text-gray-800 mb-6">Festival Banners</h3>
+        <p className="text-gray-600 mb-6">Customize the three promotional banners displayed on the home page.</p>
+
+        {bannersLoading ? (
+          <p className="text-gray-600">Loading banners...</p>
+        ) : banners.length === 0 ? (
+          <div className="bg-gray-50 rounded-lg p-8 text-center">
+            <p className="text-gray-600">No banners found.</p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {banners.map((banner) => (
+              <div key={banner.id} className={`bg-gradient-to-r ${banner.gradientFrom} ${banner.gradientTo} text-white p-6 rounded-lg`}>
+                {editingBannerId === banner.id ? (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-white font-medium mb-2">Title</label>
+                      <input
+                        type="text"
+                        value={editBannerData.title || ''}
+                        onChange={(e) => setEditBannerData({ ...editBannerData, title: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-white font-medium mb-2">Subtitle</label>
+                      <input
+                        type="text"
+                        value={editBannerData.subtitle || ''}
+                        onChange={(e) => setEditBannerData({ ...editBannerData, subtitle: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="contained"
+                        color="success"
+                        onClick={handleSaveBanner}
+                        size="small"
+                      >
+                        Save
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="inherit"
+                        onClick={handleCancelEdit}
+                        size="small"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-bold text-lg mb-2">{banner.title}</h4>
+                      <p className="text-sm">{banner.subtitle}</p>
+                    </div>
+                    <IconButton
+                      onClick={() => handleEditBanner(banner)}
+                      color="inherit"
+                      size="small"
+                      title="Edit banner"
+                    >
+                      <EditIcon />
+                    </IconButton>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </div>

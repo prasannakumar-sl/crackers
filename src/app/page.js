@@ -10,6 +10,7 @@ export default function Home() {
   const [carouselImages, setCarouselImages] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const [homePageDecoration, setHomePageDecoration] = useState(null);
   const [banners, setBanners] = useState([]);
 
@@ -150,8 +151,8 @@ export default function Home() {
                 <div className="grid grid-cols-3 gap-6">
                   {section.products && section.products.length > 0 ? (
                     section.products.map(product => (
-                      <div key={product.id} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-                        <div className="bg-purple-100 h-48 flex items-center justify-center overflow-hidden cursor-pointer" onClick={() => (product.image || 'https://cdn.builder.io/api/v1/image/assets%2Fa8b7ea913e4d4cbb918cc3633423e9fa%2Fcf0b1bff048f4f4aa4c2904d1907c926') && setSelectedImage(product.image || 'https://cdn.builder.io/api/v1/image/assets%2Fa8b7ea913e4d4cbb918cc3633423e9fa%2Fcf0b1bff048f4f4aa4c2904d1907c926')}>
+                      <div key={product.id} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow flex flex-col cursor-pointer" onClick={() => setSelectedProduct(product)}>
+                        <div className="bg-purple-100 h-48 flex items-center justify-center overflow-hidden">
                           <img
                             src={product.image || 'https://cdn.builder.io/api/v1/image/assets%2Fa8b7ea913e4d4cbb918cc3633423e9fa%2Fcf0b1bff048f4f4aa4c2904d1907c926'}
                             alt={product.name}
@@ -161,12 +162,12 @@ export default function Home() {
                             }}
                           />
                         </div>
-                        <div className="p-4">
+                        <div className="p-4 flex-grow">
                           <h3 className="font-bold text-black mb-3">{product.name}</h3>
                           <div className="flex gap-3 mb-4">
                             <span className="text-gray-800 font-bold">₹{parseFloat(product.price).toFixed(2)}</span>
                           </div>
-                          <button onClick={() => addToCart({ ...product, quantity: 1 })} className="w-full bg-red-500 text-white py-2 rounded font-semibold hover:bg-red-600 transition-colors">
+                          <button onClick={(e) => { e.stopPropagation(); addToCart({ ...product, quantity: 1 }); }} className="w-full bg-red-500 text-white py-2 rounded font-semibold hover:bg-red-600 transition-colors">
                             ADD TO CART
                           </button>
                         </div>
@@ -256,6 +257,82 @@ export default function Home() {
             >
               ✕
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Product Detail Modal */}
+      {selectedProduct && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4" onClick={() => setSelectedProduct(null)}>
+          <div className="bg-white rounded-xl max-w-lg w-full overflow-hidden shadow-2xl flex flex-col" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="relative h-64 bg-purple-100 flex items-center justify-center overflow-hidden">
+              <img
+                src={selectedProduct.image || 'https://cdn.builder.io/api/v1/image/assets%2Fa8b7ea913e4d4cbb918cc3633423e9fa%2Fcf0b1bff048f4f4aa4c2904d1907c926'}
+                alt={selectedProduct.name}
+                className="w-full h-full object-contain p-8"
+                onError={(e) => {
+                  e.target.src = 'https://cdn.builder.io/api/v1/image/assets%2Fa8b7ea913e4d4cbb918cc3633423e9fa%2Fcf0b1bff048f4f4aa4c2904d1907c926';
+                }}
+              />
+              <button
+                onClick={() => setSelectedProduct(null)}
+                className="absolute top-4 right-4 bg-white/80 backdrop-blur-sm rounded-full w-10 h-10 flex items-center justify-center text-black font-bold text-lg hover:bg-white transition-colors shadow-md"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-8 space-y-4">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">{selectedProduct.name}</h2>
+                <p className="text-gray-500 text-lg uppercase tracking-wider font-semibold">
+                  {selectedProduct.category || 'Standard Product'}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <span className="text-4xl font-extrabold text-red-600">
+                  ₹{parseFloat(selectedProduct.price).toFixed(2)}
+                </span>
+                <span className="bg-green-100 text-green-800 text-xs font-bold px-2.5 py-0.5 rounded-full uppercase">
+                  In Stock
+                </span>
+              </div>
+
+              <div className="pt-4 border-t border-gray-100">
+                <h3 className="text-sm font-bold text-gray-400 uppercase mb-3">Product Description</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  {selectedProduct.description || "This premium quality firecracker is designed for a safe and spectacular celebration. Made with high-quality materials to ensure consistent performance and vibrant effects."}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 py-4">
+                <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                  <p className="text-xs text-gray-400 uppercase font-bold mb-1">Quantity</p>
+                  <p className="text-sm font-semibold text-gray-700">1 Box / Pack</p>
+                </div>
+                <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                  <p className="text-xs text-gray-400 uppercase font-bold mb-1">Safe to Use</p>
+                  <p className="text-sm font-semibold text-gray-700">Certified Quality</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer / Action */}
+            <div className="p-8 pt-0 mt-auto">
+              <button
+                onClick={() => {
+                  addToCart({ ...selectedProduct, quantity: 1 });
+                  setSelectedProduct(null);
+                }}
+                className="w-full bg-red-600 text-white py-4 rounded-xl font-bold text-xl hover:bg-red-700 active:transform active:scale-95 transition-all shadow-lg hover:shadow-red-200 flex items-center justify-center gap-3"
+              >
+                <span>🛒</span>
+                ADD TO CART
+              </button>
+            </div>
           </div>
         </div>
       )}

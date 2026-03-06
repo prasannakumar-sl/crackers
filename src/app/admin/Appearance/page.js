@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Snackbar, Alert, IconButton, TextField, Autocomplete, Button } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import RemoveIcon from '@mui/icons-material/Remove';
 
 const styleOptions = [
   { label: 'Cards', value: 'cards' },
@@ -22,6 +23,10 @@ export default function AppearancePage() {
   const [bannersLoading, setBannersLoading] = useState(true);
   const [editingBannerId, setEditingBannerId] = useState(null);
   const [editBannerData, setEditBannerData] = useState({});
+  const [products, setProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [productSearchValue, setProductSearchValue] = useState('');
   const fileInputRef = useRef(null);
   const decorationInputRef = useRef(null);
 
@@ -44,7 +49,23 @@ export default function AppearancePage() {
     fetchCarouselImages();
     fetchSettings();
     fetchBanners();
+    fetchProducts();
   }, []);
+
+  const fetchProducts = async () => {
+    try {
+      setProductsLoading(true);
+      const response = await fetch('/api/products');
+      const data = await response.json();
+      setProducts(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      setProducts([]);
+      showAlert('Failed to load products', 'error');
+    } finally {
+      setProductsLoading(false);
+    }
+  };
 
   const fetchSettings = async () => {
     try {
@@ -80,12 +101,73 @@ export default function AppearancePage() {
 
   const handleEditBanner = (banner) => {
     setEditingBannerId(banner.id);
-    setEditBannerData({ ...banner });
+    setEditBannerData({ ...banner, products: banner.products || [] });
+    setSelectedProduct(null);
+    setProductSearchValue('');
   };
 
   const handleCancelEdit = () => {
     setEditingBannerId(null);
     setEditBannerData({});
+    setSelectedProduct(null);
+    setProductSearchValue('');
+  };
+
+  const handleAddProductToBanner = () => {
+    if (!selectedProduct) {
+      showAlert('Please select a product', 'error');
+      return;
+    }
+
+    const bannerProducts = editBannerData.products || [];
+    const alreadyAdded = bannerProducts.some(p => p.id === selectedProduct.id);
+
+    if (alreadyAdded) {
+      showAlert('This product is already added to the banner', 'error');
+      return;
+    }
+
+    const updatedProducts = [...bannerProducts, { ...selectedProduct, qty: 1 }];
+    setEditBannerData({ ...editBannerData, products: updatedProducts });
+    setSelectedProduct(null);
+    setProductSearchValue('');
+  };
+
+  const handleUpdateProductQty = (productId, newQty) => {
+    const parsedQty = parseInt(newQty);
+    // Allow empty value or numbers >= 1
+    if (newQty === '' || newQty === undefined) {
+      const updatedProducts = editBannerData.products.map(p =>
+        p.id === productId ? { ...p, qty: '' } : p
+      );
+      setEditBannerData({ ...editBannerData, products: updatedProducts });
+    } else if (!isNaN(parsedQty) && parsedQty >= 0) {
+      // Set to 1 if 0, otherwise keep the value
+      const qty = parsedQty === 0 ? 1 : parsedQty;
+      const updatedProducts = editBannerData.products.map(p =>
+        p.id === productId ? { ...p, qty } : p
+      );
+      setEditBannerData({ ...editBannerData, products: updatedProducts });
+    }
+  };
+
+  const handleIncreaseQty = (productId) => {
+    const product = editBannerData.products.find(p => p.id === productId);
+    if (product) {
+      handleUpdateProductQty(productId, (product.qty || 1) + 1);
+    }
+  };
+
+  const handleDecreaseQty = (productId) => {
+    const product = editBannerData.products.find(p => p.id === productId);
+    if (product && (product.qty || 1) > 1) {
+      handleUpdateProductQty(productId, (product.qty || 1) - 1);
+    }
+  };
+
+  const handleRemoveProductFromBanner = (productId) => {
+    const updatedProducts = (editBannerData.products || []).filter(p => p.id !== productId);
+    setEditBannerData({ ...editBannerData, products: updatedProducts });
   };
 
   const handleSaveBanner = async () => {
@@ -509,6 +591,127 @@ export default function AppearancePage() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
+
+                    {/* Product Selection Section */}
+                    <div className="bg-white rounded p-3">
+                      <label className="block text-black font-medium mb-3">Select Products for This Banner</label>
+
+                      {/* Autocomplete Field */}
+                      <div className="flex gap-2 mb-4">
+                        <Autocomplete
+                          options={products}
+                          sx={{ flex: 1 }}
+                          getOptionLabel={(option) => option?.name || ''}
+                          isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                          value={selectedProduct}
+                          onChange={(event, newValue) => setSelectedProduct(newValue)}
+                          inputValue={productSearchValue}
+                          onInputChange={(event, newInputValue) => {
+                            setProductSearchValue(newInputValue);
+                          }}
+                          clearOnBlur={false}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              label="Search products..."
+                              size="small"
+                              style={{width:"250px"}}
+                              sx={{
+                                '& .MuiOutlinedInput-root': {
+                                  color: 'black',
+                                  '& fieldset': { borderColor: 'black' },
+                                  '&:hover fieldset': { borderColor: 'black' },
+                                  '&.Mui-focused fieldset': { borderColor: 'black' }
+                                },
+                                '& .MuiInputBase-input::placeholder': {
+                                  color: 'rgba(0, 0, 0, 0.5)',
+                                  opacity: 1
+                                },
+                                '& .MuiInputBase-input': {
+                                  color: 'black'
+                                },
+                                '& .MuiAutocomplete-listbox': {
+                                  color: 'black'
+                                }
+                              }}
+                            />
+                          )}
+                          loading={productsLoading}
+                          noOptionsText="No products found"
+                        />
+                        <Button
+                          variant="contained"
+                          color="success"
+                          onClick={handleAddProductToBanner}
+                          size="small"
+                          sx={{ whiteSpace: 'nowrap' }}
+                        >
+                          Add Product
+                        </Button>
+                      </div>
+
+                      {/* Selected Products Table */}
+                      {(editBannerData.products && editBannerData.products.length > 0) && (
+                        <div className="mt-4">
+                          <p className="text-black text-sm font-medium mb-3">Selected Products ({editBannerData.products.length})</p>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-sm text-black">
+                              <thead>
+                                <tr className="border-b border-black">
+                                  <th className="text-left py-2 px-2">Product Name</th>
+                                  <th className="text-left py-2 px-2">Price</th>
+                                  <th className="text-left py-2 px-2">Qty</th>
+                                  <th className="text-left py-2 px-2">Action</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {editBannerData.products.map((product) => (
+                                  <tr key={product.id} className="border-b border-black">
+                                    <td className="py-2 px-2">{product.name}</td>
+                                    <td className="py-2 px-2">₹{parseFloat(product.price).toFixed(2)}</td>
+                                    <td className="py-2 px-2">
+                                      <div className="flex items-center gap-1">
+                                        <button
+                                          onClick={() => handleDecreaseQty(product.id)}
+                                          className="px-2 py-1 bg-gray-300 text-black rounded hover:bg-gray-400 text-sm font-bold"
+                                          title="Decrease quantity"
+                                          disabled={(product.qty || 1) <= 1}
+                                        >
+                                          −
+                                        </button>
+                                        <input
+                                          type="number"
+                                          value={product.qty || 1}
+                                          onChange={(e) => handleUpdateProductQty(product.id, e.target.value)}
+                                          className="w-16 px-2 py-1 border border-black rounded text-black text-center"
+                                        />
+                                        <button
+                                          onClick={() => handleIncreaseQty(product.id)}
+                                          className="px-2 py-1 bg-gray-300 text-black rounded hover:bg-gray-400 text-sm font-bold"
+                                          title="Increase quantity"
+                                        >
+                                          +
+                                        </button>
+                                      </div>
+                                    </td>
+                                    <td className="py-2 px-2">
+                                      <button
+                                        onClick={() => handleRemoveProductFromBanner(product.id)}
+                                        className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-xs"
+                                        title="Remove product"
+                                      >
+                                        Remove
+                                      </button>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
                     <div className="flex gap-2">
                       <Button
                         variant="contained"
@@ -533,6 +736,9 @@ export default function AppearancePage() {
                     <div>
                       <h4 className="font-bold text-lg mb-2">{banner.title}</h4>
                       <p className="text-sm">{banner.subtitle}</p>
+                      {banner.products && banner.products.length > 0 && (
+                        <p className="text-xs mt-3 opacity-80">📦 {banner.products.length} product(s) selected</p>
+                      )}
                     </div>
                     <IconButton
                       onClick={() => handleEditBanner(banner)}

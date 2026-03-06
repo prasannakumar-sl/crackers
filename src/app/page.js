@@ -282,7 +282,7 @@ export default function Home() {
                       </div>
                       <div className="flex items-center gap-4">
                         <span className="text-sm text-gray-500">Qty: {product.qty || 1}</span>
-                        <button
+                        {/* <button
                           onClick={() => {
                             addToCart({ ...product, quantity: parseInt(product.qty) || 1, bannerTitle: selectedBanner.title });
                             // Optional: show some feedback that item was added
@@ -290,7 +290,7 @@ export default function Home() {
                           className="bg-red-600 text-white px-4 py-2 rounded font-bold hover:bg-red-700 transition-colors text-sm"
                         >
                           ADD TO CART
-                        </button>
+                        </button> */}
                       </div>
                     </div>
                   ))}

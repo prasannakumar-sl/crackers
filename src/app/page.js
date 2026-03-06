@@ -11,6 +11,7 @@ export default function Home() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedBanner, setSelectedBanner] = useState(null);
   const [homePageDecoration, setHomePageDecoration] = useState(null);
   const [banners, setBanners] = useState([]);
 
@@ -94,9 +95,18 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-3 gap-4">
             {banners.map((banner) => (
-              <div key={banner.id} className={`bg-gradient-to-r ${banner.gradientFrom} ${banner.gradientTo} text-white p-6 rounded-lg`}>
+              <div
+                key={banner.id}
+                className={`bg-gradient-to-r ${banner.gradientFrom} ${banner.gradientTo} text-white p-6 rounded-lg cursor-pointer hover:shadow-lg transition-all active:scale-[0.98]`}
+                onClick={() => setSelectedBanner(banner)}
+              >
                 <h3 className="font-bold text-lg mb-2">{banner.title}</h3>
                 <p className="text-sm">{banner.subtitle}</p>
+                {banner.products && banner.products.length > 0 && (
+                  <div className="mt-4 text-xs bg-black/20 inline-block px-2 py-1 rounded">
+                    {banner.products.length} Products
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -241,6 +251,64 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Banner Products Modal */}
+      {selectedBanner && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[60] p-4" onClick={() => setSelectedBanner(null)}>
+          <div className="bg-white rounded-xl max-w-2xl w-full overflow-hidden shadow-2xl flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+            <div className={`p-6 text-white bg-gradient-to-r ${selectedBanner.gradientFrom} ${selectedBanner.gradientTo} relative`}>
+              <h2 className="text-2xl font-bold">{selectedBanner.title}</h2>
+              <p className="text-sm opacity-90">{selectedBanner.subtitle}</p>
+              <button
+                onClick={() => setSelectedBanner(null)}
+                className="absolute top-4 right-4 bg-white/20 hover:bg-white/40 rounded-full w-8 h-8 flex items-center justify-center text-white transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto flex-grow">
+              {!selectedBanner.products || selectedBanner.products.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  No products in this collection yet.
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {selectedBanner.products.map((product) => (
+                    <div key={product.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors">
+                      <div className="flex-grow">
+                        <h4 className="font-bold text-gray-900">{product.name}</h4>
+                        <p className="text-red-600 font-bold">₹{parseFloat(product.price).toFixed(2)}</p>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <span className="text-sm text-gray-500">Qty: {product.qty || 1}</span>
+                        <button
+                          onClick={() => {
+                            addToCart({ ...product, quantity: parseInt(product.qty) || 1 });
+                            // Optional: show some feedback that item was added
+                          }}
+                          className="bg-red-600 text-white px-4 py-2 rounded font-bold hover:bg-red-700 transition-colors text-sm"
+                        >
+                          ADD TO CART
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end">
+              <button
+                onClick={() => setSelectedBanner(null)}
+                className="px-6 py-2 bg-gray-200 text-gray-800 rounded font-bold hover:bg-gray-300 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Image Lightbox Modal */}
       {selectedImage && (

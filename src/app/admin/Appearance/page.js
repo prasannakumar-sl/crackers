@@ -21,6 +21,9 @@ export default function AppearancePage() {
   const [decorationLoading, setDecorationLoading] = useState(false);
   const [banners, setBanners] = useState([]);
   const [bannersLoading, setBannersLoading] = useState(true);
+  const [brands, setBrands] = useState([]);
+  const [brandsLoading, setBrandsLoading] = useState(true);
+  const [newBrandName, setNewBrandName] = useState('');
   const [editingBannerId, setEditingBannerId] = useState(null);
   const [editBannerData, setEditBannerData] = useState({});
   const [products, setProducts] = useState([]);
@@ -75,12 +78,15 @@ export default function AppearancePage() {
       const selectedOption = styleOptions.find(opt => opt.value === data.style);
       setPriceListStyle(selectedOption || styleOptions[1]); // Default to 'table'
       setHomePageDecoration(data.homePageDecoration || null);
+      setBrands(data.brands || ['Renu Crackers', 'Mightloads', 'Sri Aravind', 'Ramesh']);
     } catch (error) {
       console.error('Error fetching settings:', error);
       setPriceListStyle(styleOptions[1]); // Default to 'table'
       setHomePageDecoration(null);
+      setBrands(['Renu Crackers', 'Mightloads', 'Sri Aravind', 'Ramesh']);
     } finally {
       setStyleLoading(false);
+      setBrandsLoading(false);
     }
   };
 
@@ -198,6 +204,60 @@ export default function AppearancePage() {
     } catch (error) {
       console.error('Error updating banner:', error);
       showAlert('Error updating banner', 'error');
+    }
+  };
+
+  const handleAddBrand = async () => {
+    if (!newBrandName.trim()) {
+      showAlert('Please enter a brand name', 'error');
+      return;
+    }
+
+    const updatedBrands = [...brands, newBrandName.trim()];
+
+    try {
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ brands: updatedBrands }),
+      });
+
+      if (response.ok) {
+        setBrands(updatedBrands);
+        setNewBrandName('');
+        showAlert('✓ Brand added successfully!', 'success');
+      } else {
+        showAlert('Failed to add brand', 'error');
+      }
+    } catch (error) {
+      console.error('Error adding brand:', error);
+      showAlert('Error adding brand', 'error');
+    }
+  };
+
+  const handleDeleteBrand = async (index) => {
+    if (!confirm('Are you sure you want to delete this brand?')) {
+      return;
+    }
+
+    const updatedBrands = brands.filter((_, i) => i !== index);
+
+    try {
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ brands: updatedBrands }),
+      });
+
+      if (response.ok) {
+        setBrands(updatedBrands);
+        showAlert('✓ Brand deleted successfully!', 'success');
+      } else {
+        showAlert('Failed to delete brand', 'error');
+      }
+    } catch (error) {
+      console.error('Error deleting brand:', error);
+      showAlert('Error deleting brand', 'error');
     }
   };
 
@@ -750,6 +810,54 @@ export default function AppearancePage() {
                     </IconButton>
                   </div>
                 )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="bg-white rounded-lg shadow p-6" style={{ marginTop: '2rem' }}>
+        <h3 className="text-2xl font-bold text-gray-800 mb-6">Our Brands</h3>
+        <p className="text-gray-600 mb-6">Manage the brands displayed in the "OUR BRANDS" section on the home page.</p>
+
+        <div className="flex gap-4 mb-8">
+          <TextField
+            label="Brand Name"
+            value={newBrandName}
+            onChange={(e) => setNewBrandName(e.target.value)}
+            size="small"
+            fullWidth
+            onKeyPress={(e) => e.key === 'Enter' && handleAddBrand()}
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleAddBrand}
+            disabled={!newBrandName.trim()}
+          >
+            Add Brand
+          </Button>
+        </div>
+
+        {brandsLoading ? (
+          <p className="text-gray-600">Loading brands...</p>
+        ) : brands.length === 0 ? (
+          <div className="bg-gray-50 rounded-lg p-8 text-center">
+            <p className="text-gray-600">No brands found. Add some to get started!</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {brands.map((brand, index) => (
+              <div key={index} className="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                <span className="font-bold text-teal-900">{brand}</span>
+                <IconButton
+                  onClick={() => handleDeleteBrand(index)}
+                  color="error"
+                  size="small"
+                  title="Delete brand"
+                >
+                  <DeleteIcon />
+                </IconButton>
               </div>
             ))}
           </div>

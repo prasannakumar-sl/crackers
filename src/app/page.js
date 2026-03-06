@@ -14,6 +14,7 @@ export default function Home() {
   const [selectedBanner, setSelectedBanner] = useState(null);
   const [homePageDecoration, setHomePageDecoration] = useState(null);
   const [banners, setBanners] = useState([]);
+  const [brands, setBrands] = useState(['Renu Crackers', 'Mightloads', 'Sri Aravind', 'Ramesh']);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,6 +32,9 @@ export default function Home() {
         setCarouselImages(Array.isArray(carouselData) ? carouselData : []);
         setHomePageDecoration(settingsData.homePageDecoration || null);
         setBanners(Array.isArray(settingsData.banners) ? settingsData.banners : []);
+        if (Array.isArray(settingsData.brands)) {
+          setBrands(settingsData.brands);
+        }
       } catch (error) {
         console.error('Error fetching data:', error);
         setSections([]);
@@ -56,7 +60,6 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [carouselImages]);
 
-  const brands = ['Renu Crackers', 'Mightloads', 'Sri Aravind', 'Ramesh'];
   const blogPosts = [
     { id: 1, title: 'How to Choose the Best Crackers?', image: '🎆' },
     { id: 2, title: 'Firecrackers Safety Guide', image: '⚠️' },
@@ -197,7 +200,7 @@ export default function Home() {
       <section className="py-12 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl font-bold text-black text-center mb-12">OUR BRANDS</h2>
-          <div className="flex justify-center items-center gap-12">
+          <div className="flex justify-center items-center gap-12 flex-wrap">
             {brands.map((brand, idx) => (
               <div key={idx} className="px-6 py-4 border-2 border-gray-300 rounded-lg hover:border-yellow-500 transition-colors">
                 <p className="font-bold text-teal-900">{brand}</p>
@@ -310,7 +313,8 @@ export default function Home() {
                 }}
                 className="px-6 py-2 bg-red-600 text-white rounded font-bold hover:bg-red-700 transition-colors shadow-md active:transform active:scale-95"
               >
-                ADD TO PRODUCTS
+                <span>🛒</span>
+                ADD TO CART
               </button>
               <button
                 onClick={() => setSelectedBanner(null)}

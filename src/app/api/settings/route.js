@@ -5,14 +5,15 @@ export async function GET() {
   try {
     const connection = await getConnection();
     const [settings] = await connection.execute(
-      'SELECT * FROM settings WHERE setting_key IN (?, ?, ?)',
-      ['price_list_style', 'home_page_decoration', 'home_page_banners']
+      'SELECT * FROM settings WHERE setting_key IN (?, ?, ?, ?)',
+      ['price_list_style', 'home_page_decoration', 'home_page_banners', 'home_page_brands']
     );
     await connection.end();
 
     const result = {
       style: 'table',
       homePageDecoration: null,
+      brands: ['Renu Crackers', 'Mightloads', 'Sri Aravind', 'Ramesh'],
       banners: [
         {
           id: 1,
@@ -48,6 +49,12 @@ export async function GET() {
           result.banners = JSON.parse(setting.setting_value);
         } catch (e) {
           console.error('Error parsing banners JSON:', e);
+        }
+      } else if (setting.setting_key === 'home_page_brands') {
+        try {
+          result.brands = JSON.parse(setting.setting_value);
+        } catch (e) {
+          console.error('Error parsing brands JSON:', e);
         }
       }
     });
@@ -88,7 +95,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     const data = await request.json();
-    const { style, homePageDecoration, banners } = data;
+    const { style, homePageDecoration, banners, brands } = data;
 
     const connection = await getConnection();
 
@@ -168,9 +175,30 @@ export async function POST(request) {
       }
     }
 
+    // Update brands if provided
+    if (brands !== undefined) {
+      const brandsJSON = JSON.stringify(brands);
+      const [existing] = await connection.execute(
+        'SELECT id FROM settings WHERE setting_key = ? LIMIT 1',
+        ['home_page_brands']
+      );
+
+      if (existing.length > 0) {
+        await connection.execute(
+          'UPDATE settings SET setting_value = ? WHERE setting_key = ?',
+          [brandsJSON, 'home_page_brands']
+        );
+      } else {
+        await connection.execute(
+          'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)',
+          ['home_page_brands', brandsJSON]
+        );
+      }
+    }
+
     await connection.end();
 
-    return NextResponse.json({ style, homePageDecoration, banners }, { status: 200 });
+    return NextResponse.json({ style, homePageDecoration, banners, brands }, { status: 200 });
   } catch (error) {
     console.error('Error updating settings:', error);
     return NextResponse.json({ error: 'Failed to update settings' }, { status: 500 });

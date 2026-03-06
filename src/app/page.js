@@ -284,7 +284,7 @@ export default function Home() {
                         <span className="text-sm text-gray-500">Qty: {product.qty || 1}</span>
                         <button
                           onClick={() => {
-                            addToCart({ ...product, quantity: parseInt(product.qty) || 1 });
+                            addToCart({ ...product, quantity: parseInt(product.qty) || 1, bannerTitle: selectedBanner.title });
                             // Optional: show some feedback that item was added
                           }}
                           className="bg-red-600 text-white px-4 py-2 rounded font-bold hover:bg-red-700 transition-colors text-sm"
@@ -298,7 +298,20 @@ export default function Home() {
               )}
             </div>
 
-            <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end">
+            <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-between items-center">
+              <button
+                onClick={() => {
+                  if (selectedBanner.products && selectedBanner.products.length > 0) {
+                    selectedBanner.products.forEach(product => {
+                      addToCart({ ...product, quantity: parseInt(product.qty) || 1, bannerTitle: selectedBanner.title });
+                    });
+                    setSelectedBanner(null);
+                  }
+                }}
+                className="px-6 py-2 bg-red-600 text-white rounded font-bold hover:bg-red-700 transition-colors shadow-md active:transform active:scale-95"
+              >
+                ADD TO PRODUCTS
+              </button>
               <button
                 onClick={() => setSelectedBanner(null)}
                 className="px-6 py-2 bg-gray-200 text-gray-800 rounded font-bold hover:bg-gray-300 transition-colors"

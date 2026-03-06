@@ -36,7 +36,7 @@ export function CartProvider({ children }) {
       if (existingItem) {
         return prevCart.map(item =>
           item.id === product.id
-            ? { ...item, quantity: item.quantity + quantityToAdd }
+            ? { ...item, quantity: item.quantity + quantityToAdd, bannerTitle: product.bannerTitle || item.bannerTitle }
             : item
         );
       }

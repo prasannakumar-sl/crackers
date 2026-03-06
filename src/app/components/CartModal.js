@@ -55,7 +55,14 @@ export default function CartModal() {
                   {/* Item Details */}
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start mb-1">
-                      <h3 className="font-semibold text-black text-sm line-clamp-2">{item.name}</h3>
+                      <div>
+                        <h3 className="font-semibold text-black text-sm line-clamp-2">{item.name}</h3>
+                        {item.bannerTitle && (
+                          <p className="text-[10px] text-red-600 font-bold uppercase mt-0.5 tracking-wider">
+                            {item.bannerTitle}
+                          </p>
+                        )}
+                      </div>
                       <button
                         onClick={() => removeFromCart(item.id)}
                         className="text-red-500 hover:text-red-600 text-xs ml-2 flex-shrink-0"

@@ -26,6 +26,8 @@ export default function AppearancePage() {
   const [newBrandName, setNewBrandName] = useState('');
   const [editingBannerId, setEditingBannerId] = useState(null);
   const [editBannerData, setEditBannerData] = useState({});
+  const [isCreatingBanner, setIsCreatingBanner] = useState(false);
+  const [newBannerData, setNewBannerData] = useState({ title: '', subtitle: '', gradientFrom: 'from-purple-400', gradientTo: 'to-pink-600', products: [] });
   const [products, setProducts] = useState([]);
   const [productsLoading, setProductsLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -204,6 +206,135 @@ export default function AppearancePage() {
     } catch (error) {
       console.error('Error updating banner:', error);
       showAlert('Error updating banner', 'error');
+    }
+  };
+
+  const handleCreateNewBanner = async () => {
+    if (!newBannerData.title || !newBannerData.subtitle) {
+      showAlert('Please fill in all fields', 'error');
+      return;
+    }
+
+    const bannerId = `banner-${Date.now()}`;
+    const newBanner = {
+      id: bannerId,
+      title: newBannerData.title,
+      subtitle: newBannerData.subtitle,
+      gradientFrom: newBannerData.gradientFrom,
+      gradientTo: newBannerData.gradientTo,
+      products: newBannerData.products || [],
+    };
+
+    const updatedBanners = [...banners, newBanner];
+
+    try {
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ banners: updatedBanners }),
+      });
+
+      if (response.ok) {
+        setBanners(updatedBanners);
+        setIsCreatingBanner(false);
+        setNewBannerData({ title: '', subtitle: '', gradientFrom: 'from-purple-400', gradientTo: 'to-pink-600', products: [] });
+        setSelectedProduct(null);
+        setProductSearchValue('');
+        showAlert('✓ Banner created successfully!', 'success');
+      } else {
+        showAlert('Failed to create banner', 'error');
+      }
+    } catch (error) {
+      console.error('Error creating banner:', error);
+      showAlert('Error creating banner', 'error');
+    }
+  };
+
+  const handleCancelCreateBanner = () => {
+    setIsCreatingBanner(false);
+    setNewBannerData({ title: '', subtitle: '', gradientFrom: 'from-purple-400', gradientTo: 'to-pink-600', products: [] });
+    setSelectedProduct(null);
+    setProductSearchValue('');
+  };
+
+  const handleAddProductToNewBanner = () => {
+    if (!selectedProduct) {
+      showAlert('Please select a product', 'error');
+      return;
+    }
+
+    const bannerProducts = newBannerData.products || [];
+    const alreadyAdded = bannerProducts.some(p => p.id === selectedProduct.id);
+
+    if (alreadyAdded) {
+      showAlert('This product is already added to the banner', 'error');
+      return;
+    }
+
+    const updatedProducts = [...bannerProducts, { ...selectedProduct, qty: 1 }];
+    setNewBannerData({ ...newBannerData, products: updatedProducts });
+    setSelectedProduct(null);
+    setProductSearchValue('');
+  };
+
+  const handleUpdateNewBannerProductQty = (productId, newQty) => {
+    const parsedQty = parseInt(newQty);
+    if (newQty === '' || newQty === undefined) {
+      const updatedProducts = newBannerData.products.map(p =>
+        p.id === productId ? { ...p, qty: '' } : p
+      );
+      setNewBannerData({ ...newBannerData, products: updatedProducts });
+    } else if (!isNaN(parsedQty) && parsedQty >= 0) {
+      const qty = parsedQty === 0 ? 1 : parsedQty;
+      const updatedProducts = newBannerData.products.map(p =>
+        p.id === productId ? { ...p, qty } : p
+      );
+      setNewBannerData({ ...newBannerData, products: updatedProducts });
+    }
+  };
+
+  const handleIncreaseNewBannerProductQty = (productId) => {
+    const product = newBannerData.products.find(p => p.id === productId);
+    if (product) {
+      handleUpdateNewBannerProductQty(productId, (product.qty || 1) + 1);
+    }
+  };
+
+  const handleDecreaseNewBannerProductQty = (productId) => {
+    const product = newBannerData.products.find(p => p.id === productId);
+    if (product && (product.qty || 1) > 1) {
+      handleUpdateNewBannerProductQty(productId, (product.qty || 1) - 1);
+    }
+  };
+
+  const handleRemoveProductFromNewBanner = (productId) => {
+    const updatedProducts = (newBannerData.products || []).filter(p => p.id !== productId);
+    setNewBannerData({ ...newBannerData, products: updatedProducts });
+  };
+
+  const handleDeleteBanner = async (bannerId) => {
+    if (!confirm('Are you sure you want to delete this banner?')) {
+      return;
+    }
+
+    const updatedBanners = banners.filter(b => b.id !== bannerId);
+
+    try {
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ banners: updatedBanners }),
+      });
+
+      if (response.ok) {
+        setBanners(updatedBanners);
+        showAlert('✓ Banner deleted successfully!', 'success');
+      } else {
+        showAlert('Failed to delete banner', 'error');
+      }
+    } catch (error) {
+      console.error('Error deleting banner:', error);
+      showAlert('Error deleting banner', 'error');
     }
   };
 
@@ -618,8 +749,188 @@ export default function AppearancePage() {
       </div>
 
       <div className="bg-white rounded-lg shadow p-6" style={{ marginTop: '2rem' }}>
-        <h3 className="text-2xl font-bold text-gray-800 mb-6">Festival Banners</h3>
-        <p className="text-gray-600 mb-6">Customize the three promotional banners displayed on the home page.</p>
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h3 className="text-2xl font-bold text-gray-800">Festival Banners</h3>
+            <p className="text-gray-600 text-sm mt-1">Customize the promotional banners displayed on the home page.</p>
+          </div>
+          {!isCreatingBanner && (
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => setIsCreatingBanner(true)}
+            >
+              Add New Banner
+            </Button>
+          )}
+        </div>
+
+        {isCreatingBanner && (
+          <div className={`bg-gradient-to-r ${newBannerData.gradientFrom} ${newBannerData.gradientTo} text-white p-6 rounded-lg mb-6`}>
+            <h4 className="font-bold text-lg mb-4">Create New Festival Banner</h4>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-white font-medium mb-2">Title</label>
+                <input
+                  type="text"
+                  value={newBannerData.title || ''}
+                  onChange={(e) => setNewBannerData({ ...newBannerData, title: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter banner title"
+                />
+              </div>
+              <div>
+                <label className="block text-white font-medium mb-2">Subtitle</label>
+                <input
+                  type="text"
+                  value={newBannerData.subtitle || ''}
+                  onChange={(e) => setNewBannerData({ ...newBannerData, subtitle: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter banner subtitle"
+                />
+              </div>
+
+              {/* Product Selection Section */}
+              <div className="bg-white rounded p-3">
+                <label className="block text-black font-medium mb-3">Select Products for This Banner</label>
+
+                {/* Autocomplete Field */}
+                <div className="flex gap-2 mb-4">
+                  <Autocomplete
+                    options={products}
+                    sx={{ flex: 1 }}
+                    getOptionLabel={(option) => option?.name || ''}
+                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                    value={selectedProduct}
+                    onChange={(event, newValue) => setSelectedProduct(newValue)}
+                    inputValue={productSearchValue}
+                    onInputChange={(event, newInputValue) => {
+                      setProductSearchValue(newInputValue);
+                    }}
+                    clearOnBlur={false}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Search products..."
+                        size="small"
+                        style={{width:"250px"}}
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            color: 'black',
+                            '& fieldset': { borderColor: 'black' },
+                            '&:hover fieldset': { borderColor: 'black' },
+                            '&.Mui-focused fieldset': { borderColor: 'black' }
+                          },
+                          '& .MuiInputBase-input::placeholder': {
+                            color: 'rgba(0, 0, 0, 0.5)',
+                            opacity: 1
+                          },
+                          '& .MuiInputBase-input': {
+                            color: 'black'
+                          },
+                          '& .MuiAutocomplete-listbox': {
+                            color: 'black'
+                          }
+                        }}
+                      />
+                    )}
+                    loading={productsLoading}
+                    noOptionsText="No products found"
+                  />
+                  <Button
+                    variant="contained"
+                    color="success"
+                    onClick={handleAddProductToNewBanner}
+                    size="small"
+                    sx={{ whiteSpace: 'nowrap' }}
+                  >
+                    Add Product
+                  </Button>
+                </div>
+
+                {/* Selected Products Table */}
+                {(newBannerData.products && newBannerData.products.length > 0) && (
+                  <div className="mt-4">
+                    <p className="text-black text-sm font-medium mb-3">Selected Products ({newBannerData.products.length})</p>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm text-black">
+                        <thead>
+                          <tr className="border-b border-black">
+                            <th className="text-left py-2 px-2">Product Name</th>
+                            <th className="text-left py-2 px-2">Price</th>
+                            <th className="text-left py-2 px-2">Qty</th>
+                            <th className="text-left py-2 px-2">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {newBannerData.products.map((product) => (
+                            <tr key={product.id} className="border-b border-black">
+                              <td className="py-2 px-2">{product.name}</td>
+                              <td className="py-2 px-2">₹{parseFloat(product.price).toFixed(2)}</td>
+                              <td className="py-2 px-2">
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    onClick={() => handleDecreaseNewBannerProductQty(product.id)}
+                                    className="px-2 py-1 bg-gray-300 text-black rounded hover:bg-gray-400 text-sm font-bold"
+                                    title="Decrease quantity"
+                                    disabled={(product.qty || 1) <= 1}
+                                  >
+                                    −
+                                  </button>
+                                  <input
+                                    type="number"
+                                    value={product.qty || 1}
+                                    onChange={(e) => handleUpdateNewBannerProductQty(product.id, e.target.value)}
+                                    className="w-16 px-2 py-1 border border-black rounded text-black text-center"
+                                  />
+                                  <button
+                                    onClick={() => handleIncreaseNewBannerProductQty(product.id)}
+                                    className="px-2 py-1 bg-gray-300 text-black rounded hover:bg-gray-400 text-sm font-bold"
+                                    title="Increase quantity"
+                                  >
+                                    +
+                                  </button>
+                                </div>
+                              </td>
+                              <td className="py-2 px-2">
+                                <button
+                                  onClick={() => handleRemoveProductFromNewBanner(product.id)}
+                                  className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-xs"
+                                  title="Remove product"
+                                >
+                                  Remove
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  variant="contained"
+                  color="success"
+                  onClick={handleCreateNewBanner}
+                  size="small"
+                >
+                  Create Banner
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="inherit"
+                  onClick={handleCancelCreateBanner}
+                  size="small"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {bannersLoading ? (
           <p className="text-gray-600">Loading banners...</p>
@@ -800,14 +1111,24 @@ export default function AppearancePage() {
                         <p className="text-xs mt-3 opacity-80">📦 {banner.products.length} product(s) selected</p>
                       )}
                     </div>
-                    <IconButton
-                      onClick={() => handleEditBanner(banner)}
-                      color="inherit"
-                      size="small"
-                      title="Edit banner"
-                    >
-                      <EditIcon />
-                    </IconButton>
+                    <div className="flex gap-2">
+                      <IconButton
+                        onClick={() => handleEditBanner(banner)}
+                        color="inherit"
+                        size="small"
+                        title="Edit banner"
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton
+                        onClick={() => handleDeleteBanner(banner.id)}
+                        color="error"
+                        size="small"
+                        title="Delete banner"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </div>
                   </div>
                 )}
               </div>

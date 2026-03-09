@@ -15,6 +15,7 @@ export default function Home() {
   const [homePageDecoration, setHomePageDecoration] = useState(null);
   const [banners, setBanners] = useState([]);
   const [brands, setBrands] = useState(['Renu Crackers', 'Mightloads', 'Sri Aravind', 'Ramesh']);
+  const [navbarColor, setNavbarColor] = useState('#1d4f4f');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,6 +33,7 @@ export default function Home() {
         setCarouselImages(Array.isArray(carouselData) ? carouselData : []);
         setHomePageDecoration(settingsData.homePageDecoration || null);
         setBanners(Array.isArray(settingsData.banners) ? settingsData.banners : []);
+        setNavbarColor(settingsData.navbarColor || '#1d4f4f');
         if (Array.isArray(settingsData.brands)) {
           setBrands(settingsData.brands);
         }
@@ -211,7 +213,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="relative bg-gradient-to-r from-teal-800 to-teal-900 text-white py-12 px-6">
+      <section className="relative text-white py-12 px-6" style={{ backgroundColor: navbarColor }}>
         <div className="absolute left-0 top-0 w-16 h-16 opacity-20">
           <svg viewBox="0 0 100 100" className="w-full h-full">
             <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" strokeWidth="2" />
@@ -227,7 +229,7 @@ export default function Home() {
           <h2 className="text-3xl font-bold mb-4">CRACKERS INDIA</h2>
           <h3 className="text-2xl font-bold text-yellow-300 mb-6">Client Says About Us</h3>
           <p className="text-lg leading-relaxed max-w-2xl mx-auto">
-            "We have been sourcing crackers from pk crackers for the past 5 years. The quality is consistently excellent, 
+            "We have been sourcing crackers from pk crackers for the past 5 years. The quality is consistently excellent,
             and their customer service is outstanding. They have helped us grow our business significantly."
           </p>
           <p className="text-sm mt-6 text-yellow-200">- Satisfied Customer</p>

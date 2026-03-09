@@ -5,14 +5,15 @@ export async function GET() {
   try {
     const connection = await getConnection();
     const [settings] = await connection.execute(
-      'SELECT * FROM settings WHERE setting_key IN (?, ?, ?, ?)',
-      ['price_list_style', 'home_page_decoration', 'home_page_banners', 'home_page_brands']
+      'SELECT * FROM settings WHERE setting_key IN (?, ?, ?, ?, ?)',
+      ['price_list_style', 'home_page_decoration', 'home_page_banners', 'home_page_brands', 'navbar_color']
     );
     await connection.end();
 
     const result = {
       style: 'table',
       homePageDecoration: null,
+      navbarColor: '#1d4f4f',
       brands: ['Renu Crackers', 'Mightloads', 'Sri Aravind', 'Ramesh'],
       banners: [
         {
@@ -56,6 +57,8 @@ export async function GET() {
         } catch (e) {
           console.error('Error parsing brands JSON:', e);
         }
+      } else if (setting.setting_key === 'navbar_color') {
+        result.navbarColor = setting.setting_value;
       }
     });
 
@@ -65,6 +68,7 @@ export async function GET() {
     return NextResponse.json({
       style: 'table',
       homePageDecoration: null,
+      navbarColor: '#1d4f4f',
       banners: [
         {
           id: 1,
@@ -95,7 +99,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     const data = await request.json();
-    const { style, homePageDecoration, banners, brands } = data;
+    const { style, homePageDecoration, banners, brands, navbarColor } = data;
 
     const connection = await getConnection();
 
@@ -196,9 +200,29 @@ export async function POST(request) {
       }
     }
 
+    // Update navbar color if provided
+    if (navbarColor !== undefined) {
+      const [existing] = await connection.execute(
+        'SELECT id FROM settings WHERE setting_key = ? LIMIT 1',
+        ['navbar_color']
+      );
+
+      if (existing.length > 0) {
+        await connection.execute(
+          'UPDATE settings SET setting_value = ? WHERE setting_key = ?',
+          [navbarColor, 'navbar_color']
+        );
+      } else {
+        await connection.execute(
+          'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)',
+          ['navbar_color', navbarColor]
+        );
+      }
+    }
+
     await connection.end();
 
-    return NextResponse.json({ style, homePageDecoration, banners, brands }, { status: 200 });
+    return NextResponse.json({ style, homePageDecoration, banners, brands, navbarColor }, { status: 200 });
   } catch (error) {
     console.error('Error updating settings:', error);
     return NextResponse.json({ error: 'Failed to update settings' }, { status: 500 });

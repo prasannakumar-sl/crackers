@@ -156,28 +156,28 @@ export default function PriceList() {
   return (
     <div className="bg-white">
       {/* Golden Header Section */}
-      <section className="bg-gradient-to-r from-yellow-600 to-yellow-700 text-black py-4 px-6">
+      <section className="bg-gradient-to-r from-yellow-600 to-yellow-700 text-black py-4 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-3 gap-4 items-center mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 items-center mb-4">
             {/* Products Count */}
             <div className="text-center">
-              <p className="text-sm font-semibold">Products</p>
-              <p className="text-2xl font-bold">
+              <p className="text-xs sm:text-sm font-semibold">Products</p>
+              <p className="text-xl sm:text-2xl font-bold">
                 {Object.values(quantities).reduce((sum, qty) => sum + qty, 0)}
               </p>
             </div>
 
             {/* Cart Total */}
             <div className="text-center">
-              <p className="text-sm font-semibold">Overall Total</p>
-              <p className="text-2xl font-bold">₹{cartTotal.toFixed(2)}</p>
+              <p className="text-xs sm:text-sm font-semibold">Overall Total</p>
+              <p className="text-xl sm:text-2xl font-bold">₹{cartTotal.toFixed(2)}</p>
             </div>
 
             {/* View Cart Button */}
             <div className="text-center">
               <button
                 onClick={handleViewCart}
-                className="bg-yellow-100 text-black px-6 py-2 rounded font-semibold hover:bg-yellow-50 transition-colors flex items-center justify-center gap-2 w-full"
+                className="bg-yellow-100 text-black px-3 sm:px-6 py-2 rounded font-semibold text-sm sm:text-base hover:bg-yellow-50 transition-colors flex items-center justify-center gap-2 w-full"
               >
                 🛒 View Cart
               </button>
@@ -186,20 +186,20 @@ export default function PriceList() {
 
           {/* Filter Section */}
           <div>
-            <button className="w-full bg-yellow-100 text-black py-2 rounded font-semibold hover:bg-yellow-50 transition-colors">
+            <button className="w-full bg-yellow-100 text-black py-2 rounded font-semibold text-sm hover:bg-yellow-50 transition-colors">
               🔽 Filter
             </button>
           </div>
 
           {/* Minimum Order Info */}
-          <div className="text-center text-sm font-semibold mt-3 text-blue-900">
+          <div className="text-center text-xs sm:text-sm font-semibold mt-3 text-blue-900">
             Minimum Order Rs.2000 for Tamilnadu and Rs.3000 for Other States.
           </div>
         </div>
       </section>
 
       {/* Categories and Products */}
-      <section className="py-8 px-6 bg-gray-50">
+      <section className="py-8 px-4 sm:px-6 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           {loading ? (
             <div className="bg-white rounded-lg shadow p-6 text-center">
@@ -213,23 +213,23 @@ export default function PriceList() {
             categories.map((category, catIdx) => (
               <div key={catIdx} className="mb-12">
                 {/* Category Header */}
-                <div className="bg-purple-400 text-white py-3 px-6 rounded-t-lg font-bold text-lg mb-0">
+                <div className="bg-purple-400 text-white py-2 sm:py-3 px-4 sm:px-6 rounded-t-lg font-bold text-sm sm:text-lg mb-0">
                   {catIdx + 1}. {category.name.toUpperCase()} ({category.discount})
                 </div>
 
                 {/* Table View */}
                 {displayStyle === 'table' && (
-                  <div className="bg-white border border-purple-400 rounded-b-lg overflow-hidden shadow-md">
-                    <table className="w-full">
-                      <thead className="bg-purple-300 text-black font-semibold">
+                  <div className="bg-white border border-purple-400 rounded-b-lg shadow-md w-full overflow-x-auto">
+                    <table className="w-full text-xs sm:text-sm">
+                      <thead className="bg-purple-300 text-black font-semibold sticky top-0">
                         <tr>
-                          <th className="px-4 py-3 text-left text-xs">Image</th>
-                          <th className="px-4 py-3 text-left text-xs">Product</th>
-                          <th className="px-4 py-3 text-left text-xs">Size</th>
-                          <th className="px-4 py-3 text-left text-xs">Price</th>
-                          <th className="px-4 py-3 text-left text-xs">Discount</th>
-                          <th className="px-4 py-3 text-center text-xs">Quantity</th>
-                          <th className="px-4 py-3 text-right text-xs">Total</th>
+                          <th className="px-1 sm:px-3 py-2 text-left whitespace-nowrap">Img</th>
+                          <th className="px-1 sm:px-3 py-2 text-left whitespace-nowrap">Product</th>
+                          <th className="px-1 sm:px-3 py-2 text-left whitespace-nowrap hidden sm:table-cell">Size</th>
+                          <th className="px-1 sm:px-3 py-2 text-left whitespace-nowrap hidden md:table-cell">Price</th>
+                          <th className="px-1 sm:px-3 py-2 text-left whitespace-nowrap">Disc.</th>
+                          <th className="px-1 sm:px-3 py-2 text-center whitespace-nowrap">Qty</th>
+                          <th className="px-1 sm:px-3 py-2 text-right whitespace-nowrap">Total</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -240,9 +240,9 @@ export default function PriceList() {
                           return (
                             <tr key={product.id} className="border-b hover:bg-gray-50">
                               {/* Image */}
-                              <td className="px-4 py-3">
+                              <td className="px-1 sm:px-3 py-1 sm:py-2">
                                 <div
-                                  className="w-12 h-12 bg-yellow-100 rounded flex items-center justify-center text-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                                  className="w-8 h-8 sm:w-10 sm:h-10 bg-yellow-100 rounded flex items-center justify-center text-sm sm:text-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0"
                                   onClick={() => product.image && setEnlargedImage(product.image)}
                                 >
                                   {product.image ? (
@@ -258,30 +258,30 @@ export default function PriceList() {
                               </td>
 
                               {/* Product Name */}
-                              <td className="px-4 py-3">
-                                <div className="text-sm font-semibold text-black">{product.name}</div>
-                                <div className="text-xs text-gray-500">{product.description}</div>
+                              <td className="px-1 sm:px-3 py-1 sm:py-2">
+                                <div className="font-semibold text-black whitespace-nowrap">{product.name}</div>
+                                <div className="text-xs text-gray-500 hidden sm:block">{product.description}</div>
                               </td>
 
-                              {/* Size */}
-                              <td className="px-4 py-3 text-sm text-black">{product.size}</td>
+                              {/* Size - Hidden on Mobile */}
+                              <td className="px-1 sm:px-3 py-1 sm:py-2 text-black hidden sm:table-cell whitespace-nowrap">{product.size}</td>
 
-                              {/* Original Price */}
-                              <td className="px-4 py-3">
-                                <span className="text-sm line-through text-gray-600">₹{product.originalPrice.toFixed(2)}</span>
+                              {/* Original Price - Hidden on Tablet */}
+                              <td className="px-1 sm:px-3 py-1 sm:py-2 hidden md:table-cell">
+                                <span className="line-through text-gray-600 whitespace-nowrap">₹{product.originalPrice.toFixed(2)}</span>
                               </td>
 
                               {/* Discount Price */}
-                              <td className="px-4 py-3">
-                                <span className="text-sm font-bold text-red-600">₹{product.discount.toFixed(2)}</span>
+                              <td className="px-1 sm:px-3 py-1 sm:py-2">
+                                <span className="font-bold text-red-600 whitespace-nowrap">₹{product.discount.toFixed(2)}</span>
                               </td>
 
                               {/* Quantity Controls */}
-                              <td className="px-4 py-3">
-                                <div className="flex items-center justify-center gap-2">
+                              <td className="px-1 sm:px-3 py-1 sm:py-2">
+                                <div className="flex items-center justify-center gap-0.5">
                                   <button
                                     onClick={() => setQuantity(product.id, qty - 1)}
-                                    className="bg-red-500 text-white w-7 h-7 rounded font-bold hover:bg-red-600 transition-colors"
+                                    className="bg-red-500 text-white w-5 h-5 sm:w-6 sm:h-6 rounded font-bold text-xs hover:bg-red-600 transition-colors flex-shrink-0"
                                   >
                                     −
                                   </button>
@@ -296,11 +296,11 @@ export default function PriceList() {
                                         setQuantity(product.id, val);
                                       }
                                     }}
-                                    className="w-10 text-center border border-gray-300 rounded py-1 text-sm font-semibold"
+                                    className="w-6 sm:w-8 text-center border border-gray-300 rounded py-0.5 text-xs font-semibold"
                                   />
                                   <button
                                     onClick={() => setQuantity(product.id, qty + 1)}
-                                    className="bg-green-600 text-white w-7 h-7 rounded font-bold hover:bg-green-700 transition-colors"
+                                    className="bg-green-600 text-white w-5 h-5 sm:w-6 sm:h-6 rounded font-bold text-xs hover:bg-green-700 transition-colors flex-shrink-0"
                                   >
                                     +
                                   </button>
@@ -308,8 +308,8 @@ export default function PriceList() {
                               </td>
 
                               {/* Total */}
-                              <td className="px-4 py-3 text-right">
-                                <span className="font-bold text-black">₹{total}</span>
+                              <td className="px-1 sm:px-3 py-1 sm:py-2 text-right">
+                                <span className="font-bold text-black whitespace-nowrap">₹{total}</span>
                               </td>
                             </tr>
                           );
@@ -321,16 +321,16 @@ export default function PriceList() {
 
                 {/* Cards View */}
                 {displayStyle === 'cards' && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-white border border-purple-400 rounded-b-lg overflow-hidden shadow-md p-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 bg-white border border-purple-400 rounded-b-lg overflow-hidden shadow-md p-3 sm:p-4">
                     {category.products.map((product) => {
                       const qty = getQuantity(product.id);
                       const total = calculateTotal(product.discount, qty);
 
                       return (
-                        <div key={product.id} className="border border-purple-300 rounded-lg p-4 hover:shadow-lg transition-shadow">
+                        <div key={product.id} className="border border-purple-300 rounded-lg p-3 sm:p-4 hover:shadow-lg transition-shadow">
                           {/* Product Image */}
                           <div
-                            className="w-full h-40 bg-yellow-100 rounded flex items-center justify-center text-3xl overflow-hidden cursor-pointer hover:opacity-80 transition-opacity mb-3"
+                            className="w-full h-32 sm:h-40 bg-yellow-100 rounded flex items-center justify-center text-2xl sm:text-3xl overflow-hidden cursor-pointer hover:opacity-80 transition-opacity mb-3"
                             onClick={() => product.image && setEnlargedImage(product.image)}
                           >
                             {product.image ? (
@@ -346,7 +346,7 @@ export default function PriceList() {
 
                           {/* Product Info */}
                           <div className="mb-3">
-                            <h3 className="text-sm font-semibold text-black mb-1">{product.name}</h3>
+                            <h3 className="text-xs sm:text-sm font-semibold text-black mb-1">{product.name}</h3>
                             <p className="text-xs text-gray-500 mb-2">{product.description}</p>
                             <p className="text-xs text-gray-600">{product.size}</p>
                           </div>
@@ -368,10 +368,10 @@ export default function PriceList() {
                           </div>
 
                           {/* Quantity Controls */}
-                          <div className="flex items-center justify-center gap-2">
+                          <div className="flex items-center justify-center gap-1 sm:gap-2">
                             <button
                               onClick={() => setQuantity(product.id, qty - 1)}
-                              className="bg-red-500 text-white w-7 h-7 rounded font-bold hover:bg-red-600 transition-colors"
+                              className="bg-red-500 text-white w-6 h-6 sm:w-7 sm:h-7 rounded font-bold text-sm hover:bg-red-600 transition-colors"
                             >
                               −
                             </button>
@@ -386,11 +386,11 @@ export default function PriceList() {
                                   setQuantity(product.id, val);
                                 }
                               }}
-                              className="w-10 text-center border border-gray-300 rounded py-1 text-sm font-semibold"
+                              className="w-8 sm:w-10 text-center border border-gray-300 rounded py-1 text-xs sm:text-sm font-semibold"
                             />
                             <button
                               onClick={() => setQuantity(product.id, qty + 1)}
-                              className="bg-green-600 text-white w-7 h-7 rounded font-bold hover:bg-green-700 transition-colors"
+                              className="bg-green-600 text-white w-6 h-6 sm:w-7 sm:h-7 rounded font-bold text-sm hover:bg-green-700 transition-colors"
                             >
                               +
                             </button>
@@ -409,7 +409,7 @@ export default function PriceList() {
       {/* Image Enlargement Modal */}
       {enlargedImage && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-2 sm:p-4"
           onClick={() => setEnlargedImage(null)}
         >
           <div
@@ -419,7 +419,7 @@ export default function PriceList() {
           >
             <button
               onClick={() => setEnlargedImage(null)}
-              className="absolute top-2 right-2 bg-black text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors z-10"
+              className="absolute top-1 right-1 sm:top-2 sm:right-2 bg-black text-white w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-sm sm:text-base hover:bg-gray-700 transition-colors z-10"
             >
               ✕
             </button>

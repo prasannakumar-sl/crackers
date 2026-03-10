@@ -73,7 +73,7 @@ export default function Header() {
     { href: '/about-us', label: 'About Us' },
     { href: '/contact-us', label: 'Contact Us' },
     { href: '/payments-info', label: 'Payments Info' },
-    { href: '/chit-fund', label: 'Chit Fund' },
+    // { href: '/chit-fund', label: 'Chit Fund' },
   ];
 
   return (

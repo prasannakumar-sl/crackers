@@ -95,33 +95,10 @@ export default function Home() {
           />
         </div>
       )}
-      {/* Festival Banners */}
-      <section className="py-6 px-6 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-3 gap-4">
-            {banners.map((banner) => (
-              <div
-                key={banner.id}
-                className={`bg-gradient-to-r ${banner.gradientFrom} ${banner.gradientTo} text-white p-6 rounded-lg cursor-pointer hover:shadow-lg transition-all active:scale-[0.98]`}
-                onClick={() => setSelectedBanner(banner)}
-              >
-                <h3 className="font-bold text-lg mb-2">{banner.title}</h3>
-                <p className="text-sm">{banner.subtitle}</p>
-                {banner.products && banner.products.length > 0 && (
-                  <div className="mt-4 text-xs bg-black/20 inline-block px-2 py-1 rounded">
-                    {banner.products.length} Products
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Carousel Banner */}
       <section className="w-full relative overflow-hidden bg-gray-200">
         {carouselImages.length > 0 ? (
-          <div className="relative w-full h-96 flex items-center justify-center">
+          <div className="relative w-full h-48 sm:h-64 md:h-96 flex items-center justify-center">
             <img
               key={carouselImages[currentImageIndex]?.id}
               src={carouselImages[currentImageIndex]?.image_url}
@@ -147,9 +124,32 @@ export default function Home() {
           <div style={{padding:"15%"}}/>
         )}
       </section>
+      
+      {/* Festival Banners */}
+      <section className="py-6 px-4 sm:px-6 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {banners.map((banner) => (
+              <div
+                key={banner.id}
+                className={`bg-gradient-to-r ${banner.gradientFrom} ${banner.gradientTo} text-white p-6 rounded-lg cursor-pointer hover:shadow-lg transition-all active:scale-[0.98]`}
+                onClick={() => setSelectedBanner(banner)}
+              >
+                <h3 className="font-bold text-lg mb-2">{banner.title}</h3>
+                <p className="text-sm">{banner.subtitle}</p>
+                {banner.products && banner.products.length > 0 && (
+                  <div className="mt-4 text-xs bg-black/20 inline-block px-2 py-1 rounded">
+                    {banner.products.length} Products
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Products Section */}
-      <section className="py-12 px-6 bg-gray-50">
+      <section className="py-12 px-4 sm:px-6 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           {loading ? (
             <div className="text-center py-12">
@@ -162,8 +162,8 @@ export default function Home() {
           ) : (
             sections.map((section) => (
               <div key={section.id} className="mb-16">
-                <h2 className="text-3xl font-bold text-black mb-8">{section.title}</h2>
-                <div className="grid grid-cols-3 gap-6">
+                <h2 className="text-2xl sm:text-3xl font-bold text-black mb-6 sm:mb-8">{section.title}</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   {section.products && section.products.length > 0 ? (
                     section.products.map(product => (
                       <div key={product.id} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow flex flex-col cursor-pointer" onClick={() => setSelectedProduct(product)}>
@@ -199,13 +199,13 @@ export default function Home() {
       </section>
 
       {/* Our Brands */}
-      <section className="py-12 px-6 bg-white">
+      <section className="py-12 px-4 sm:px-6 bg-white">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-black text-center mb-12">OUR BRANDS</h2>
-          <div className="flex justify-center items-center gap-12 flex-wrap">
+          <h2 className="text-2xl sm:text-3xl font-bold text-black text-center mb-8 sm:mb-12">OUR BRANDS</h2>
+          <div className="flex justify-center items-center gap-4 sm:gap-6 lg:gap-12 flex-wrap">
             {brands.map((brand, idx) => (
-              <div key={idx} className="px-6 py-4 border-2 border-gray-300 rounded-lg hover:border-yellow-500 transition-colors">
-                <p className="font-bold text-teal-900">{brand}</p>
+              <div key={idx} className="px-4 sm:px-6 py-3 sm:py-4 border-2 border-gray-300 rounded-lg hover:border-yellow-500 transition-colors">
+                <p className="font-bold text-sm sm:text-base text-teal-900">{brand}</p>
               </div>
             ))}
           </div>
@@ -213,7 +213,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="relative text-white py-12 px-6" style={{ backgroundColor: navbarColor }}>
+      <section className="relative text-white py-12 px-4 sm:px-6" style={{ backgroundColor: navbarColor }}>
         <div className="absolute left-0 top-0 w-16 h-16 opacity-20">
           <svg viewBox="0 0 100 100" className="w-full h-full">
             <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" strokeWidth="2" />
@@ -226,9 +226,9 @@ export default function Home() {
         </div>
 
         <div className="max-w-7xl mx-auto text-center relative z-10">
-          <h2 className="text-3xl font-bold mb-4">CRACKERS INDIA</h2>
-          <h3 className="text-2xl font-bold text-yellow-300 mb-6">Client Says About Us</h3>
-          <p className="text-lg leading-relaxed max-w-2xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-4">CRACKERS INDIA</h2>
+          <h3 className="text-xl sm:text-2xl font-bold text-yellow-300 mb-6">Client Says About Us</h3>
+          <p className="text-base sm:text-lg leading-relaxed max-w-2xl mx-auto px-4">
             "We have been sourcing crackers from pk crackers for the past 5 years. The quality is consistently excellent,
             and their customer service is outstanding. They have helped us grow our business significantly."
           </p>
@@ -237,10 +237,10 @@ export default function Home() {
       </section>
 
       {/* Blog Posts */}
-      <section className="py-12 px-6 bg-gray-50">
+      <section className="py-12 px-4 sm:px-6 bg-gray-50">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-black mb-12">OUR BLOG POSTS</h2>
-          <div className="grid grid-cols-4 gap-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-black mb-8 sm:mb-12">OUR BLOG POSTS</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {blogPosts.map(post => (
               <div key={post.id} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow cursor-pointer">
                 <div className="bg-gray-300 p-8 text-5xl flex items-center justify-center h-40">

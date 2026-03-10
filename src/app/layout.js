@@ -4,6 +4,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import CartModal from "./components/CartModal";
 import FloatingCartButton from "./components/FloatingCartButton";
+import FloatingWhatsAppButton from "./components/FloatingWhatsAppButton";
 import HashRouter from "./components/HashRouter";
 import { CartProvider } from "./context/CartContext";
 
@@ -32,6 +33,7 @@ export default function RootLayout({ children }) {
           <HashRouter>
             {children}
             <CartModal />
+            <FloatingWhatsAppButton />
             <FloatingCartButton />
           </HashRouter>
         </CartProvider>

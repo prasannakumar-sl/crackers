@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 
 export default function FloatingWhatsAppButton() {
   const [phoneNumber, setPhoneNumber] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchPhoneNumber();
@@ -29,8 +29,6 @@ export default function FloatingWhatsAppButton() {
       }
     } catch (error) {
       console.error('Error fetching phone number:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -42,17 +40,18 @@ export default function FloatingWhatsAppButton() {
     }
   };
 
-  if (loading || !phoneNumber) {
+  if (!phoneNumber) {
     return null;
   }
 
   return (
     <button
       onClick={handleWhatsAppClick}
-      className="fixed bottom-24 right-6 w-16 h-16 bg-green-500 text-white rounded-full flex items-center justify-center text-3xl shadow-lg hover:shadow-xl hover:bg-green-600 transition-all z-40"
+      className="whatsapp-button"
       title="Chat with us on WhatsApp"
+      aria-label="Chat with us on WhatsApp"
     >
-      💬
+      <WhatsAppIcon className="whatsapp-icon" />
     </button>
   );
 }

@@ -49,3 +49,35 @@ img {
   max-width: 100%;
   height: auto;
 }
+
+/* WhatsApp Button Styling */
+.whatsapp-button {
+  position: fixed;
+  bottom: 6rem;
+  right: 1.5rem;
+  width: 4rem;
+  height: 4rem;
+  background-color: #25D366;
+  color: white;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 40;
+}
+
+.whatsapp-button:hover {
+  background-color: #20BA5A;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.whatsapp-button:active {
+  transform: scale(0.95);
+}
+
+.whatsapp-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}

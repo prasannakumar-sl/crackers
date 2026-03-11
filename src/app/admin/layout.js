@@ -37,6 +37,7 @@ export default function AdminLayout({ children }) {
     { label: 'Staffs', href: '/admin/staffs', icon: '👨‍💼' },
     { label: 'Company Info', href: '/admin/company-info', icon: '🏢' },
     { label: 'Appearance', href: '/admin/appearance', icon: '🎨' },
+    { label: 'Theme Colors', href: '/admin/colours', icon: '🎨' },
   ];
 
   const handleLogout = () => {

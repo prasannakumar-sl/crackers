@@ -14,6 +14,7 @@ import ChitFundPage from '../admin/chit-fund/page';
 import StaffsPage from '../admin/staffs/page';
 import CompanyInfoPage from '../admin/company-info/page';
 import AppearancePage from '../admin/appearance/page';
+import ColoursPage from '../admin/colours/page';
 import EditOrderPage from '../admin/orders/edit/page';
 
 export default function HashRouter({ children }) {
@@ -36,7 +37,7 @@ export default function HashRouter({ children }) {
   const route = hash.replace('#', '') || '/';
 
   // Admin routes - check if user is authorized
-  const adminRoutes = ['/admin', '/admin/dashboard', '/admin/products', '/admin/orders', '/admin/customers', '/admin/payments-info', '/admin/chit-fund', '/admin/staffs', '/admin/company-info', '/admin/appearance'];
+  const adminRoutes = ['/admin', '/admin/dashboard', '/admin/products', '/admin/orders', '/admin/customers', '/admin/payments-info', '/admin/chit-fund', '/admin/staffs', '/admin/company-info', '/admin/appearance', '/admin/colours'];
 
   // Check for dynamic routes
   const orderEditMatch = route.match(/^\/admin\/orders\/(\d+)$/);
@@ -75,6 +76,8 @@ export default function HashRouter({ children }) {
       pageContent = <CompanyInfoPage />;
     } else if (route === '/admin/appearance') {
       pageContent = <AppearancePage />;
+    } else if (route === '/admin/colours') {
+      pageContent = <ColoursPage />;
     }
 
     return <AdminLayout>{pageContent}</AdminLayout>;

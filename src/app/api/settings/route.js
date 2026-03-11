@@ -5,8 +5,8 @@ export async function GET() {
   try {
     const connection = await getConnection();
     const [settings] = await connection.execute(
-      'SELECT * FROM settings WHERE setting_key IN (?, ?, ?, ?, ?)',
-      ['price_list_style', 'home_page_decoration', 'home_page_banners', 'home_page_brands', 'navbar_color']
+      'SELECT * FROM settings WHERE setting_key IN (?, ?, ?, ?, ?, ?, ?, ?)',
+      ['price_list_style', 'home_page_decoration', 'home_page_banners', 'home_page_brands', 'navbar_color', 'dark_background_color', 'navy_background_color', 'gold_accent_color']
     );
     await connection.end();
 
@@ -14,6 +14,9 @@ export async function GET() {
       style: 'table',
       homePageDecoration: null,
       navbarColor: '#1d4f4f',
+      darkBackground: '#0f1e3d',
+      navyBackground: '#1a2847',
+      goldAccent: '#d4a574',
       brands: ['Renu Crackers', 'Mightloads', 'Sri Aravind', 'Ramesh'],
       banners: [
         {
@@ -59,6 +62,12 @@ export async function GET() {
         }
       } else if (setting.setting_key === 'navbar_color') {
         result.navbarColor = setting.setting_value;
+      } else if (setting.setting_key === 'dark_background_color') {
+        result.darkBackground = setting.setting_value;
+      } else if (setting.setting_key === 'navy_background_color') {
+        result.navyBackground = setting.setting_value;
+      } else if (setting.setting_key === 'gold_accent_color') {
+        result.goldAccent = setting.setting_value;
       }
     });
 
@@ -69,6 +78,9 @@ export async function GET() {
       style: 'table',
       homePageDecoration: null,
       navbarColor: '#1d4f4f',
+      darkBackground: '#0f1e3d',
+      navyBackground: '#1a2847',
+      goldAccent: '#d4a574',
       banners: [
         {
           id: 1,
@@ -99,7 +111,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     const data = await request.json();
-    const { style, homePageDecoration, banners, brands, navbarColor } = data;
+    const { style, homePageDecoration, banners, brands, navbarColor, darkBackground, navyBackground, goldAccent } = data;
 
     const connection = await getConnection();
 
@@ -220,9 +232,69 @@ export async function POST(request) {
       }
     }
 
+    // Update dark background color if provided
+    if (darkBackground !== undefined) {
+      const [existing] = await connection.execute(
+        'SELECT id FROM settings WHERE setting_key = ? LIMIT 1',
+        ['dark_background_color']
+      );
+
+      if (existing.length > 0) {
+        await connection.execute(
+          'UPDATE settings SET setting_value = ? WHERE setting_key = ?',
+          [darkBackground, 'dark_background_color']
+        );
+      } else {
+        await connection.execute(
+          'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)',
+          ['dark_background_color', darkBackground]
+        );
+      }
+    }
+
+    // Update navy background color if provided
+    if (navyBackground !== undefined) {
+      const [existing] = await connection.execute(
+        'SELECT id FROM settings WHERE setting_key = ? LIMIT 1',
+        ['navy_background_color']
+      );
+
+      if (existing.length > 0) {
+        await connection.execute(
+          'UPDATE settings SET setting_value = ? WHERE setting_key = ?',
+          [navyBackground, 'navy_background_color']
+        );
+      } else {
+        await connection.execute(
+          'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)',
+          ['navy_background_color', navyBackground]
+        );
+      }
+    }
+
+    // Update gold accent color if provided
+    if (goldAccent !== undefined) {
+      const [existing] = await connection.execute(
+        'SELECT id FROM settings WHERE setting_key = ? LIMIT 1',
+        ['gold_accent_color']
+      );
+
+      if (existing.length > 0) {
+        await connection.execute(
+          'UPDATE settings SET setting_value = ? WHERE setting_key = ?',
+          [goldAccent, 'gold_accent_color']
+        );
+      } else {
+        await connection.execute(
+          'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)',
+          ['gold_accent_color', goldAccent]
+        );
+      }
+    }
+
     await connection.end();
 
-    return NextResponse.json({ style, homePageDecoration, banners, brands, navbarColor }, { status: 200 });
+    return NextResponse.json({ style, homePageDecoration, banners, brands, navbarColor, darkBackground, navyBackground, goldAccent }, { status: 200 });
   } catch (error) {
     console.error('Error updating settings:', error);
     return NextResponse.json({ error: 'Failed to update settings' }, { status: 500 });

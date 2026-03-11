@@ -37,6 +37,16 @@ export default function Home() {
         if (Array.isArray(settingsData.brands)) {
           setBrands(settingsData.brands);
         }
+
+        // Apply theme colors from settings
+        const darkBg = settingsData.darkBackground || '#0f1e3d';
+        const navyBg = settingsData.navyBackground || '#1a2847';
+        const goldAccent = settingsData.goldAccent || '#d4a574';
+
+        document.documentElement.style.setProperty('--background', darkBg);
+        document.documentElement.style.setProperty('--dark-navy', darkBg);
+        document.documentElement.style.setProperty('--navy', navyBg);
+        document.documentElement.style.setProperty('--gold', goldAccent);
       } catch (error) {
         console.error('Error fetching data:', error);
         setSections([]);

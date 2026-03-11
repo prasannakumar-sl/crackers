@@ -9,7 +9,9 @@ export default function ColoursPage() {
     navyBackground: '#1a2847',
     goldAccent: '#d4a574',
   });
+  const [navbarColor, setNavbarColor] = useState('#1d4f4f');
   const [loading, setLoading] = useState(true);
+  const [navbarColorLoading, setNavbarColorLoading] = useState(true);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
@@ -32,6 +34,7 @@ export default function ColoursPage() {
   const fetchColors = async () => {
     try {
       setLoading(true);
+      setNavbarColorLoading(true);
       const response = await fetch('/api/settings');
       const data = await response.json();
       setColors({
@@ -39,11 +42,13 @@ export default function ColoursPage() {
         navyBackground: data.navyBackground || '#1a2847',
         goldAccent: data.goldAccent || '#d4a574',
       });
+      setNavbarColor(data.navbarColor || '#1d4f4f');
     } catch (error) {
       console.error('Error fetching colors:', error);
       showAlert('Failed to load colors', 'error');
     } finally {
       setLoading(false);
+      setNavbarColorLoading(false);
     }
   };
 
@@ -52,6 +57,30 @@ export default function ColoursPage() {
       ...prev,
       [colorKey]: value,
     }));
+  };
+
+  const handleNavbarColorChange = async (e) => {
+    const newColor = e.target.value;
+    setNavbarColor(newColor);
+
+    try {
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ navbarColor: newColor }),
+      });
+
+      if (response.ok) {
+        showAlert('✓ Navbar color updated successfully!', 'success');
+      } else {
+        showAlert('Failed to update navbar color', 'error');
+        fetchColors(); // Revert to previous value on error
+      }
+    } catch (error) {
+      console.error('Error updating navbar color:', error);
+      showAlert('Error updating navbar color', 'error');
+      fetchColors(); // Revert to previous value on error
+    }
   };
 
   const handleSaveColors = async () => {
@@ -138,9 +167,31 @@ export default function ColoursPage() {
 
   return (
     <div>
-      <h2 className="text-3xl font-bold text-gray-800 mb-8">Theme Colors</h2>
+      <h2 className="text-3xl font-bold text-gray-800 mb-8">Appearance Settings</h2>
 
+      {/* Navbar Appearance Section */}
+      <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <h3 className="text-2xl font-bold text-gray-800 mb-6">Navbar Appearance</h3>
+        <div className="flex gap-4 items-flex-start">
+          <div style={{ flex: 1, maxWidth: "300px" }}>
+            <label className="block text-gray-700 font-medium mb-2">Navbar Color</label>
+            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+              <input
+                type="color"
+                value={navbarColor}
+                onChange={handleNavbarColorChange}
+                disabled={navbarColorLoading}
+                style={{ width: "60px", height: "40px", cursor: "pointer", border: "1px solid #ddd", borderRadius: "4px" }}
+              />
+              <span style={{ fontSize: "0.875rem", color: "#666" }}>{navbarColor}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Theme Colors Section */}
       <div className="bg-white rounded-lg shadow p-6">
+        <h3 className="text-2xl font-bold text-gray-800 mb-6">Theme Colors</h3>
         <p className="text-gray-600 mb-8">
           Customize the theme colors used throughout your website. Changes will be applied instantly to the home page.
         </p>

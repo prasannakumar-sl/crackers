@@ -32,8 +32,6 @@ export default function AppearancePage() {
   const [productsLoading, setProductsLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [productSearchValue, setProductSearchValue] = useState('');
-  const [navbarColor, setNavbarColor] = useState('#1d4f4f');
-  const [navbarColorLoading, setNavbarColorLoading] = useState(true);
   const fileInputRef = useRef(null);
   const decorationInputRef = useRef(null);
 
@@ -77,24 +75,20 @@ export default function AppearancePage() {
   const fetchSettings = async () => {
     try {
       setStyleLoading(true);
-      setNavbarColorLoading(true);
       const response = await fetch('/api/settings');
       const data = await response.json();
       const selectedOption = styleOptions.find(opt => opt.value === data.style);
       setPriceListStyle(selectedOption || styleOptions[1]); // Default to 'table'
       setHomePageDecoration(data.homePageDecoration || null);
       setBrands(data.brands || ['Renu Crackers', 'Mightloads', 'Sri Aravind', 'Ramesh']);
-      setNavbarColor(data.navbarColor || '#1d4f4f');
     } catch (error) {
       console.error('Error fetching settings:', error);
       setPriceListStyle(styleOptions[1]); // Default to 'table'
       setHomePageDecoration(null);
       setBrands(['Renu Crackers', 'Mightloads', 'Sri Aravind', 'Ramesh']);
-      setNavbarColor('#1d4f4f');
     } finally {
       setStyleLoading(false);
       setBrandsLoading(false);
-      setNavbarColorLoading(false);
     }
   };
 
@@ -423,30 +417,6 @@ export default function AppearancePage() {
     }
   };
 
-  const handleNavbarColorChange = async (e) => {
-    const newColor = e.target.value;
-    setNavbarColor(newColor);
-
-    try {
-      const response = await fetch('/api/settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ navbarColor: newColor }),
-      });
-
-      if (response.ok) {
-        showAlert('✓ Navbar color updated successfully!', 'success');
-      } else {
-        showAlert('Failed to update navbar color', 'error');
-        fetchSettings(); // Revert to previous value on error
-      }
-    } catch (error) {
-      console.error('Error updating navbar color:', error);
-      showAlert('Error updating navbar color', 'error');
-      fetchSettings(); // Revert to previous value on error
-    }
-  };
-
   const handleDecorationFileSelect = async (e) => {
     const file = e.target.files?.[0];
 
@@ -717,26 +687,7 @@ export default function AppearancePage() {
         )}
       </div>
 
-        <div className="bg-white rounded-lg shadow p-6" style={{ marginTop: '2rem' }}>
-        <h3 className="text-2xl font-bold text-gray-800 mb-6">Navbar Appearance</h3>
-        <div style={{display:"flex", gap: "1rem", alignItems: "flex-start"}}>
-          <div style={{ flex: 1, maxWidth: "300px" }}>
-            <label className="block text-gray-700 font-medium mb-2">Navbar Color</label>
-            <div style={{display: "flex", gap: "0.5rem", alignItems: "center"}}>
-              <input
-                type="color"
-                value={navbarColor}
-                onChange={handleNavbarColorChange}
-                disabled={navbarColorLoading}
-                style={{width: "60px", height: "40px", cursor: "pointer", border: "1px solid #ddd", borderRadius: "4px"}}
-              />
-              <span style={{fontSize: "0.875rem", color: "#666"}}>{navbarColor}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-        <div className="bg-white rounded-lg shadow p-6" style={{ marginTop: '2rem' }}>
+      <div className="bg-white rounded-lg shadow p-6" style={{ marginTop: '2rem' }}>
         <h3 className="text-2xl font-bold text-gray-800 mb-6">Price-List Page Design</h3>
         <div style={{display:"flex", gap: "1rem", alignItems: "flex-start"}}>
           <div style={{ flex: 1, maxWidth: "300px" }}>

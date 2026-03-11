@@ -73,7 +73,7 @@ export default function Home() {
   const cartItemsCount = getCartItemCount();
 
   return (
-    <div className="bg-white relative">
+    <div className="dark-bg-section relative">
       {/* Decoration - Top Left Corner */}
       {homePageDecoration && (
         <div className="fixed top-4 left-4 z-10 pointer-events-none">
@@ -96,7 +96,7 @@ export default function Home() {
         </div>
       )}
       {/* Carousel Banner */}
-      <section className="w-full relative overflow-hidden bg-gray-200">
+      <section className="w-full relative overflow-hidden dark-bg-section">
         {carouselImages.length > 0 ? (
           <div className="relative w-full h-48 sm:h-64 md:h-96 flex items-center justify-center">
             <img
@@ -126,7 +126,7 @@ export default function Home() {
       </section>
       
       {/* Festival Banners */}
-      <section className="py-6 px-4 sm:px-6 bg-white">
+      <section className="py-6 px-4 sm:px-6 navy-bg-section">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {banners.map((banner) => (
@@ -149,25 +149,25 @@ export default function Home() {
       </section>
 
       {/* Products Section */}
-      <section className="py-12 px-4 sm:px-6 bg-gray-50">
+      <section className="py-12 px-4 sm:px-6 dark-bg-section">
         <div className="max-w-7xl mx-auto">
           {loading ? (
             <div className="text-center py-12">
-              <p className="text-gray-600">Loading products...</p>
+              <p className="text-gray-300">Loading products...</p>
             </div>
           ) : sections.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-600">No product sections available. Visit the admin panel to create sections and add products.</p>
+              <p className="text-gray-300">No product sections available. Visit the admin panel to create sections and add products.</p>
             </div>
           ) : (
             sections.map((section) => (
               <div key={section.id} className="mb-16">
-                <h2 className="text-2xl sm:text-3xl font-bold text-black mb-6 sm:mb-8">{section.title}</h2>
+                <h2 className="text-2xl sm:text-3xl font-bold gold-text mb-6 sm:mb-8">{section.title}</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   {section.products && section.products.length > 0 ? (
                     section.products.map(product => (
-                      <div key={product.id} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow flex flex-col cursor-pointer" onClick={() => setSelectedProduct(product)}>
-                        <div className="bg-purple-100 h-48 flex items-center justify-center overflow-hidden">
+                      <div key={product.id} className="navy-bg-section rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow flex flex-col cursor-pointer" onClick={() => setSelectedProduct(product)}>
+                        <div className="bg-gray-700 h-48 flex items-center justify-center overflow-hidden">
                           <img
                             src={product.image || 'https://cdn.builder.io/api/v1/image/assets%2Fa8b7ea913e4d4cbb918cc3633423e9fa%2Fcf0b1bff048f4f4aa4c2904d1907c926'}
                             alt={product.name}
@@ -178,18 +178,18 @@ export default function Home() {
                           />
                         </div>
                         <div className="p-4 flex-grow">
-                          <h3 className="font-bold text-black mb-3">{product.name}</h3>
+                          <h3 className="font-bold text-white mb-3">{product.name}</h3>
                           <div className="flex gap-3 mb-4">
-                            <span className="text-gray-800 font-bold">₹{parseFloat(product.price).toFixed(2)}</span>
+                            <span className="gold-text font-bold">₹{parseFloat(product.price).toFixed(2)}</span>
                           </div>
-                          <button onClick={(e) => { e.stopPropagation(); addToCart({ ...product, quantity: 1 }); }} className="w-full bg-red-500 text-white py-2 rounded font-semibold hover:bg-red-600 transition-colors">
+                          <button onClick={(e) => { e.stopPropagation(); addToCart({ ...product, quantity: 1 }); }} className="w-full gold-button py-2 rounded font-semibold hover:bg-yellow-400 transition-colors">
                             ADD TO CART
                           </button>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <p className="text-gray-600 col-span-3">No products in this section yet.</p>
+                    <p className="text-gray-300 col-span-3">No products in this section yet.</p>
                   )}
                 </div>
               </div>
@@ -199,13 +199,13 @@ export default function Home() {
       </section>
 
       {/* Our Brands */}
-      <section className="py-12 px-4 sm:px-6 bg-white">
+      <section className="py-12 px-4 sm:px-6 navy-bg-section">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl font-bold text-black text-center mb-8 sm:mb-12">OUR BRANDS</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold gold-text text-center mb-8 sm:mb-12">OUR BRANDS</h2>
           <div className="flex justify-center items-center gap-4 sm:gap-6 lg:gap-12 flex-wrap">
             {brands.map((brand, idx) => (
-              <div key={idx} className="px-4 sm:px-6 py-3 sm:py-4 border-2 border-gray-300 rounded-lg hover:border-yellow-500 transition-colors">
-                <p className="font-bold text-sm sm:text-base text-teal-900">{brand}</p>
+              <div key={idx} className="px-4 sm:px-6 py-3 sm:py-4 border-2 gold-accent rounded-lg hover:bg-opacity-10 hover:bg-yellow-500 transition-colors">
+                <p className="font-bold text-sm sm:text-base gold-text">{brand}</p>
               </div>
             ))}
           </div>
@@ -237,17 +237,17 @@ export default function Home() {
       </section>
 
       {/* Blog Posts */}
-      <section className="py-12 px-4 sm:px-6 bg-gray-50">
+      <section className="py-12 px-4 sm:px-6 dark-bg-section">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl font-bold text-black mb-8 sm:mb-12">OUR BLOG POSTS</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold gold-text mb-8 sm:mb-12">OUR BLOG POSTS</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {blogPosts.map(post => (
-              <div key={post.id} className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow cursor-pointer">
-                <div className="bg-gray-300 p-8 text-5xl flex items-center justify-center h-40">
+              <div key={post.id} className="navy-bg-section rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+                <div className="bg-gray-700 p-8 text-5xl flex items-center justify-center h-40">
                   {post.image}
                 </div>
                 <div className="p-4">
-                  <h3 className="font-semibold text-black text-sm leading-relaxed hover:text-yellow-600 transition-colors">
+                  <h3 className="font-semibold text-white text-sm leading-relaxed hover:gold-text transition-colors">
                     {post.title}
                   </h3>
                 </div>
@@ -260,7 +260,7 @@ export default function Home() {
       {/* Banner Products Modal */}
       {selectedBanner && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[60] p-4" onClick={() => setSelectedBanner(null)}>
-          <div className="bg-white rounded-xl max-w-2xl w-full overflow-hidden shadow-2xl flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+          <div className="navy-bg-section rounded-xl max-w-2xl w-full overflow-hidden shadow-2xl flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
             <div className={`p-6 text-white bg-gradient-to-r ${selectedBanner.gradientFrom} ${selectedBanner.gradientTo} relative`}>
               <h2 className="text-2xl font-bold">{selectedBanner.title}</h2>
               <p className="text-sm opacity-90">{selectedBanner.subtitle}</p>
@@ -274,19 +274,19 @@ export default function Home() {
 
             <div className="p-6 overflow-y-auto flex-grow">
               {!selectedBanner.products || selectedBanner.products.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-gray-400">
                   No products in this collection yet.
                 </div>
               ) : (
                 <div className="space-y-4">
                   {selectedBanner.products.map((product) => (
-                    <div key={product.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors">
+                    <div key={product.id} className="flex items-center justify-between p-4 border border-gray-600 rounded-lg hover:bg-gray-800 transition-colors">
                       <div className="flex-grow">
-                        <h4 className="font-bold text-gray-900">{product.name}</h4>
-                        <p className="text-red-600 font-bold">₹{parseFloat(product.price).toFixed(2)}</p>
+                        <h4 className="font-bold text-white">{product.name}</h4>
+                        <p className="gold-text font-bold">₹{parseFloat(product.price).toFixed(2)}</p>
                       </div>
                       <div className="flex items-center gap-4">
-                        <span className="text-sm text-gray-500">Qty: {product.qty || 1}</span>
+                        <span className="text-sm text-gray-300">Qty: {product.qty || 1}</span>
                         {/* <button
                           onClick={() => {
                             addToCart({ ...product, quantity: parseInt(product.qty) || 1, bannerTitle: selectedBanner.title });
@@ -303,7 +303,7 @@ export default function Home() {
               )}
             </div>
 
-            <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-between items-center">
+            <div className="p-4 border-t border-gray-600 bg-gray-800 flex justify-between items-center">
               <button
                 onClick={() => {
                   if (selectedBanner.products && selectedBanner.products.length > 0) {
@@ -313,14 +313,14 @@ export default function Home() {
                     setSelectedBanner(null);
                   }
                 }}
-                className="px-6 py-2 bg-red-600 text-white rounded font-bold hover:bg-red-700 transition-colors shadow-md active:transform active:scale-95"
+                className="px-6 py-2 gold-button rounded font-bold hover:bg-yellow-400 transition-colors shadow-md active:transform active:scale-95"
               >
                 <span>🛒</span>
                 ADD TO CART
               </button>
               <button
                 onClick={() => setSelectedBanner(null)}
-                className="px-6 py-2 bg-gray-200 text-gray-800 rounded font-bold hover:bg-gray-300 transition-colors"
+                className="px-6 py-2 bg-gray-700 text-white rounded font-bold hover:bg-gray-600 transition-colors"
               >
                 Close
               </button>
@@ -351,9 +351,9 @@ export default function Home() {
       {/* Product Detail Modal */}
       {selectedProduct && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4" onClick={() => setSelectedProduct(null)}>
-          <div className="bg-white rounded-xl max-w-lg w-full overflow-hidden shadow-2xl flex flex-col" onClick={(e) => e.stopPropagation()}>
+          <div className="navy-bg-section rounded-xl max-w-lg w-full overflow-hidden shadow-2xl flex flex-col" onClick={(e) => e.stopPropagation()}>
             {/* Header */}
-            <div className="relative h-64 bg-purple-100 flex items-center justify-center overflow-hidden">
+            <div className="relative h-64 bg-gray-700 flex items-center justify-center overflow-hidden">
               <img
                 src={selectedProduct.image || 'https://cdn.builder.io/api/v1/image/assets%2Fa8b7ea913e4d4cbb918cc3633423e9fa%2Fcf0b1bff048f4f4aa4c2904d1907c926'}
                 alt={selectedProduct.name}
@@ -364,7 +364,7 @@ export default function Home() {
               />
               <button
                 onClick={() => setSelectedProduct(null)}
-                className="absolute top-4 right-4 bg-white/80 backdrop-blur-sm rounded-full w-10 h-10 flex items-center justify-center text-black font-bold text-lg hover:bg-white transition-colors shadow-md"
+                className="absolute top-4 right-4 bg-white/20 backdrop-blur-sm rounded-full w-10 h-10 flex items-center justify-center text-white font-bold text-lg hover:bg-white/40 transition-colors shadow-md"
               >
                 ✕
               </button>
@@ -373,36 +373,36 @@ export default function Home() {
             {/* Content */}
             <div className="p-8 space-y-4">
               <div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">{selectedProduct.name}</h2>
-                <p className="text-gray-500 text-lg uppercase tracking-wider font-semibold">
+                <h2 className="text-3xl font-bold text-white mb-2">{selectedProduct.name}</h2>
+                <p className="text-gray-300 text-lg uppercase tracking-wider font-semibold">
                   {selectedProduct.category || 'Standard Product'}
                 </p>
               </div>
 
               <div className="flex items-center gap-4">
-                <span className="text-4xl font-extrabold text-red-600">
+                <span className="text-4xl font-extrabold gold-text">
                   ₹{parseFloat(selectedProduct.price).toFixed(2)}
                 </span>
-                <span className="bg-green-100 text-green-800 text-xs font-bold px-2.5 py-0.5 rounded-full uppercase">
+                <span className="bg-green-900 text-green-200 text-xs font-bold px-2.5 py-0.5 rounded-full uppercase">
                   In Stock
                 </span>
               </div>
 
-              <div className="pt-4 border-t border-gray-100">
+              <div className="pt-4 border-t border-gray-600">
                 <h3 className="text-sm font-bold text-gray-400 uppercase mb-3">Product Description</h3>
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-gray-300 leading-relaxed">
                   {selectedProduct.description || "This premium quality firecracker is designed for a safe and spectacular celebration. Made with high-quality materials to ensure consistent performance and vibrant effects."}
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4 py-4">
-                <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                <div className="bg-gray-800 p-3 rounded-lg border border-gray-600">
                   <p className="text-xs text-gray-400 uppercase font-bold mb-1">Quantity</p>
-                  <p className="text-sm font-semibold text-gray-700">1 Box / Pack</p>
+                  <p className="text-sm font-semibold text-gray-200">1 Box / Pack</p>
                 </div>
-                <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                <div className="bg-gray-800 p-3 rounded-lg border border-gray-600">
                   <p className="text-xs text-gray-400 uppercase font-bold mb-1">Safe to Use</p>
-                  <p className="text-sm font-semibold text-gray-700">Certified Quality</p>
+                  <p className="text-sm font-semibold text-gray-200">Certified Quality</p>
                 </div>
               </div>
             </div>
@@ -414,7 +414,7 @@ export default function Home() {
                   addToCart({ ...selectedProduct, quantity: 1 });
                   setSelectedProduct(null);
                 }}
-                className="w-full bg-red-600 text-white py-4 rounded-xl font-bold text-xl hover:bg-red-700 active:transform active:scale-95 transition-all shadow-lg hover:shadow-red-200 flex items-center justify-center gap-3"
+                className="w-full gold-button py-4 rounded-xl font-bold text-xl hover:bg-yellow-400 active:transform active:scale-95 transition-all shadow-lg flex items-center justify-center gap-3"
               >
                 <span>🛒</span>
                 ADD TO CART

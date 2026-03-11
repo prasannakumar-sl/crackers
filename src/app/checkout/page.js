@@ -125,12 +125,12 @@ export default function CheckoutPage() {
 
   if (cart.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="bg-white p-8 rounded-lg shadow-lg text-center">
-          <h1 className="text-2xl font-bold mb-4">Your cart is empty</h1>
+      <div className="min-h-screen dark-bg-section flex items-center justify-center">
+        <div className="navy-bg-section p-8 rounded-lg shadow-lg text-center border border-gray-600">
+          <h1 className="text-2xl font-bold mb-4 text-white">Your cart is empty</h1>
           <button
             onClick={() => router.push('/')}
-            className="bg-blue-600 text-white py-2 px-6 rounded"
+            className="gold-button py-2 px-6 rounded"
           >
             Continue Shopping
           </button>
@@ -145,29 +145,29 @@ export default function CheckoutPage() {
   const totalAmount = cartTotal + shippingFee + packingFee;
 
   return (
-    <div className="bg-gray-100 min-h-screen py-8">
+    <div className="dark-bg-section min-h-screen py-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Checkout</h1>
-          <p className="text-gray-600">Review your order and complete checkout</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Checkout</h1>
+          <p className="text-gray-300">Review your order and complete checkout</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Order Review Section */}
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-              <div className="bg-green-600 text-white px-6 py-4">
+            <div className="navy-bg-section rounded-lg shadow-lg overflow-hidden border border-gray-600">
+              <div className="bg-green-700 text-white px-6 py-4">
                 <h2 className="text-xl font-bold">Order Review</h2>
               </div>
-              
+
               <div className="p-6">
                 {cart.map((item) => (
-                  <div key={item.id} className="flex gap-4 pb-6 border-b border-gray-200 last:border-b-0 last:pb-0">
+                  <div key={item.id} className="flex gap-4 pb-6 border-b border-gray-600 last:border-b-0 last:pb-0">
                     {/* Product Image */}
                     {item.image && (
-                      <div className="w-24 h-24 flex-shrink-0 bg-gray-100 rounded-lg flex items-center justify-center text-4xl">
+                      <div className="w-24 h-24 flex-shrink-0 bg-gray-700 rounded-lg flex items-center justify-center text-4xl">
                         {item.image.startsWith('http') || item.image.startsWith('/') ? (
                           <img
                             src={item.image}
@@ -182,14 +182,14 @@ export default function CheckoutPage() {
 
                     {/* Product Details */}
                     <div className="flex-1">
-                      <h3 className="font-bold text-gray-800 mb-1">{item.name}</h3>
+                      <h3 className="font-bold text-white mb-1">{item.name}</h3>
                       {item.productNumber && (
-                        <p className="text-sm text-gray-600 mb-2">Product ID: {item.productNumber}</p>
+                        <p className="text-sm text-gray-400 mb-2">Product ID: {item.productNumber}</p>
                       )}
-                      <p className="text-gray-700 mb-2">
+                      <p className="text-gray-300 mb-2">
                         Quantity: <span className="font-semibold">{item.quantity}</span>
                       </p>
-                      <p className="text-gray-700">
+                      <p className="text-gray-300">
                         Price:{' '}
                         <span className="font-semibold">
                           ₹{item.discount
@@ -204,76 +204,76 @@ export default function CheckoutPage() {
                 ))}
 
                 {/* Order Summary */}
-                <div className="mt-6 pt-6 border-t border-gray-200 space-y-3">
-                  <div className="flex justify-between text-gray-700">
+                <div className="mt-6 pt-6 border-t border-gray-600 space-y-3">
+                  <div className="flex justify-between text-gray-300">
                     <span>Subtotal:</span>
                     <span>₹{cartTotal.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-gray-700">
+                  <div className="flex justify-between text-gray-300">
                     <span>Packing Fee:</span>
                     <span>₹{packingFee.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-gray-700">
+                  <div className="flex justify-between text-gray-300">
                     <span>Shipping:</span>
                     <span>₹{shippingFee.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-lg font-bold text-gray-800 pt-3 border-t border-gray-200">
+                  <div className="flex justify-between text-lg font-bold text-white pt-3 border-t border-gray-600">
                     <span>Order Total:</span>
-                    <span className="text-green-600">₹{totalAmount.toFixed(2)}</span>
+                    <span className="gold-text">₹{totalAmount.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Customer Details Section */}
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-              <div className="bg-green-600 text-white px-6 py-4">
+            <div className="navy-bg-section rounded-lg shadow-lg overflow-hidden border border-gray-600">
+              <div className="bg-green-700 text-white px-6 py-4">
                 <h2 className="text-xl font-bold">Customer Details</h2>
               </div>
-              
+
               <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-gray-700 font-semibold mb-2">Name</label>
+                  <label className="block text-gray-300 font-semibold mb-2">Name</label>
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
                     placeholder="Enter your name"
-                    className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-green-600 text-black"
+                    className="w-full border border-gray-600 bg-gray-700 text-white rounded px-4 py-2 focus:outline-none focus:border-yellow-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-700 font-semibold mb-2">Phone Number</label>
+                  <label className="block text-gray-300 font-semibold mb-2">Phone Number</label>
                   <input
                     type="tel"
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
                     placeholder="Enter phone number"
-                    className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-green-600 text-black"
+                    className="w-full border border-gray-600 bg-gray-700 text-white rounded px-4 py-2 focus:outline-none focus:border-yellow-500"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-gray-700 font-semibold mb-2">Email</label>
+                  <label className="block text-gray-300 font-semibold mb-2">Email</label>
                   <input
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
                     placeholder="Enter email address"
-                    className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-green-600 text-black"
+                    className="w-full border border-gray-600 bg-gray-700 text-white rounded px-4 py-2 focus:outline-none focus:border-yellow-500"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-gray-700 font-semibold mb-2">Delivery Address</label>
+                  <label className="block text-gray-300 font-semibold mb-2">Delivery Address</label>
                   <textarea
                     name="address"
                     value={formData.address}
                     onChange={handleInputChange}
                     placeholder="Enter delivery address"
                     rows="3"
-                    className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-green-600 text-black"
+                    className="w-full border border-gray-600 bg-gray-700 text-white rounded px-4 py-2 focus:outline-none focus:border-yellow-500"
                   />
                 </div>
               </div>
@@ -283,37 +283,37 @@ export default function CheckoutPage() {
           {/* Sidebar - Order Summary & Payment Info */}
           <div className="space-y-6">
             {/* Payment Methods */}
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div className="navy-bg-section rounded-lg shadow-lg overflow-hidden border border-gray-600">
               <div className="bg-blue-900 text-white px-6 py-4">
                 <h2 className="text-lg font-bold">Payment Methods</h2>
               </div>
 
               <div className="p-6 space-y-3">
-                <div className="pb-4 border-b border-gray-200">
-                  <h3 className="font-bold text-gray-800 mb-2">Bank Account</h3>
-                  <p className="text-sm text-gray-700">A/C Name: {payments.bankAccount.name}</p>
-                  <p className="text-sm text-gray-700">A/C No: {payments.bankAccount.accountNo}</p>
-                  <p className="text-sm text-gray-700">Bank: {payments.bankAccount.bankName}</p>
+                <div className="pb-4 border-b border-gray-600">
+                  <h3 className="font-bold text-white mb-2">Bank Account</h3>
+                  <p className="text-sm text-gray-300">A/C Name: {payments.bankAccount.name}</p>
+                  <p className="text-sm text-gray-300">A/C No: {payments.bankAccount.accountNo}</p>
+                  <p className="text-sm text-gray-300">Bank: {payments.bankAccount.bankName}</p>
                 </div>
 
-                <div className="pb-4 border-b border-gray-200">
-                  <h3 className="font-bold text-gray-800 mb-2">GPay</h3>
-                  <p className="text-sm text-gray-700">Name: {payments.gpay.name}</p>
-                  <p className="text-sm text-gray-700">GPay No: {payments.gpay.number}</p>
+                <div className="pb-4 border-b border-gray-600">
+                  <h3 className="font-bold text-white mb-2">GPay</h3>
+                  <p className="text-sm text-gray-300">Name: {payments.gpay.name}</p>
+                  <p className="text-sm text-gray-300">GPay No: {payments.gpay.number}</p>
                 </div>
 
                 <div>
-                  <h3 className="font-bold text-gray-800 mb-2">UPI</h3>
-                  <p className="text-sm text-gray-700">Name: {payments.upi.name}</p>
-                  <p className="text-sm text-gray-700">UPI ID: {payments.upi.id}</p>
+                  <h3 className="font-bold text-white mb-2">UPI</h3>
+                  <p className="text-sm text-gray-300">Name: {payments.upi.name}</p>
+                  <p className="text-sm text-gray-300">UPI ID: {payments.upi.id}</p>
                 </div>
               </div>
             </div>
 
             {/* Important Notes */}
-            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
-              <h3 className="font-bold text-yellow-800 mb-2">Important Notes</h3>
-              <ul className="text-sm text-yellow-700 space-y-1">
+            <div className="bg-yellow-900 border-l-4 gold-accent p-4 rounded">
+              <h3 className="font-bold gold-text mb-2">Important Notes</h3>
+              <ul className="text-sm text-gray-300 space-y-1">
                 <li>• Minimum Order: ₹2000 (TamilNadu), ₹3000 (Other States)</li>
                 <li>• 50% Discount on bulk orders</li>
                 <li>• Payment required before delivery</li>
@@ -324,7 +324,7 @@ export default function CheckoutPage() {
             <button
               onClick={handleConfirmOrder}
               disabled={loading}
-              className="w-full bg-blue-900 text-white py-3 rounded font-bold hover:bg-blue-800 transition disabled:bg-gray-400"
+              className="w-full gold-button py-3 rounded font-bold hover:bg-yellow-400 transition disabled:bg-gray-600"
             >
               {loading ? 'Confirming...' : 'Confirm Order'}
             </button>
@@ -332,7 +332,7 @@ export default function CheckoutPage() {
             {/* Continue Shopping Button */}
             <button
               onClick={() => router.push('/')}
-              className="w-full border-2 border-blue-900 text-blue-900 py-3 rounded font-bold hover:bg-blue-50 transition"
+              className="w-full border-2 gold-accent py-3 rounded font-bold text-white hover:bg-gray-800 transition"
             >
               Continue Shopping
             </button>

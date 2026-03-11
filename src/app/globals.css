@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0f1e3d;
+  --foreground: #ffffff;
+  --gold: #d4a574;
+  --dark-navy: #0f1e3d;
+  --navy: #1a2847;
 }
 
 @theme inline {
@@ -14,8 +17,8 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0f1e3d;
+    --foreground: #ffffff;
   }
 }
 
@@ -48,6 +51,39 @@ section {
 img {
   max-width: 100%;
   height: auto;
+}
+
+/* Dark theme with gold accents */
+.dark-bg-section {
+  background-color: var(--dark-navy);
+}
+
+.navy-bg-section {
+  background-color: var(--navy);
+}
+
+.gold-text {
+  color: var(--gold);
+}
+
+.gold-accent {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.gold-button {
+  background-color: var(--gold);
+  color: var(--dark-navy);
+}
+
+.gold-button:hover {
+  background-color: #e8c4a0;
+  transform: translateY(-2px);
+}
+
+.section-title {
+  color: var(--gold);
+  font-weight: bold;
 }
 
 /* WhatsApp Button Styling */

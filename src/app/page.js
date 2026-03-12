@@ -136,19 +136,22 @@ export default function Home() {
       </section>
       
       {/* Festival Banners */}
-      <section className="py-6 px-4 sm:px-6 navy-bg-section">
+      <section className="py-8 px-4 sm:px-6 navy-bg-section">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {banners.map((banner) => (
               <div
                 key={banner.id}
-                className={`bg-gradient-to-r ${banner.gradientFrom} ${banner.gradientTo} text-white p-6 rounded-lg cursor-pointer hover:shadow-lg transition-all active:scale-[0.98]`}
+                className="text-white p-8 rounded-xl cursor-pointer hover:shadow-xl transition-all active:scale-[0.98] banner-card"
+                style={{
+                  backgroundColor: banner.solidColor || banner.gradientFrom || 'var(--gold)'
+                }}
                 onClick={() => setSelectedBanner(banner)}
               >
-                <h3 className="font-bold text-lg mb-2">{banner.title}</h3>
-                <p className="text-sm">{banner.subtitle}</p>
+                <h3 className="font-bold text-xl sm:text-2xl mb-2">{banner.title}</h3>
+                <p className="text-sm sm:text-base font-semibold">{banner.subtitle}</p>
                 {banner.products && banner.products.length > 0 && (
-                  <div className="mt-4 text-xs bg-black/20 inline-block px-2 py-1 rounded">
+                  <div className="mt-4 text-xs bg-white/20 inline-block px-3 py-1.5 rounded-full">
                     {banner.products.length} Products
                   </div>
                 )}

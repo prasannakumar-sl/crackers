@@ -27,7 +27,7 @@ export default function AppearancePage() {
   const [editingBannerId, setEditingBannerId] = useState(null);
   const [editBannerData, setEditBannerData] = useState({});
   const [isCreatingBanner, setIsCreatingBanner] = useState(false);
-  const [newBannerData, setNewBannerData] = useState({ title: '', subtitle: '', gradientFrom: 'from-purple-400', gradientTo: 'to-pink-600', products: [] });
+  const [newBannerData, setNewBannerData] = useState({ title: '', subtitle: '', solidColor: '#8B5CF6', products: [] });
   const [products, setProducts] = useState([]);
   const [productsLoading, setProductsLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -220,8 +220,7 @@ export default function AppearancePage() {
       id: bannerId,
       title: newBannerData.title,
       subtitle: newBannerData.subtitle,
-      gradientFrom: newBannerData.gradientFrom,
-      gradientTo: newBannerData.gradientTo,
+      solidColor: newBannerData.solidColor,
       products: newBannerData.products || [],
     };
 
@@ -252,7 +251,7 @@ export default function AppearancePage() {
 
   const handleCancelCreateBanner = () => {
     setIsCreatingBanner(false);
-    setNewBannerData({ title: '', subtitle: '', gradientFrom: 'from-purple-400', gradientTo: 'to-pink-600', products: [] });
+    setNewBannerData({ title: '', subtitle: '', solidColor: '#8B5CF6', products: [] });
     setSelectedProduct(null);
     setProductSearchValue('');
   };
@@ -766,7 +765,7 @@ export default function AppearancePage() {
         </div>
 
         {isCreatingBanner && (
-          <div className={`bg-gradient-to-r ${newBannerData.gradientFrom} ${newBannerData.gradientTo} text-white p-6 rounded-lg mb-6`}>
+          <div style={{ backgroundColor: newBannerData.solidColor, color: 'white' }} className="text-white p-6 rounded-lg mb-6">
             <h4 className="font-bold text-lg mb-4">Create New Festival Banner</h4>
             <div className="space-y-4">
               <div>
@@ -787,6 +786,15 @@ export default function AppearancePage() {
                   onChange={(e) => setNewBannerData({ ...newBannerData, subtitle: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter banner subtitle"
+                />
+              </div>
+              <div>
+                <label className="block text-white font-medium mb-2">Banner Color</label>
+                <input
+                  type="color"
+                  value={newBannerData.solidColor || '#8B5CF6'}
+                  onChange={(e) => setNewBannerData({ ...newBannerData, solidColor: e.target.value })}
+                  className="w-16 h-10 border border-gray-300 rounded-lg cursor-pointer"
                 />
               </div>
 
@@ -941,7 +949,7 @@ export default function AppearancePage() {
         ) : (
           <div className="space-y-6">
             {banners.map((banner) => (
-              <div key={banner.id} className={`bg-gradient-to-r ${banner.gradientFrom} ${banner.gradientTo} text-white p-6 rounded-lg`}>
+              <div key={banner.id} style={{ backgroundColor: banner.solidColor || '#8B5CF6' }} className="text-white p-6 rounded-lg">
                 {editingBannerId === banner.id ? (
                   <div className="space-y-4">
                     <div>
@@ -960,6 +968,15 @@ export default function AppearancePage() {
                         value={editBannerData.subtitle || ''}
                         onChange={(e) => setEditBannerData({ ...editBannerData, subtitle: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-white font-medium mb-2">Banner Color</label>
+                      <input
+                        type="color"
+                        value={editBannerData.solidColor || '#8B5CF6'}
+                        onChange={(e) => setEditBannerData({ ...editBannerData, solidColor: e.target.value })}
+                        className="w-16 h-10 border border-gray-300 rounded-lg cursor-pointer"
                       />
                     </div>
 

@@ -5,14 +5,15 @@ import '../styles/paradise-animation.css';
 
 export default function ParadiseAnimation({ text = 'PARADISE', backgroundColor = '#000000' }) {
   const containerRef = useRef(null);
-  const letters = text.toUpperCase().split('');
+  const letters = text.toUpperCase().split('').filter(char => char !== ' ');
+  const originalText = text.toUpperCase();
 
   const playAnimation = () => {
     const container = containerRef.current;
     if (!container) return;
 
     // Clear previous animation
-    const existingLetters = container.querySelectorAll('.paradise-letter');
+    const existingLetters = container.querySelectorAll('.paradise-letter, .paradise-spacer');
     existingLetters.forEach(el => el.remove());
 
     // Determine spark distance based on screen size
@@ -26,31 +27,43 @@ export default function ParadiseAnimation({ text = 'PARADISE', backgroundColor =
     else if (isTablet) sparkDistance = 45;
     else if (isLargeTablet) sparkDistance = 65;
 
-    // Create letters with animation
-    letters.forEach((letter, index) => {
-      const letterEl = document.createElement('span');
-      letterEl.className = 'paradise-letter';
-      letterEl.textContent = letter;
-      letterEl.style.animationDelay = `${index * 0.15}s`;
-      container.appendChild(letterEl);
+    // Create letters with animation, preserving space positions
+    let letterIndex = 0;
+    for (let i = 0; i < originalText.length; i++) {
+      const char = originalText[i];
 
-      // Create sparks for each letter
-      for (let i = 0; i < 8; i++) {
-        const spark = document.createElement('span');
-        spark.className = 'paradise-spark';
-        const sparkDelay = index * 0.15 + i * 0.05;
-        spark.style.animationDelay = `${sparkDelay}s`;
+      if (char === ' ') {
+        // Create a spacer for spaces
+        const spacer = document.createElement('span');
+        spacer.className = 'paradise-spacer';
+        container.appendChild(spacer);
+      } else {
+        const letterEl = document.createElement('span');
+        letterEl.className = 'paradise-letter';
+        letterEl.textContent = char;
+        letterEl.style.animationDelay = `${letterIndex * 0.15}s`;
+        container.appendChild(letterEl);
 
-        // Calculate angle in radians
-        const angle = (360 / 8) * i * (Math.PI / 180);
-        const x = Math.cos(angle) * sparkDistance;
-        const y = Math.sin(angle) * sparkDistance;
+        // Create sparks for each letter
+        for (let j = 0; j < 8; j++) {
+          const spark = document.createElement('span');
+          spark.className = 'paradise-spark';
+          const sparkDelay = letterIndex * 0.15 + j * 0.05;
+          spark.style.animationDelay = `${sparkDelay}s`;
 
-        spark.style.setProperty('--spark-x', `${x}px`);
-        spark.style.setProperty('--spark-y', `${y}px`);
-        letterEl.appendChild(spark);
+          // Calculate angle in radians
+          const angle = (360 / 8) * j * (Math.PI / 180);
+          const x = Math.cos(angle) * sparkDistance;
+          const y = Math.sin(angle) * sparkDistance;
+
+          spark.style.setProperty('--spark-x', `${x}px`);
+          spark.style.setProperty('--spark-y', `${y}px`);
+          letterEl.appendChild(spark);
+        }
+
+        letterIndex++;
       }
-    });
+    }
   };
 
   useEffect(() => {

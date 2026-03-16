@@ -616,7 +616,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <ParadiseAnimation text="PARADISE" backgroundColor={paradiseBackgroundColor} />
+            <ParadiseAnimation text="PARADISE CRACKERS" backgroundColor={paradiseBackgroundColor} />
 
             <div className="bg-white p-8 pt-12">
               <h4 className="text-lg font-semibold text-gray-800 mb-4">Animation Features:</h4>

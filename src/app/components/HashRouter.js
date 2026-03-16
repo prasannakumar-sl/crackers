@@ -11,7 +11,6 @@ import OrdersPage from '../admin/orders/page';
 import CustomersPage from '../admin/customers/page';
 import PaymentsInfoPage from '../admin/payments-info/page';
 import ChitFundPage from '../admin/chit-fund/page';
-import StaffsPage from '../admin/staffs/page';
 import CompanyInfoPage from '../admin/company-info/page';
 import AppearancePage from '../admin/appearance/page';
 import ColoursPage from '../admin/colours/page';
@@ -37,7 +36,7 @@ export default function HashRouter({ children }) {
   const route = hash.replace('#', '') || '/';
 
   // Admin routes - check if user is authorized
-  const adminRoutes = ['/admin', '/admin/dashboard', '/admin/products', '/admin/orders', '/admin/customers', '/admin/payments-info', '/admin/chit-fund', '/admin/staffs', '/admin/company-info', '/admin/appearance', '/admin/colours'];
+  const adminRoutes = ['/admin', '/admin/dashboard', '/admin/products', '/admin/orders', '/admin/customers', '/admin/payments-info', '/admin/chit-fund', '/admin/company-info', '/admin/appearance', '/admin/colours'];
 
   // Check for dynamic routes
   const orderEditMatch = route.match(/^\/admin\/orders\/(\d+)$/);
@@ -70,8 +69,6 @@ export default function HashRouter({ children }) {
       pageContent = <PaymentsInfoPage />;
     } else if (route === '/admin/chit-fund') {
       pageContent = <ChitFundPage />;
-    } else if (route === '/admin/staffs') {
-      pageContent = <StaffsPage />;
     } else if (route === '/admin/company-info') {
       pageContent = <CompanyInfoPage />;
     } else if (route === '/admin/appearance') {

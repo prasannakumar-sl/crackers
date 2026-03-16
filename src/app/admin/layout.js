@@ -34,7 +34,6 @@ export default function AdminLayout({ children }) {
     { label: 'Customers', href: '/admin/customers', icon: '👥' },
     { label: 'Payments Info', href: '/admin/payments-info', icon: '💳' },
     // { label: 'Chit Fund', href: '/admin/chit-fund', icon: '💰' },
-    { label: 'Staffs', href: '/admin/staffs', icon: '👨‍💼' },
     { label: 'Company Info', href: '/admin/company-info', icon: '🏢' },
     { label: 'Appearance', href: '/admin/appearance', icon: '🎨' },
     { label: 'Theme Colors', href: '/admin/colours', icon: '🎨' },

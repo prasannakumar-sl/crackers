@@ -7,7 +7,7 @@ export default function ParadiseAnimation({ text = 'PARADISE', backgroundColor =
   const containerRef = useRef(null);
   const letters = text.toUpperCase().split('');
 
-  useEffect(() => {
+  const playAnimation = () => {
     const container = containerRef.current;
     if (!container) return;
 
@@ -41,6 +41,32 @@ export default function ParadiseAnimation({ text = 'PARADISE', backgroundColor =
         letterEl.appendChild(spark);
       }
     });
+  };
+
+  useEffect(() => {
+    // Play animation on initial mount
+    playAnimation();
+
+    // Set up Intersection Observer to replay animation when scrolling back into view
+    const container = containerRef.current;
+    if (!container) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          // Play animation when element comes into view
+          playAnimation();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(container);
+
+    return () => {
+      observer.unobserve(container);
+      observer.disconnect();
+    };
   }, [letters]);
 
   return (

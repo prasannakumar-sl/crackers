@@ -47,7 +47,7 @@ export default function ParadiseAnimation({ text = 'PARADISE', backgroundColor =
     <div
       className="paradise-container"
       ref={containerRef}
-      style={{ '--paradise-bg': backgroundColor }}
+      style={{ backgroundColor: backgroundColor }}
     >
       {/* Letters will be added dynamically */}
     </div>

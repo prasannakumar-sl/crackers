@@ -18,6 +18,7 @@ export default function Home() {
   const [brands, setBrands] = useState(['Renu Crackers', 'Mightloads', 'Sri Aravind', 'Ramesh']);
   const [navbarColor, setNavbarColor] = useState('#1d4f4f');
   const [paradiseText, setParadiseText] = useState('PARADISE');
+  const [paradiseBackgroundColor, setParadiseBackgroundColor] = useState('#f3f4f6');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,6 +38,7 @@ export default function Home() {
         setBanners(Array.isArray(settingsData.banners) ? settingsData.banners : []);
         setNavbarColor(settingsData.navbarColor || '#1d4f4f');
         setParadiseText(settingsData.paradiseText || 'PARADISE');
+        setParadiseBackgroundColor(settingsData.paradiseBackgroundColor || '#f3f4f6');
         if (Array.isArray(settingsData.brands)) {
           setBrands(settingsData.brands);
         }
@@ -88,7 +90,7 @@ export default function Home() {
   return (
     <div className="dark-bg-section relative">
       {/* Paradise Animation */}
-      <ParadiseAnimation text={paradiseText} />
+      <ParadiseAnimation text={paradiseText} backgroundColor={paradiseBackgroundColor} />
 
       {/* Decoration - Top Left Corner */}
       {homePageDecoration && (

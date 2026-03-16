@@ -3,7 +3,6 @@
   justify-content: center;
   align-items: center;
   min-height: 400px;
-  background: var(--paradise-bg, #000000);
   position: relative;
   overflow: visible;
   padding: 60px 20px;

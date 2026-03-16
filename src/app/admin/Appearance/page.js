@@ -36,6 +36,8 @@ export default function AppearancePage() {
   const [paradiseText, setParadiseText] = useState('PARADISE');
   const [paradiseTextEditing, setParadiseTextEditing] = useState(false);
   const [paradiseTextSaving, setParadiseTextSaving] = useState(false);
+  const [paradiseBackgroundColor, setParadiseBackgroundColor] = useState('#f3f4f6');
+  const [paradiseBackgroundSaving, setParadiseBackgroundSaving] = useState(false);
   const fileInputRef = useRef(null);
   const decorationInputRef = useRef(null);
 
@@ -86,12 +88,14 @@ export default function AppearancePage() {
       setHomePageDecoration(data.homePageDecoration || null);
       setBrands(data.brands || ['Renu Crackers', 'Mightloads', 'Sri Aravind', 'Ramesh']);
       setParadiseText(data.paradiseText || 'PARADISE');
+      setParadiseBackgroundColor(data.paradiseBackgroundColor || '#f3f4f6');
     } catch (error) {
       console.error('Error fetching settings:', error);
       setPriceListStyle(styleOptions[1]); // Default to 'table'
       setHomePageDecoration(null);
       setBrands(['Renu Crackers', 'Mightloads', 'Sri Aravind', 'Ramesh']);
       setParadiseText('PARADISE');
+      setParadiseBackgroundColor('#f3f4f6');
     } finally {
       setStyleLoading(false);
       setBrandsLoading(false);
@@ -512,6 +516,29 @@ export default function AppearancePage() {
     setParadiseText(paradiseText); // Reset to previous value
   };
 
+  const handleSaveParadiseBackgroundColor = async (color) => {
+    try {
+      setParadiseBackgroundSaving(true);
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paradiseBackgroundColor: color }),
+      });
+
+      if (response.ok) {
+        setParadiseBackgroundColor(color);
+        showAlert('✓ Paradise Animation background color updated successfully!', 'success');
+      } else {
+        showAlert('Failed to update background color', 'error');
+      }
+    } catch (error) {
+      console.error('Error updating background color:', error);
+      showAlert('Error updating background color', 'error');
+    } finally {
+      setParadiseBackgroundSaving(false);
+    }
+  };
+
   const handleDeleteDecoration = async () => {
     if (!confirm('Are you sure you want to delete the decoration image?')) {
       return;
@@ -702,8 +729,24 @@ export default function AppearancePage() {
         ) : (
           <>
             <p className="text-gray-600 mb-4">This is the animated text displayed at the top of the home page:</p>
-            <div className="border border-gray-300 rounded-lg overflow-hidden bg-gray-50 p-8">
+            <div style={{ backgroundColor: paradiseBackgroundColor }} className="border border-gray-300 rounded-lg overflow-hidden p-8">
               <ParadiseAnimation text={paradiseText} />
+            </div>
+            <div className="mt-6 flex items-center gap-4">
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Background Color</label>
+                <input
+                  type="color"
+                  value={paradiseBackgroundColor}
+                  onChange={(e) => handleSaveParadiseBackgroundColor(e.target.value)}
+                  disabled={paradiseBackgroundSaving}
+                  className="w-16 h-10 border border-gray-300 rounded-lg cursor-pointer"
+                  title="Click to change the animation background color"
+                />
+              </div>
+              {paradiseBackgroundSaving && (
+                <p className="text-sm text-gray-500">Saving...</p>
+              )}
             </div>
             <p className="text-sm text-gray-500 mt-4">Each letter appears one-by-one with a spark/fireworks animation effect.</p>
           </>

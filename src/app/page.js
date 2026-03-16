@@ -93,8 +93,7 @@ export default function Home() {
 
   return (
     <div className="dark-bg-section relative">
-      {/* Paradise Animation */}
-      <ParadiseAnimation text={paradiseText} backgroundColor={paradiseBackgroundColor} />
+      
 
       {/* Decoration - Top Left Corner */}
       {homePageDecoration && (
@@ -146,6 +145,9 @@ export default function Home() {
           <div style={{padding:"15%"}}/>
         )}
       </section>
+
+      {/* Paradise Animation */}
+      <ParadiseAnimation text={paradiseText} backgroundColor={paradiseBackgroundColor} />
       
       {/* Festival Banners */}
       <section className="py-8 px-4 sm:px-6 navy-bg-section">

@@ -19,6 +19,13 @@ export default function Home() {
   const [navbarColor, setNavbarColor] = useState('#1d4f4f');
   const [paradiseText, setParadiseText] = useState('PARADISE');
   const [paradiseBackgroundColor, setParadiseBackgroundColor] = useState('#f3f4f6');
+  const [testimonial, setTestimonial] = useState(null);
+  const [blogPosts, setBlogPosts] = useState([
+    { id: 1, title: 'How to Choose the Best Crackers?', image: '🎆' },
+    { id: 2, title: 'Firecrackers Safety Guide', image: '⚠️' },
+    { id: 3, title: 'Diwali Crackers Online Shopping', image: '🛒' },
+    { id: 4, title: 'Diwali Crackers for Kids and Safe Celebration', image: '👨‍👩‍👧‍👦' },
+  ]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,6 +46,10 @@ export default function Home() {
         setNavbarColor(settingsData.navbarColor || '#1d4f4f');
         setParadiseText(settingsData.paradiseText || 'PARADISE');
         setParadiseBackgroundColor(settingsData.paradiseBackgroundColor || '#f3f4f6');
+        setTestimonial(settingsData.testimonial || null);
+        if (Array.isArray(settingsData.blogPosts)) {
+          setBlogPosts(settingsData.blogPosts);
+        }
         if (Array.isArray(settingsData.brands)) {
           setBrands(settingsData.brands);
         }
@@ -76,13 +87,6 @@ export default function Home() {
 
     return () => clearInterval(interval);
   }, [carouselImages]);
-
-  const blogPosts = [
-    { id: 1, title: 'How to Choose the Best Crackers?', image: '🎆' },
-    { id: 2, title: 'Firecrackers Safety Guide', image: '⚠️' },
-    { id: 3, title: 'Diwali Crackers Online Shopping', image: '🛒' },
-    { id: 4, title: 'Diwali Crackers for Kids and Safe Celebration', image: '👨‍👩‍👧‍👦' },
-  ];
 
   const cartTotal = getCartTotal();
   const cartItemsCount = getCartItemCount();
@@ -250,28 +254,29 @@ export default function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="relative text-white py-12 px-4 sm:px-6" style={{ backgroundColor: navbarColor }}>
-        <div className="absolute left-0 top-0 w-16 h-16 opacity-20">
-          <svg viewBox="0 0 100 100" className="w-full h-full">
-            <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" strokeWidth="2" />
-          </svg>
-        </div>
-        <div className="absolute right-0 bottom-0 w-16 h-16 opacity-20">
-          <svg viewBox="0 0 100 100" className="w-full h-full">
-            <path d="M50,10 L61,40 L92,40 L67,60 L78,90 L50,70 L22,90 L33,60 L8,40 L39,40 Z" fill="currentColor" />
-          </svg>
-        </div>
+      {testimonial && (
+        <section className="relative text-white py-12 px-4 sm:px-6" style={{ backgroundColor: navbarColor }}>
+          <div className="absolute left-0 top-0 w-16 h-16 opacity-20">
+            <svg viewBox="0 0 100 100" className="w-full h-full">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" strokeWidth="2" />
+            </svg>
+          </div>
+          <div className="absolute right-0 bottom-0 w-16 h-16 opacity-20">
+            <svg viewBox="0 0 100 100" className="w-full h-full">
+              <path d="M50,10 L61,40 L92,40 L67,60 L78,90 L50,70 L22,90 L33,60 L8,40 L39,40 Z" fill="currentColor" />
+            </svg>
+          </div>
 
-        <div className="max-w-7xl mx-auto text-center relative z-10">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-4">CRACKERS INDIA</h2>
-          <h3 className="text-xl sm:text-2xl font-bold text-yellow-300 mb-6">Client Says About Us</h3>
-          <p className="text-base sm:text-lg leading-relaxed max-w-2xl mx-auto px-4">
-            "We have been sourcing crackers from pk crackers for the past 5 years. The quality is consistently excellent,
-            and their customer service is outstanding. They have helped us grow our business significantly."
-          </p>
-          <p className="text-sm mt-6 text-yellow-200">- Satisfied Customer</p>
-        </div>
-      </section>
+          <div className="max-w-7xl mx-auto text-center relative z-10">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4">{testimonial.title}</h2>
+            <h3 className="text-xl sm:text-2xl font-bold text-yellow-300 mb-6">{testimonial.heading}</h3>
+            <p className="text-base sm:text-lg leading-relaxed max-w-2xl mx-auto px-4">
+              "{testimonial.quote}"
+            </p>
+            <p className="text-sm mt-6 text-yellow-200">- {testimonial.attribution}</p>
+          </div>
+        </section>
+      )}
 
       {/* Blog Posts */}
       <section className="py-12 px-4 sm:px-6 dark-bg-section">

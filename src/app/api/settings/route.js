@@ -5,8 +5,8 @@ export async function GET() {
   try {
     const connection = await getConnection();
     const [settings] = await connection.execute(
-      'SELECT * FROM settings WHERE setting_key IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      ['price_list_style', 'home_page_decoration', 'home_page_banners', 'home_page_brands', 'navbar_color', 'dark_background_color', 'navy_background_color', 'gold_accent_color', 'paradise_text', 'paradise_background_color']
+      'SELECT * FROM settings WHERE setting_key IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      ['price_list_style', 'home_page_decoration', 'home_page_banners', 'home_page_brands', 'navbar_color', 'dark_background_color', 'navy_background_color', 'gold_accent_color', 'paradise_text', 'paradise_background_color', 'testimonial_data', 'blog_posts_data']
     );
     await connection.end();
 
@@ -19,6 +19,18 @@ export async function GET() {
       goldAccent: '#d4a574',
       paradiseText: 'PARADISE',
       paradiseBackgroundColor: '#f3f4f6',
+      testimonial: {
+        title: 'CRACKERS INDIA',
+        heading: 'Client Says About Us',
+        quote: 'We have been sourcing crackers from pk crackers for the past 5 years. The quality is consistently excellent, and their customer service is outstanding. They have helped us grow our business significantly.',
+        attribution: 'Satisfied Customer'
+      },
+      blogPosts: [
+        { id: 1, title: 'How to Choose the Best Crackers?', image: '🎆' },
+        { id: 2, title: 'Firecrackers Safety Guide', image: '⚠️' },
+        { id: 3, title: 'Diwali Crackers Online Shopping', image: '🛒' },
+        { id: 4, title: 'Diwali Crackers for Kids and Safe Celebration', image: '👨‍👩‍👧‍👦' },
+      ],
       brands: ['Renu Crackers', 'Mightloads', 'Sri Aravind', 'Ramesh'],
       banners: [
         {
@@ -74,6 +86,18 @@ export async function GET() {
         result.paradiseText = setting.setting_value;
       } else if (setting.setting_key === 'paradise_background_color') {
         result.paradiseBackgroundColor = setting.setting_value;
+      } else if (setting.setting_key === 'testimonial_data') {
+        try {
+          result.testimonial = JSON.parse(setting.setting_value);
+        } catch (e) {
+          console.error('Error parsing testimonial JSON:', e);
+        }
+      } else if (setting.setting_key === 'blog_posts_data') {
+        try {
+          result.blogPosts = JSON.parse(setting.setting_value);
+        } catch (e) {
+          console.error('Error parsing blog posts JSON:', e);
+        }
       }
     });
 
@@ -119,7 +143,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     const data = await request.json();
-    const { style, homePageDecoration, banners, brands, navbarColor, darkBackground, navyBackground, goldAccent, paradiseText, paradiseBackgroundColor } = data;
+    const { style, homePageDecoration, banners, brands, navbarColor, darkBackground, navyBackground, goldAccent, paradiseText, paradiseBackgroundColor, testimonial, blogPosts } = data;
 
     const connection = await getConnection();
 
@@ -340,9 +364,51 @@ export async function POST(request) {
       }
     }
 
+    // Update testimonial if provided
+    if (testimonial !== undefined) {
+      const testimonialJSON = JSON.stringify(testimonial);
+      const [existing] = await connection.execute(
+        'SELECT id FROM settings WHERE setting_key = ? LIMIT 1',
+        ['testimonial_data']
+      );
+
+      if (existing.length > 0) {
+        await connection.execute(
+          'UPDATE settings SET setting_value = ? WHERE setting_key = ?',
+          [testimonialJSON, 'testimonial_data']
+        );
+      } else {
+        await connection.execute(
+          'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)',
+          ['testimonial_data', testimonialJSON]
+        );
+      }
+    }
+
+    // Update blog posts if provided
+    if (blogPosts !== undefined) {
+      const blogPostsJSON = JSON.stringify(blogPosts);
+      const [existing] = await connection.execute(
+        'SELECT id FROM settings WHERE setting_key = ? LIMIT 1',
+        ['blog_posts_data']
+      );
+
+      if (existing.length > 0) {
+        await connection.execute(
+          'UPDATE settings SET setting_value = ? WHERE setting_key = ?',
+          [blogPostsJSON, 'blog_posts_data']
+        );
+      } else {
+        await connection.execute(
+          'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)',
+          ['blog_posts_data', blogPostsJSON]
+        );
+      }
+    }
+
     await connection.end();
 
-    return NextResponse.json({ style, homePageDecoration, banners, brands, navbarColor, darkBackground, navyBackground, goldAccent, paradiseText, paradiseBackgroundColor }, { status: 200 });
+    return NextResponse.json({ style, homePageDecoration, banners, brands, navbarColor, darkBackground, navyBackground, goldAccent, paradiseText, paradiseBackgroundColor, testimonial, blogPosts }, { status: 200 });
   } catch (error) {
     console.error('Error updating settings:', error);
     return NextResponse.json({ error: 'Failed to update settings' }, { status: 500 });

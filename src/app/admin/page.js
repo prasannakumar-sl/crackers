@@ -24,6 +24,19 @@ export default function AdminDashboard() {
   const [importingFile, setImportingFile] = useState(false);
   const [importResults, setImportResults] = useState(null);
   const [paradiseBackgroundColor, setParadiseBackgroundColor] = useState('#000000');
+  const [testimonial, setTestimonial] = useState({
+    title: 'CRACKERS INDIA',
+    heading: 'Client Says About Us',
+    quote: 'We have been sourcing crackers from pk crackers for the past 5 years. The quality is consistently excellent, and their customer service is outstanding. They have helped us grow our business significantly.',
+    attribution: 'Satisfied Customer'
+  });
+  const [blogPosts, setBlogPosts] = useState([
+    { id: 1, title: 'How to Choose the Best Crackers?', image: '🎆' },
+    { id: 2, title: 'Firecrackers Safety Guide', image: '⚠️' },
+    { id: 3, title: 'Diwali Crackers Online Shopping', image: '🛒' },
+    { id: 4, title: 'Diwali Crackers for Kids and Safe Celebration', image: '👨‍👩‍👧‍👦' },
+  ]);
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
 
   const [dashboardMetrics, setDashboardMetrics] = useState({
     totalOrders: 0,
@@ -50,6 +63,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchProducts();
     fetchDashboardMetrics();
+    fetchAppearanceSettings();
 
     // Load saved background color
     const saved = localStorage.getItem('paradiseBackgroundColor');
@@ -57,6 +71,26 @@ export default function AdminDashboard() {
       setParadiseBackgroundColor(saved);
     }
   }, []);
+
+  const fetchAppearanceSettings = async () => {
+    try {
+      const response = await fetch('/api/settings', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+        }
+      });
+      const data = await response.json();
+      if (data.testimonial) {
+        setTestimonial(data.testimonial);
+      }
+      if (data.blogPosts) {
+        setBlogPosts(data.blogPosts);
+      }
+    } catch (error) {
+      console.error('Error fetching appearance settings:', error);
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -184,6 +218,33 @@ export default function AdminDashboard() {
     } finally {
       setImportingFile(false);
       e.target.value = '';
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    try {
+      setIsSavingSettings(true);
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          testimonial,
+          blogPosts,
+        }),
+      });
+
+      if (response.ok) {
+        showAlert('Settings saved successfully!', 'success');
+      } else {
+        showAlert('Failed to save settings', 'error');
+      }
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      showAlert(`Error saving settings: ${error.message}`, 'error');
+    } finally {
+      setIsSavingSettings(false);
     }
   };
 
@@ -585,50 +646,120 @@ export default function AdminDashboard() {
         <div>
           <h2 className="text-3xl font-bold text-gray-800 mb-8">Appearance Settings</h2>
 
-          <div className="rounded-lg shadow overflow-hidden">
-            <div className="p-8">
-              <h3 className="text-2xl font-bold text-gray-800 mb-6">Paradise Animation</h3>
-              <p className="text-gray-600 mb-6">Stunning animated text with golden sparkle effects:</p>
+          {/* Testimonials Section */}
+          <div className="bg-white rounded-lg shadow p-8 mb-8">
+            <h3 className="text-2xl font-bold text-gray-800 mb-6">Testimonials Section</h3>
 
-              <div className="mb-6">
-                <label className="block text-gray-700 font-medium mb-2">Background Color</label>
-                <div className="flex items-center gap-4">
-                  <input
-                    type="color"
-                    value={paradiseBackgroundColor}
-                    onChange={(e) => {
-                      setParadiseBackgroundColor(e.target.value);
-                      localStorage.setItem('paradiseBackgroundColor', e.target.value);
-                    }}
-                    className="w-16 h-12 rounded-lg cursor-pointer border border-gray-300"
-                  />
-                  <input
-                    type="text"
-                    value={paradiseBackgroundColor}
-                    onChange={(e) => {
-                      setParadiseBackgroundColor(e.target.value);
-                      localStorage.setItem('paradiseBackgroundColor', e.target.value);
-                    }}
-                    placeholder="#000000"
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 w-32"
-                  />
-                </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Section Title</label>
+                <input
+                  type="text"
+                  value={testimonial.title}
+                  onChange={(e) => setTestimonial({ ...testimonial, title: e.target.value })}
+                  placeholder="e.g., CRACKERS INDIA"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Heading</label>
+                <input
+                  type="text"
+                  value={testimonial.heading}
+                  onChange={(e) => setTestimonial({ ...testimonial, heading: e.target.value })}
+                  placeholder="e.g., Client Says About Us"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Testimonial Quote</label>
+                <textarea
+                  value={testimonial.quote}
+                  onChange={(e) => setTestimonial({ ...testimonial, quote: e.target.value })}
+                  placeholder="Enter the customer testimonial..."
+                  rows="4"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Attribution (Customer Name)</label>
+                <input
+                  type="text"
+                  value={testimonial.attribution}
+                  onChange={(e) => setTestimonial({ ...testimonial, attribution: e.target.value })}
+                  placeholder="e.g., Satisfied Customer"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                />
               </div>
             </div>
+          </div>
 
-            <ParadiseAnimation text="PARADISE CRACKERS" backgroundColor={paradiseBackgroundColor} />
+          {/* Blog Posts Section */}
+          <div className="bg-white rounded-lg shadow p-8 mb-8">
+            <h3 className="text-2xl font-bold text-gray-800 mb-6">Blog Posts</h3>
 
-            <div className="bg-white p-8 pt-12">
-              <h4 className="text-lg font-semibold text-gray-800 mb-4">Animation Features:</h4>
-              <ul className="list-disc list-inside text-gray-600 space-y-3">
-                <li>Each letter animates in with a dynamic pop effect</li>
-                <li>Golden sparkle particles radiate outward from each letter</li>
-                <li>Smooth sequential timing creates flowing animation</li>
-                <li>Works responsively across all screen sizes</li>
-                <li>Fully customizable background color</li>
-                <li>Fully customizable text and styling</li>
-              </ul>
+            <div className="space-y-6">
+              {blogPosts.map((post, index) => (
+                <div key={post.id} className="p-6 border border-gray-200 rounded-lg bg-gray-50">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-gray-700 font-medium mb-2">Blog Post {index + 1} - Title</label>
+                      <input
+                        type="text"
+                        value={post.title}
+                        onChange={(e) => {
+                          const updated = [...blogPosts];
+                          updated[index] = { ...post, title: e.target.value };
+                          setBlogPosts(updated);
+                        }}
+                        placeholder="Enter blog post title..."
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-gray-700 font-medium mb-2">Blog Post {index + 1} - Icon/Emoji</label>
+                      <input
+                        type="text"
+                        value={post.image}
+                        onChange={(e) => {
+                          const updated = [...blogPosts];
+                          updated[index] = { ...post, image: e.target.value };
+                          setBlogPosts(updated);
+                        }}
+                        placeholder="e.g., 🎆"
+                        maxLength="5"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                      />
+                      <p className="text-sm text-gray-500 mt-1">Enter an emoji or special character</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
+          </div>
+
+          <div className="bg-white p-8 pt-12 rounded-lg shadow">
+            <h4 className="text-lg font-semibold text-gray-800 mb-4">Animation Features:</h4>
+            <ul className="list-disc list-inside text-gray-600 space-y-3 mb-6">
+              <li>Each letter animates in with a dynamic pop effect</li>
+              <li>Golden sparkle particles radiate outward from each letter</li>
+              <li>Smooth sequential timing creates flowing animation</li>
+              <li>Works responsively across all screen sizes</li>
+              <li>Fully customizable background color</li>
+              <li>Fully customizable text and styling</li>
+            </ul>
+
+            <button
+              onClick={handleSaveSettings}
+              disabled={isSavingSettings}
+              className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400 font-semibold"
+            >
+              {isSavingSettings ? 'Saving...' : '💾 Save All Settings'}
+            </button>
           </div>
         </div>
       )}

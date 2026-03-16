@@ -15,6 +15,17 @@ export default function ParadiseAnimation({ text = 'PARADISE', backgroundColor =
     const existingLetters = container.querySelectorAll('.paradise-letter');
     existingLetters.forEach(el => el.remove());
 
+    // Determine spark distance based on screen size
+    const isSmallMobile = window.innerWidth < 360;
+    const isMobile = window.innerWidth < 480;
+    const isTablet = window.innerWidth < 640;
+    const isLargeTablet = window.innerWidth < 1024;
+    let sparkDistance = 80;
+    if (isSmallMobile) sparkDistance = 25;
+    else if (isMobile) sparkDistance = 35;
+    else if (isTablet) sparkDistance = 45;
+    else if (isLargeTablet) sparkDistance = 65;
+
     // Create letters with animation
     letters.forEach((letter, index) => {
       const letterEl = document.createElement('span');
@@ -32,9 +43,8 @@ export default function ParadiseAnimation({ text = 'PARADISE', backgroundColor =
 
         // Calculate angle in radians
         const angle = (360 / 8) * i * (Math.PI / 180);
-        const distance = 80;
-        const x = Math.cos(angle) * distance;
-        const y = Math.sin(angle) * distance;
+        const x = Math.cos(angle) * sparkDistance;
+        const y = Math.sin(angle) * sparkDistance;
 
         spark.style.setProperty('--spark-x', `${x}px`);
         spark.style.setProperty('--spark-y', `${y}px`);
@@ -63,9 +73,17 @@ export default function ParadiseAnimation({ text = 'PARADISE', backgroundColor =
 
     observer.observe(container);
 
+    // Handle window resize to adjust spark distance on screen size change
+    const handleResize = () => {
+      playAnimation();
+    };
+
+    window.addEventListener('resize', handleResize);
+
     return () => {
       observer.unobserve(container);
       observer.disconnect();
+      window.removeEventListener('resize', handleResize);
     };
   }, [letters]);
 

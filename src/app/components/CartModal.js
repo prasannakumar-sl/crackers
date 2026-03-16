@@ -25,7 +25,7 @@ export default function CartModal() {
       />
 
       {/* Modal Drawer */}
-      <div className="fixed top-0 right-0 h-full w-80 bg-white z-50 shadow-2xl flex flex-col overflow-hidden">
+      <div className="fixed top-0 right-0 h-full w-full sm:w-80 bg-white z-50 shadow-2xl flex flex-col overflow-hidden">
       {/* Header */}
       <div className="bg-teal-900 text-white p-4 flex justify-between items-center">
         <h2 className="text-lg font-bold">Shopping Cart</h2>

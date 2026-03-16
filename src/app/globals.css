@@ -89,8 +89,8 @@ img {
 /* WhatsApp Button Styling */
 .whatsapp-button {
   position: fixed;
-  bottom: 6rem;
-  right: 1.5rem;
+  bottom: 1rem;
+  right: 1rem;
   width: 4rem;
   height: 4rem;
   background-color: #25D366;
@@ -111,6 +111,12 @@ img {
 
 .whatsapp-button:active {
   transform: scale(0.95);
+}
+
+@media (min-width: 640px) {
+  .whatsapp-button {
+    bottom: 6rem;
+  }
 }
 
 .whatsapp-icon {

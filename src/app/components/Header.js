@@ -78,21 +78,21 @@ export default function Header() {
 
   return (
     <header className="text-white sticky top-0 z-50 shadow-md" style={{ backgroundColor: navbarColor }}>
-      <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2 sm:py-3 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center gap-2">
           {!loadingCompanyInfo && companyInfo.logo ? (
             <img
               src={companyInfo.logo}
               alt={companyInfo.company_name}
-              className="w-8 h-8 rounded-full object-cover"
+              className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover"
             />
           ) : (
-            <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center font-bold text-teal-900">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-yellow-500 rounded-full flex items-center justify-center font-bold text-teal-900 text-xs sm:text-sm">
               {companyInfo.company_name.charAt(0).toUpperCase()}
             </div>
           )}
-          <span className="font-bold text-sm">{companyInfo.company_name}</span>
+          <span className="font-bold text-xs sm:text-sm">{companyInfo.company_name}</span>
         </div>
 
         {/* Desktop Navigation */}
@@ -125,7 +125,7 @@ export default function Header() {
         {/* Mobile Menu Button */}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden text-white text-2xl"
+          className="md:hidden text-white text-xl"
         >
           ☰
         </button>

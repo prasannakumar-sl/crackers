@@ -36,7 +36,7 @@ export default function AppearancePage() {
   const [paradiseText, setParadiseText] = useState('PARADISE');
   const [paradiseTextEditing, setParadiseTextEditing] = useState(false);
   const [paradiseTextSaving, setParadiseTextSaving] = useState(false);
-  const [paradiseBackgroundColor, setParadiseBackgroundColor] = useState('#f3f4f6');
+  const [paradiseBackgroundColor, setParadiseBackgroundColor] = useState('#000000');
   const [paradiseBackgroundSaving, setParadiseBackgroundSaving] = useState(false);
   const fileInputRef = useRef(null);
   const decorationInputRef = useRef(null);
@@ -88,14 +88,14 @@ export default function AppearancePage() {
       setHomePageDecoration(data.homePageDecoration || null);
       setBrands(data.brands || ['Renu Crackers', 'Mightloads', 'Sri Aravind', 'Ramesh']);
       setParadiseText(data.paradiseText || 'PARADISE');
-      setParadiseBackgroundColor(data.paradiseBackgroundColor || '#f3f4f6');
+      setParadiseBackgroundColor(data.paradiseBackgroundColor || '#000000');
     } catch (error) {
       console.error('Error fetching settings:', error);
       setPriceListStyle(styleOptions[1]); // Default to 'table'
       setHomePageDecoration(null);
       setBrands(['Renu Crackers', 'Mightloads', 'Sri Aravind', 'Ramesh']);
       setParadiseText('PARADISE');
-      setParadiseBackgroundColor('#f3f4f6');
+      setParadiseBackgroundColor('#000000');
     } finally {
       setStyleLoading(false);
       setBrandsLoading(false);

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Snackbar, Alert, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SectionManager from '../components/SectionManager';
+import ParadiseAnimation from '../components/ParadiseAnimation';
 
 export default function AdminDashboard() {
   const [products, setProducts] = useState([]);
@@ -22,6 +23,7 @@ export default function AdminDashboard() {
   const [showImport, setShowImport] = useState(false);
   const [importingFile, setImportingFile] = useState(false);
   const [importResults, setImportResults] = useState(null);
+  const [paradiseBackgroundColor, setParadiseBackgroundColor] = useState('#000000');
 
   const [dashboardMetrics, setDashboardMetrics] = useState({
     totalOrders: 0,
@@ -48,6 +50,12 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchProducts();
     fetchDashboardMetrics();
+
+    // Load saved background color
+    const saved = localStorage.getItem('paradiseBackgroundColor');
+    if (saved) {
+      setParadiseBackgroundColor(saved);
+    }
   }, []);
 
   const fetchProducts = async () => {
@@ -241,6 +249,16 @@ export default function AdminDashboard() {
             }`}
           >
             Sections Management
+          </button>
+          <button
+            onClick={() => setActiveTab('appearance')}
+            className={`px-6 py-3 font-semibold transition ${
+              activeTab === 'appearance'
+                ? 'text-blue-600 border-b-2 border-blue-600'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            Appearance
           </button>
         </div>
       </div>
@@ -561,6 +579,59 @@ export default function AdminDashboard() {
 
       {/* Sections Tab */}
       {activeTab === 'sections' && <SectionManager />}
+
+      {/* Appearance Tab */}
+      {activeTab === 'appearance' && (
+        <div>
+          <h2 className="text-3xl font-bold text-gray-800 mb-8">Appearance Settings</h2>
+
+          <div className="rounded-lg shadow overflow-hidden">
+            <div className="p-8">
+              <h3 className="text-2xl font-bold text-gray-800 mb-6">Paradise Animation</h3>
+              <p className="text-gray-600 mb-6">Stunning animated text with golden sparkle effects:</p>
+
+              <div className="mb-6">
+                <label className="block text-gray-700 font-medium mb-2">Background Color</label>
+                <div className="flex items-center gap-4">
+                  <input
+                    type="color"
+                    value={paradiseBackgroundColor}
+                    onChange={(e) => {
+                      setParadiseBackgroundColor(e.target.value);
+                      localStorage.setItem('paradiseBackgroundColor', e.target.value);
+                    }}
+                    className="w-16 h-12 rounded-lg cursor-pointer border border-gray-300"
+                  />
+                  <input
+                    type="text"
+                    value={paradiseBackgroundColor}
+                    onChange={(e) => {
+                      setParadiseBackgroundColor(e.target.value);
+                      localStorage.setItem('paradiseBackgroundColor', e.target.value);
+                    }}
+                    placeholder="#000000"
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 w-32"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <ParadiseAnimation text="PARADISE" backgroundColor={paradiseBackgroundColor} />
+
+            <div className="bg-white p-8 pt-12">
+              <h4 className="text-lg font-semibold text-gray-800 mb-4">Animation Features:</h4>
+              <ul className="list-disc list-inside text-gray-600 space-y-3">
+                <li>Each letter animates in with a dynamic pop effect</li>
+                <li>Golden sparkle particles radiate outward from each letter</li>
+                <li>Smooth sequential timing creates flowing animation</li>
+                <li>Works responsively across all screen sizes</li>
+                <li>Fully customizable background color</li>
+                <li>Fully customizable text and styling</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Snackbar
         open={snackbar.open}

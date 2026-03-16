@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import '../styles/paradise-animation.css';
 
-export default function ParadiseAnimation({ text = 'PARADISE' }) {
+export default function ParadiseAnimation({ text = 'PARADISE', backgroundColor = '#000000' }) {
   const containerRef = useRef(null);
   const letters = text.toUpperCase().split('');
 
@@ -44,7 +44,11 @@ export default function ParadiseAnimation({ text = 'PARADISE' }) {
   }, [letters]);
 
   return (
-    <div className="paradise-container" ref={containerRef}>
+    <div
+      className="paradise-container"
+      ref={containerRef}
+      style={{ '--paradise-bg': backgroundColor }}
+    >
       {/* Letters will be added dynamically */}
     </div>
   );

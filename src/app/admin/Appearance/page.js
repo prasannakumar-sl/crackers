@@ -5,6 +5,7 @@ import { Snackbar, Alert, IconButton, TextField, Autocomplete, Button } from '@m
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import RemoveIcon from '@mui/icons-material/Remove';
+import ParadiseAnimation from '../../components/ParadiseAnimation';
 
 const styleOptions = [
   { label: 'Cards', value: 'cards' },
@@ -616,6 +617,16 @@ export default function AppearancePage() {
   return (
     <div>
       <h2 className="text-3xl font-bold text-gray-800 mb-8">Appearance Settings</h2>
+
+      {/* Paradise Animation Preview */}
+      <div className="bg-white rounded-lg shadow p-6 mb-8">
+        <h3 className="text-2xl font-bold text-gray-800 mb-6">Paradise Animation Preview</h3>
+        <p className="text-gray-600 mb-4">This is the animated "PARADISE" text displayed at the top of the home page:</p>
+        <div className="border border-gray-300 rounded-lg overflow-hidden">
+          <ParadiseAnimation />
+        </div>
+        <p className="text-sm text-gray-500 mt-4">Each letter appears one-by-one with a spark/fireworks animation effect.</p>
+      </div>
 
       {/* Carousel Images Section */}
       <div className="bg-white rounded-lg shadow p-6">

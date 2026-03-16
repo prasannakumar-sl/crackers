@@ -1,6 +1,7 @@
 'use client';
 
 import { useCart } from './context/CartContext';
+import ParadiseAnimation from './components/ParadiseAnimation';
 import { useState, useEffect } from 'react';
 
 export default function Home() {
@@ -84,6 +85,9 @@ export default function Home() {
 
   return (
     <div className="dark-bg-section relative">
+      {/* Paradise Animation */}
+      <ParadiseAnimation />
+
       {/* Decoration - Top Left Corner */}
       {homePageDecoration && (
         <div className="fixed top-4 left-4 z-10 pointer-events-none">
@@ -142,19 +146,35 @@ export default function Home() {
             {banners.map((banner) => (
               <div
                 key={banner.id}
-                className="text-white p-8 rounded-xl cursor-pointer hover:shadow-xl transition-all active:scale-[0.98] banner-card"
+                className="text-white rounded-xl cursor-pointer hover:shadow-xl transition-all active:scale-[0.98] banner-card overflow-hidden flex flex-col"
                 style={{
                   backgroundColor: banner.solidColor || banner.gradientFrom || 'var(--gold)'
                 }}
                 onClick={() => setSelectedBanner(banner)}
               >
-                <h3 className="font-bold text-xl sm:text-2xl mb-2">{banner.title}</h3>
-                <p className="text-sm sm:text-base font-semibold">{banner.subtitle}</p>
-                {banner.products && banner.products.length > 0 && (
-                  <div className="mt-4 text-xs bg-white/20 inline-block px-3 py-1.5 rounded-full">
-                    {banner.products.length} Products
+                {banner.bannerImage && (
+                  <div className="w-full h-40 overflow-hidden flex items-center justify-center bg-gray-700">
+                    <img
+                      src={banner.bannerImage}
+                      alt={banner.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
                   </div>
                 )}
+                <div className="p-8 flex-grow flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-bold text-xl sm:text-2xl mb-2">{banner.title}</h3>
+                    <p className="text-sm sm:text-base font-semibold">{banner.subtitle}</p>
+                  </div>
+                  {banner.products && banner.products.length > 0 && (
+                    <div className="mt-4 text-xs bg-white/20 inline-block px-3 py-1.5 rounded-full w-fit">
+                      {banner.products.length} Products
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>

@@ -5,8 +5,8 @@ export async function GET() {
   try {
     const connection = await getConnection();
     const [settings] = await connection.execute(
-      'SELECT * FROM settings WHERE setting_key IN (?, ?, ?, ?, ?, ?, ?, ?)',
-      ['price_list_style', 'home_page_decoration', 'home_page_banners', 'home_page_brands', 'navbar_color', 'dark_background_color', 'navy_background_color', 'gold_accent_color']
+      'SELECT * FROM settings WHERE setting_key IN (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      ['price_list_style', 'home_page_decoration', 'home_page_banners', 'home_page_brands', 'navbar_color', 'dark_background_color', 'navy_background_color', 'gold_accent_color', 'paradise_text']
     );
     await connection.end();
 
@@ -17,6 +17,7 @@ export async function GET() {
       darkBackground: '#0f1e3d',
       navyBackground: '#1a2847',
       goldAccent: '#d4a574',
+      paradiseText: 'PARADISE',
       brands: ['Renu Crackers', 'Mightloads', 'Sri Aravind', 'Ramesh'],
       banners: [
         {
@@ -68,6 +69,8 @@ export async function GET() {
         result.navyBackground = setting.setting_value;
       } else if (setting.setting_key === 'gold_accent_color') {
         result.goldAccent = setting.setting_value;
+      } else if (setting.setting_key === 'paradise_text') {
+        result.paradiseText = setting.setting_value;
       }
     });
 
@@ -81,6 +84,7 @@ export async function GET() {
       darkBackground: '#0f1e3d',
       navyBackground: '#1a2847',
       goldAccent: '#d4a574',
+      paradiseText: 'PARADISE',
       banners: [
         {
           id: 1,
@@ -111,7 +115,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     const data = await request.json();
-    const { style, homePageDecoration, banners, brands, navbarColor, darkBackground, navyBackground, goldAccent } = data;
+    const { style, homePageDecoration, banners, brands, navbarColor, darkBackground, navyBackground, goldAccent, paradiseText } = data;
 
     const connection = await getConnection();
 
@@ -292,9 +296,29 @@ export async function POST(request) {
       }
     }
 
+    // Update paradise text if provided
+    if (paradiseText !== undefined) {
+      const [existing] = await connection.execute(
+        'SELECT id FROM settings WHERE setting_key = ? LIMIT 1',
+        ['paradise_text']
+      );
+
+      if (existing.length > 0) {
+        await connection.execute(
+          'UPDATE settings SET setting_value = ? WHERE setting_key = ?',
+          [paradiseText, 'paradise_text']
+        );
+      } else {
+        await connection.execute(
+          'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)',
+          ['paradise_text', paradiseText]
+        );
+      }
+    }
+
     await connection.end();
 
-    return NextResponse.json({ style, homePageDecoration, banners, brands, navbarColor, darkBackground, navyBackground, goldAccent }, { status: 200 });
+    return NextResponse.json({ style, homePageDecoration, banners, brands, navbarColor, darkBackground, navyBackground, goldAccent, paradiseText }, { status: 200 });
   } catch (error) {
     console.error('Error updating settings:', error);
     return NextResponse.json({ error: 'Failed to update settings' }, { status: 500 });

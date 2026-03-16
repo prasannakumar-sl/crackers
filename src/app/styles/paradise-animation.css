@@ -5,7 +5,7 @@
   min-height: 200px;
   background: linear-gradient(135deg, rgba(15, 30, 61, 0.95) 0%, rgba(26, 40, 71, 0.95) 100%);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   padding: 40px 20px;
   gap: 8px;
 }

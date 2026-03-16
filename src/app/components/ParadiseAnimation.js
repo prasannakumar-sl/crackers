@@ -3,9 +3,9 @@
 import { useEffect, useRef } from 'react';
 import '../styles/paradise-animation.css';
 
-export default function ParadiseAnimation() {
+export default function ParadiseAnimation({ text = 'PARADISE' }) {
   const containerRef = useRef(null);
-  const letters = ['P', 'A', 'R', 'A', 'D', 'I', 'S', 'E'];
+  const letters = text.toUpperCase().split('');
 
   useEffect(() => {
     const container = containerRef.current;
@@ -41,7 +41,7 @@ export default function ParadiseAnimation() {
         letterEl.appendChild(spark);
       }
     });
-  }, []);
+  }, [letters]);
 
   return (
     <div className="paradise-container" ref={containerRef}>

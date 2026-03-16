@@ -33,6 +33,9 @@ export default function AppearancePage() {
   const [productsLoading, setProductsLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [productSearchValue, setProductSearchValue] = useState('');
+  const [paradiseText, setParadiseText] = useState('PARADISE');
+  const [paradiseTextEditing, setParadiseTextEditing] = useState(false);
+  const [paradiseTextSaving, setParadiseTextSaving] = useState(false);
   const fileInputRef = useRef(null);
   const decorationInputRef = useRef(null);
 
@@ -82,11 +85,13 @@ export default function AppearancePage() {
       setPriceListStyle(selectedOption || styleOptions[1]); // Default to 'table'
       setHomePageDecoration(data.homePageDecoration || null);
       setBrands(data.brands || ['Renu Crackers', 'Mightloads', 'Sri Aravind', 'Ramesh']);
+      setParadiseText(data.paradiseText || 'PARADISE');
     } catch (error) {
       console.error('Error fetching settings:', error);
       setPriceListStyle(styleOptions[1]); // Default to 'table'
       setHomePageDecoration(null);
       setBrands(['Renu Crackers', 'Mightloads', 'Sri Aravind', 'Ramesh']);
+      setParadiseText('PARADISE');
     } finally {
       setStyleLoading(false);
       setBrandsLoading(false);
@@ -474,6 +479,39 @@ export default function AppearancePage() {
     }
   };
 
+  const handleSaveParadiseText = async () => {
+    if (!paradiseText.trim()) {
+      showAlert('Please enter text for Paradise Animation', 'error');
+      return;
+    }
+
+    try {
+      setParadiseTextSaving(true);
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paradiseText: paradiseText.trim() }),
+      });
+
+      if (response.ok) {
+        setParadiseTextEditing(false);
+        showAlert('✓ Paradise Animation text updated successfully!', 'success');
+      } else {
+        showAlert('Failed to update Paradise Animation text', 'error');
+      }
+    } catch (error) {
+      console.error('Error updating Paradise Animation text:', error);
+      showAlert('Error updating Paradise Animation text', 'error');
+    } finally {
+      setParadiseTextSaving(false);
+    }
+  };
+
+  const handleCancelParadiseEdit = () => {
+    setParadiseTextEditing(false);
+    setParadiseText(paradiseText); // Reset to previous value
+  };
+
   const handleDeleteDecoration = async () => {
     if (!confirm('Are you sure you want to delete the decoration image?')) {
       return;
@@ -620,12 +658,56 @@ export default function AppearancePage() {
 
       {/* Paradise Animation Preview */}
       <div className="bg-white rounded-lg shadow p-6 mb-8">
-        <h3 className="text-2xl font-bold text-gray-800 mb-6">Paradise Animation Preview</h3>
-        <p className="text-gray-600 mb-4">This is the animated "PARADISE" text displayed at the top of the home page:</p>
-        <div className="border border-gray-300 rounded-lg overflow-hidden">
-          <ParadiseAnimation />
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-2xl font-bold text-gray-800">Paradise Animation Preview</h3>
+          {!paradiseTextEditing && (
+            <button
+              onClick={() => setParadiseTextEditing(true)}
+              className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition"
+            >
+              Edit Text
+            </button>
+          )}
         </div>
-        <p className="text-sm text-gray-500 mt-4">Each letter appears one-by-one with a spark/fireworks animation effect.</p>
+
+        {paradiseTextEditing ? (
+          <div className="mb-6 space-y-4">
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">Animation Text</label>
+              <input
+                type="text"
+                value={paradiseText}
+                onChange={(e) => setParadiseText(e.target.value.toUpperCase())}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                placeholder="Enter text for animation"
+              />
+              <p className="text-sm text-gray-500 mt-2">Text will be converted to uppercase. Max 20 characters recommended.</p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={handleSaveParadiseText}
+                disabled={paradiseTextSaving}
+                className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition disabled:bg-gray-400"
+              >
+                {paradiseTextSaving ? 'Saving...' : 'Save'}
+              </button>
+              <button
+                onClick={handleCancelParadiseEdit}
+                className="bg-gray-400 text-white px-6 py-2 rounded-lg hover:bg-gray-500 transition"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <p className="text-gray-600 mb-4">This is the animated text displayed at the top of the home page:</p>
+            <div className="border border-gray-300 rounded-lg overflow-hidden bg-gray-50 p-8">
+              <ParadiseAnimation text={paradiseText} />
+            </div>
+            <p className="text-sm text-gray-500 mt-4">Each letter appears one-by-one with a spark/fireworks animation effect.</p>
+          </>
+        )}
       </div>
 
       {/* Carousel Images Section */}

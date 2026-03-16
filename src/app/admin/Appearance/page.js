@@ -797,6 +797,43 @@ export default function AppearancePage() {
                   className="w-16 h-10 border border-gray-300 rounded-lg cursor-pointer"
                 />
               </div>
+              <div>
+                <label className="block text-white font-medium mb-2">Banner Image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      if (!file.type.startsWith('image/')) {
+                        showAlert('Please select a valid image file', 'error');
+                        return;
+                      }
+                      if (file.size > 5 * 1024 * 1024) {
+                        showAlert('Image size must be less than 5MB', 'error');
+                        return;
+                      }
+                      const reader = new FileReader();
+                      reader.onload = (event) => {
+                        setNewBannerData({ ...newBannerData, bannerImage: event.target?.result });
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-black focus:outline-none cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-white file:text-black hover:file:bg-gray-100"
+                />
+                {newBannerData.bannerImage && (
+                  <div className="mt-3 bg-white rounded p-2 flex items-center justify-between">
+                    <img src={newBannerData.bannerImage} alt="Preview" className="max-h-32 max-w-xs object-contain rounded" />
+                    <button
+                      onClick={() => setNewBannerData({ ...newBannerData, bannerImage: null })}
+                      className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm font-medium"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+              </div>
 
               {/* Product Selection Section */}
               <div className="bg-white rounded p-3">
@@ -979,6 +1016,43 @@ export default function AppearancePage() {
                         className="w-16 h-10 border border-gray-300 rounded-lg cursor-pointer"
                       />
                     </div>
+                    <div>
+                      <label className="block text-white font-medium mb-2">Banner Image</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            if (!file.type.startsWith('image/')) {
+                              showAlert('Please select a valid image file', 'error');
+                              return;
+                            }
+                            if (file.size > 5 * 1024 * 1024) {
+                              showAlert('Image size must be less than 5MB', 'error');
+                              return;
+                            }
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              setEditBannerData({ ...editBannerData, bannerImage: event.target?.result });
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-black focus:outline-none cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-white file:text-black hover:file:bg-gray-100"
+                      />
+                      {editBannerData.bannerImage && (
+                        <div className="mt-3 bg-white rounded p-2 flex items-center justify-between">
+                          <img src={editBannerData.bannerImage} alt="Preview" className="max-h-32 max-w-xs object-contain rounded" />
+                          <button
+                            onClick={() => setEditBannerData({ ...editBannerData, bannerImage: null })}
+                            className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm font-medium"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      )}
+                    </div>
 
                     {/* Product Selection Section */}
                     <div className="bg-white rounded p-3">
@@ -1120,15 +1194,20 @@ export default function AppearancePage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex justify-between items-start">
-                    <div>
+                  <div className="flex justify-between items-start gap-6">
+                    <div className="flex-1">
+                      {banner.bannerImage && (
+                        <div className="mb-4">
+                          <img src={banner.bannerImage} alt={banner.title} className="w-full max-h-48 object-cover rounded" />
+                        </div>
+                      )}
                       <h4 className="font-bold text-lg mb-2">{banner.title}</h4>
                       <p className="text-sm">{banner.subtitle}</p>
                       {banner.products && banner.products.length > 0 && (
                         <p className="text-xs mt-3 opacity-80">📦 {banner.products.length} product(s) selected</p>
                       )}
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-shrink-0">
                       <IconButton
                         onClick={() => handleEditBanner(banner)}
                         color="inherit"

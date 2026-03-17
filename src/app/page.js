@@ -26,6 +26,8 @@ export default function Home() {
     { id: 3, title: 'Diwali Crackers Online Shopping', image: '🛒' },
     { id: 4, title: 'Diwali Crackers for Kids and Safe Celebration', image: '👨‍👩‍👧‍👦' },
   ]);
+  const [showParadiseAnimation, setShowParadiseAnimation] = useState(true);
+  const [showCarouselImages, setShowCarouselImages] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,6 +48,8 @@ export default function Home() {
         setNavbarColor(settingsData.navbarColor || '#1d4f4f');
         setParadiseText(settingsData.paradiseText || 'PARADISE');
         setParadiseBackgroundColor(settingsData.paradiseBackgroundColor || '#f3f4f6');
+        setShowParadiseAnimation(settingsData.showParadiseAnimation !== false);
+        setShowCarouselImages(settingsData.showCarouselImages !== false);
         setTestimonial(settingsData.testimonial || null);
         if (Array.isArray(settingsData.blogPosts)) {
           setBlogPosts(settingsData.blogPosts);
@@ -117,37 +121,41 @@ export default function Home() {
         </div>
       )}
       {/* Carousel Banner */}
-      <section className="w-full relative overflow-hidden dark-bg-section">
-        {carouselImages.length > 0 ? (
-          <div className="relative w-full h-48 sm:h-64 md:h-96 flex items-center justify-center">
-            <img
-              key={carouselImages[currentImageIndex]?.id}
-              src={carouselImages[currentImageIndex]?.image_url}
-              alt={`Carousel ${currentImageIndex + 1}`}
-              className="w-full h-full object-cover transition-opacity duration-500"
-              onError={(e) => {
-                e.target.src = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23ddd%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-size=%2220%22 fill=%22%23999%22%3EImage Failed to Load%3C/text%3E%3C/svg%3E';
-              }}
-            />
-            {/* Carousel Indicators */}
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
-              {carouselImages.map((_, idx) => (
-                <div
-                  key={idx}
-                  className={`w-3 h-3 rounded-full transition-colors ${
-                    idx === currentImageIndex ? 'bg-white' : 'bg-white/50'
-                  }`}
-                />
-              ))}
+      {showCarouselImages && (
+        <section className="w-full relative overflow-hidden dark-bg-section">
+          {carouselImages.length > 0 ? (
+            <div className="relative w-full h-48 sm:h-64 md:h-96 flex items-center justify-center">
+              <img
+                key={carouselImages[currentImageIndex]?.id}
+                src={carouselImages[currentImageIndex]?.image_url}
+                alt={`Carousel ${currentImageIndex + 1}`}
+                className="w-full h-full object-cover transition-opacity duration-500"
+                onError={(e) => {
+                  e.target.src = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23ddd%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-size=%2220%22 fill=%22%23999%22%3EImage Failed to Load%3C/text%3E%3C/svg%3E';
+                }}
+              />
+              {/* Carousel Indicators */}
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
+                {carouselImages.map((_, idx) => (
+                  <div
+                    key={idx}
+                    className={`w-3 h-3 rounded-full transition-colors ${
+                      idx === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        ) : (
-          <div style={{padding:"15%"}}/>
-        )}
-      </section>
+          ) : (
+            <div style={{padding:"15%"}}/>
+          )}
+        </section>
+      )}
 
       {/* Paradise Animation */}
-      <ParadiseAnimation text={paradiseText} backgroundColor={paradiseBackgroundColor} />
+      {showParadiseAnimation && (
+        <ParadiseAnimation text={paradiseText} backgroundColor={paradiseBackgroundColor} />
+      )}
       
       {/* Festival Banners */}
       <section className="py-8 px-4 sm:px-6 navy-bg-section">

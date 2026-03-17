@@ -5,8 +5,8 @@ export async function GET() {
   try {
     const connection = await getConnection();
     const [settings] = await connection.execute(
-      'SELECT * FROM settings WHERE setting_key IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      ['price_list_style', 'home_page_decoration', 'home_page_banners', 'home_page_brands', 'navbar_color', 'dark_background_color', 'navy_background_color', 'gold_accent_color', 'paradise_text', 'paradise_background_color', 'testimonial_data', 'blog_posts_data']
+      'SELECT * FROM settings WHERE setting_key IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      ['price_list_style', 'home_page_decoration', 'home_page_banners', 'home_page_brands', 'navbar_color', 'dark_background_color', 'navy_background_color', 'gold_accent_color', 'paradise_text', 'paradise_background_color', 'testimonial_data', 'blog_posts_data', 'show_paradise_animation', 'show_carousel_images']
     );
     await connection.end();
 
@@ -19,6 +19,8 @@ export async function GET() {
       goldAccent: '#d4a574',
       paradiseText: 'PARADISE',
       paradiseBackgroundColor: '#f3f4f6',
+      showParadiseAnimation: true,
+      showCarouselImages: true,
       testimonial: {
         title: 'CRACKERS INDIA',
         heading: 'Client Says About Us',
@@ -98,6 +100,10 @@ export async function GET() {
         } catch (e) {
           console.error('Error parsing blog posts JSON:', e);
         }
+      } else if (setting.setting_key === 'show_paradise_animation') {
+        result.showParadiseAnimation = setting.setting_value === '1' || setting.setting_value === true;
+      } else if (setting.setting_key === 'show_carousel_images') {
+        result.showCarouselImages = setting.setting_value === '1' || setting.setting_value === true;
       }
     });
 
@@ -113,6 +119,8 @@ export async function GET() {
       goldAccent: '#d4a574',
       paradiseText: 'PARADISE',
       paradiseBackgroundColor: '#f3f4f6',
+      showParadiseAnimation: true,
+      showCarouselImages: true,
       banners: [
         {
           id: 1,
@@ -143,7 +151,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     const data = await request.json();
-    const { style, homePageDecoration, banners, brands, navbarColor, darkBackground, navyBackground, goldAccent, paradiseText, paradiseBackgroundColor, testimonial, blogPosts } = data;
+    const { style, homePageDecoration, banners, brands, navbarColor, darkBackground, navyBackground, goldAccent, paradiseText, paradiseBackgroundColor, testimonial, blogPosts, showParadiseAnimation, showCarouselImages } = data;
 
     const connection = await getConnection();
 
@@ -406,9 +414,51 @@ export async function POST(request) {
       }
     }
 
+    // Update paradise animation visibility if provided
+    if (showParadiseAnimation !== undefined) {
+      const value = showParadiseAnimation ? '1' : '0';
+      const [existing] = await connection.execute(
+        'SELECT id FROM settings WHERE setting_key = ? LIMIT 1',
+        ['show_paradise_animation']
+      );
+
+      if (existing.length > 0) {
+        await connection.execute(
+          'UPDATE settings SET setting_value = ? WHERE setting_key = ?',
+          [value, 'show_paradise_animation']
+        );
+      } else {
+        await connection.execute(
+          'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)',
+          ['show_paradise_animation', value]
+        );
+      }
+    }
+
+    // Update carousel images visibility if provided
+    if (showCarouselImages !== undefined) {
+      const value = showCarouselImages ? '1' : '0';
+      const [existing] = await connection.execute(
+        'SELECT id FROM settings WHERE setting_key = ? LIMIT 1',
+        ['show_carousel_images']
+      );
+
+      if (existing.length > 0) {
+        await connection.execute(
+          'UPDATE settings SET setting_value = ? WHERE setting_key = ?',
+          [value, 'show_carousel_images']
+        );
+      } else {
+        await connection.execute(
+          'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)',
+          ['show_carousel_images', value]
+        );
+      }
+    }
+
     await connection.end();
 
-    return NextResponse.json({ style, homePageDecoration, banners, brands, navbarColor, darkBackground, navyBackground, goldAccent, paradiseText, paradiseBackgroundColor, testimonial, blogPosts }, { status: 200 });
+    return NextResponse.json({ style, homePageDecoration, banners, brands, navbarColor, darkBackground, navyBackground, goldAccent, paradiseText, paradiseBackgroundColor, testimonial, blogPosts, showParadiseAnimation, showCarouselImages }, { status: 200 });
   } catch (error) {
     console.error('Error updating settings:', error);
     return NextResponse.json({ error: 'Failed to update settings' }, { status: 500 });

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Snackbar, Alert, IconButton, TextField, Autocomplete, Button } from '@mui/material';
+import { Snackbar, Alert, IconButton, TextField, Autocomplete, Button, Switch, FormControlLabel } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -38,6 +38,9 @@ export default function AppearancePage() {
   const [paradiseTextSaving, setParadiseTextSaving] = useState(false);
   const [paradiseBackgroundColor, setParadiseBackgroundColor] = useState('#000000');
   const [paradiseBackgroundSaving, setParadiseBackgroundSaving] = useState(false);
+  const [showParadiseAnimation, setShowParadiseAnimation] = useState(true);
+  const [showCarouselImages, setShowCarouselImages] = useState(true);
+  const [visibilityToggleSaving, setVisibilityToggleSaving] = useState(false);
   const fileInputRef = useRef(null);
   const decorationInputRef = useRef(null);
 
@@ -89,6 +92,8 @@ export default function AppearancePage() {
       setBrands(data.brands || ['Renu Crackers', 'Mightloads', 'Sri Aravind', 'Ramesh']);
       setParadiseText(data.paradiseText || 'PARADISE');
       setParadiseBackgroundColor(data.paradiseBackgroundColor || '#000000');
+      setShowParadiseAnimation(data.showParadiseAnimation !== false);
+      setShowCarouselImages(data.showCarouselImages !== false);
     } catch (error) {
       console.error('Error fetching settings:', error);
       setPriceListStyle(styleOptions[1]); // Default to 'table'
@@ -96,6 +101,8 @@ export default function AppearancePage() {
       setBrands(['Renu Crackers', 'Mightloads', 'Sri Aravind', 'Ramesh']);
       setParadiseText('PARADISE');
       setParadiseBackgroundColor('#000000');
+      setShowParadiseAnimation(true);
+      setShowCarouselImages(true);
     } finally {
       setStyleLoading(false);
       setBrandsLoading(false);
@@ -566,6 +573,56 @@ export default function AppearancePage() {
     }
   };
 
+  const handleToggleParadiseAnimation = async (checked) => {
+    setShowParadiseAnimation(checked);
+    try {
+      setVisibilityToggleSaving(true);
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ showParadiseAnimation: checked }),
+      });
+
+      if (response.ok) {
+        showAlert(checked ? '✓ Paradise Animation enabled!' : '✓ Paradise Animation disabled!', 'success');
+      } else {
+        showAlert('Failed to update setting', 'error');
+        setShowParadiseAnimation(!checked); // Revert on error
+      }
+    } catch (error) {
+      console.error('Error updating setting:', error);
+      showAlert('Error updating setting', 'error');
+      setShowParadiseAnimation(!checked); // Revert on error
+    } finally {
+      setVisibilityToggleSaving(false);
+    }
+  };
+
+  const handleToggleCarouselImages = async (checked) => {
+    setShowCarouselImages(checked);
+    try {
+      setVisibilityToggleSaving(true);
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ showCarouselImages: checked }),
+      });
+
+      if (response.ok) {
+        showAlert(checked ? '✓ Carousel Images enabled!' : '✓ Carousel Images disabled!', 'success');
+      } else {
+        showAlert('Failed to update setting', 'error');
+        setShowCarouselImages(!checked); // Revert on error
+      }
+    } catch (error) {
+      console.error('Error updating setting:', error);
+      showAlert('Error updating setting', 'error');
+      setShowCarouselImages(!checked); // Revert on error
+    } finally {
+      setVisibilityToggleSaving(false);
+    }
+  };
+
   const fetchCarouselImages = async () => {
     try {
       setLoading(true);
@@ -687,14 +744,27 @@ export default function AppearancePage() {
       <div className="bg-white rounded-lg shadow p-6 mb-8">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-2xl font-bold text-gray-800">Paradise Animation Preview</h3>
-          {!paradiseTextEditing && (
-            <button
-              onClick={() => setParadiseTextEditing(true)}
-              className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition"
-            >
-              Edit Text
-            </button>
-          )}
+          <div className="flex items-center gap-4">
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={showParadiseAnimation}
+                  onChange={(e) => handleToggleParadiseAnimation(e.target.checked)}
+                  disabled={visibilityToggleSaving}
+                  color="primary"
+                />
+              }
+              label={showParadiseAnimation ? 'Enabled' : 'Disabled'}
+            />
+            {!paradiseTextEditing && (
+              <button
+                onClick={() => setParadiseTextEditing(true)}
+                className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition"
+              >
+                Edit Text
+              </button>
+            )}
+          </div>
         </div>
 
         {paradiseTextEditing ? (
@@ -755,8 +825,23 @@ export default function AppearancePage() {
 
       {/* Carousel Images Section */}
       <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-2xl font-bold text-gray-800 mb-6">Carousel Images</h3>
-        <p className="text-gray-600 mb-6">Upload images for the DIWALI 2026 banner carousel. Images will auto-scroll every 3 seconds.</p>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="text-2xl font-bold text-gray-800 mb-2">Carousel Images</h3>
+            <p className="text-gray-600">Upload images for the DIWALI 2026 banner carousel. Images will auto-scroll every 3 seconds.</p>
+          </div>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={showCarouselImages}
+                onChange={(e) => handleToggleCarouselImages(e.target.checked)}
+                disabled={visibilityToggleSaving}
+                color="primary"
+              />
+            }
+            label={showCarouselImages ? 'Enabled' : 'Disabled'}
+          />
+        </div>
 
         {/* Add Image Form */}
         <div className="bg-gray-50 rounded-lg p-6 mb-8">

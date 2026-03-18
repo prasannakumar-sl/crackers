@@ -10,6 +10,10 @@ export default function ColoursPage() {
     goldAccent: '#d4a574',
   });
   const [navbarColor, setNavbarColor] = useState('#1d4f4f');
+  const [priceListColors, setPriceListColors] = useState({
+    categoryColor: '#a855f7',
+    tableHeaderColor: '#9333ea',
+  });
   const [loading, setLoading] = useState(true);
   const [navbarColorLoading, setNavbarColorLoading] = useState(true);
   const [snackbar, setSnackbar] = useState({
@@ -43,6 +47,10 @@ export default function ColoursPage() {
         goldAccent: data.goldAccent || '#d4a574',
       });
       setNavbarColor(data.navbarColor || '#1d4f4f');
+      setPriceListColors({
+        categoryColor: data.priceListCategoryColor || '#a855f7',
+        tableHeaderColor: data.priceListTableHeaderColor || '#9333ea',
+      });
     } catch (error) {
       console.error('Error fetching colors:', error);
       showAlert('Failed to load colors', 'error');
@@ -54,6 +62,13 @@ export default function ColoursPage() {
 
   const handleColorChange = (colorKey, value) => {
     setColors(prev => ({
+      ...prev,
+      [colorKey]: value,
+    }));
+  };
+
+  const handlePriceListColorChange = (colorKey, value) => {
+    setPriceListColors(prev => ({
       ...prev,
       [colorKey]: value,
     }));
@@ -103,6 +118,28 @@ export default function ColoursPage() {
     } catch (error) {
       console.error('Error updating colors:', error);
       showAlert('Error updating colors', 'error');
+    }
+  };
+
+  const handleSavePriceListColors = async () => {
+    try {
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          priceListCategoryColor: priceListColors.categoryColor,
+          priceListTableHeaderColor: priceListColors.tableHeaderColor,
+        }),
+      });
+
+      if (response.ok) {
+        showAlert('✓ Price list colors updated successfully!', 'success');
+      } else {
+        showAlert('Failed to update price list colors', 'error');
+      }
+    } catch (error) {
+      console.error('Error updating price list colors:', error);
+      showAlert('Error updating price list colors', 'error');
     }
   };
 
@@ -257,6 +294,111 @@ export default function ColoursPage() {
             size="large"
           >
             Reset to Defaults
+          </Button>
+        </div>
+      </div>
+
+      {/* price list colors section */}
+      <div className="bg-white rounded-lg shadow p-6 mt-6">
+        <h3 className="text-2xl font-bold text-gray-800 mb-6">Price List Page Colors</h3>
+        <p className="text-gray-600 mb-8">
+          Customize the colors used in the price list section of your website.
+        </p>
+
+        <div className="space-y-8">
+          {/* Category Header Color */}
+          <div className="border-b border-gray-200 pb-8">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-1">Category Header Color</h3>
+              <p className="text-sm text-gray-600">Color used for category section headers (e.g., "SPARKLERS")</p>
+              <p className="text-xs text-gray-500 mt-2">Used for: Category header backgrounds</p>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  value={priceListColors.categoryColor}
+                  onChange={(e) => handlePriceListColorChange('categoryColor', e.target.value)}
+                  style={{
+                    width: '80px',
+                    height: '50px',
+                    cursor: 'pointer',
+                    border: '2px solid #ddd',
+                    borderRadius: '6px',
+                  }}
+                />
+                <div className="flex flex-col">
+                  <input
+                    type="text"
+                    value={priceListColors.categoryColor}
+                    onChange={(e) => handlePriceListColorChange('categoryColor', e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="#000000"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Hex color code</p>
+                </div>
+              </div>
+
+              <div
+                style={{ backgroundColor: priceListColors.categoryColor }}
+                className="w-24 h-12 rounded-lg border-2 border-gray-300 flex-shrink-0"
+                title="Color preview"
+              />
+            </div>
+          </div>
+
+          {/* Table Header Color */}
+          <div className="border-b border-gray-200 pb-8">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-1">Table Header Color</h3>
+              <p className="text-sm text-gray-600">Color used for the table header row in the price list</p>
+              <p className="text-xs text-gray-500 mt-2">Used for: Table header backgrounds</p>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  value={priceListColors.tableHeaderColor}
+                  onChange={(e) => handlePriceListColorChange('tableHeaderColor', e.target.value)}
+                  style={{
+                    width: '80px',
+                    height: '50px',
+                    cursor: 'pointer',
+                    border: '2px solid #ddd',
+                    borderRadius: '6px',
+                  }}
+                />
+                <div className="flex flex-col">
+                  <input
+                    type="text"
+                    value={priceListColors.tableHeaderColor}
+                    onChange={(e) => handlePriceListColorChange('tableHeaderColor', e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="#000000"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Hex color code</p>
+                </div>
+              </div>
+
+              <div
+                style={{ backgroundColor: priceListColors.tableHeaderColor }}
+                className="w-24 h-12 rounded-lg border-2 border-gray-300 flex-shrink-0"
+                title="Color preview"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8">
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSavePriceListColors}
+            size="large"
+          >
+            Save Price List Colors
           </Button>
         </div>
       </div>

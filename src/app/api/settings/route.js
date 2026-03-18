@@ -5,8 +5,8 @@ export async function GET() {
   try {
     const connection = await getConnection();
     const [settings] = await connection.execute(
-      'SELECT * FROM settings WHERE setting_key IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      ['price_list_style', 'home_page_decoration', 'home_page_banners', 'home_page_brands', 'navbar_color', 'dark_background_color', 'navy_background_color', 'gold_accent_color', 'paradise_text', 'paradise_background_color', 'testimonial_data', 'blog_posts_data', 'show_paradise_animation', 'show_carousel_images']
+      'SELECT * FROM settings WHERE setting_key IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      ['price_list_style', 'home_page_decoration', 'home_page_banners', 'home_page_brands', 'navbar_color', 'dark_background_color', 'navy_background_color', 'gold_accent_color', 'paradise_text', 'paradise_background_color', 'testimonial_data', 'blog_posts_data', 'show_paradise_animation', 'show_carousel_images', 'price_list_category_color', 'price_list_table_header_color']
     );
     await connection.end();
 
@@ -21,6 +21,8 @@ export async function GET() {
       paradiseBackgroundColor: '#f3f4f6',
       showParadiseAnimation: true,
       showCarouselImages: true,
+      priceListCategoryColor: '#a855f7',
+      priceListTableHeaderColor: '#9333ea',
       testimonial: {
         title: 'CRACKERS INDIA',
         heading: 'Client Says About Us',
@@ -104,6 +106,10 @@ export async function GET() {
         result.showParadiseAnimation = setting.setting_value === '1' || setting.setting_value === true;
       } else if (setting.setting_key === 'show_carousel_images') {
         result.showCarouselImages = setting.setting_value === '1' || setting.setting_value === true;
+      } else if (setting.setting_key === 'price_list_category_color') {
+        result.priceListCategoryColor = setting.setting_value;
+      } else if (setting.setting_key === 'price_list_table_header_color') {
+        result.priceListTableHeaderColor = setting.setting_value;
       }
     });
 
@@ -121,6 +127,8 @@ export async function GET() {
       paradiseBackgroundColor: '#f3f4f6',
       showParadiseAnimation: true,
       showCarouselImages: true,
+      priceListCategoryColor: '#a855f7',
+      priceListTableHeaderColor: '#9333ea',
       banners: [
         {
           id: 1,
@@ -151,7 +159,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     const data = await request.json();
-    const { style, homePageDecoration, banners, brands, navbarColor, darkBackground, navyBackground, goldAccent, paradiseText, paradiseBackgroundColor, testimonial, blogPosts, showParadiseAnimation, showCarouselImages } = data;
+    const { style, homePageDecoration, banners, brands, navbarColor, darkBackground, navyBackground, goldAccent, paradiseText, paradiseBackgroundColor, testimonial, blogPosts, showParadiseAnimation, showCarouselImages, priceListCategoryColor, priceListTableHeaderColor } = data;
 
     const connection = await getConnection();
 
@@ -456,9 +464,49 @@ export async function POST(request) {
       }
     }
 
+    // Update price list category color if provided
+    if (priceListCategoryColor !== undefined) {
+      const [existing] = await connection.execute(
+        'SELECT id FROM settings WHERE setting_key = ? LIMIT 1',
+        ['price_list_category_color']
+      );
+
+      if (existing.length > 0) {
+        await connection.execute(
+          'UPDATE settings SET setting_value = ? WHERE setting_key = ?',
+          [priceListCategoryColor, 'price_list_category_color']
+        );
+      } else {
+        await connection.execute(
+          'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)',
+          ['price_list_category_color', priceListCategoryColor]
+        );
+      }
+    }
+
+    // Update price list table header color if provided
+    if (priceListTableHeaderColor !== undefined) {
+      const [existing] = await connection.execute(
+        'SELECT id FROM settings WHERE setting_key = ? LIMIT 1',
+        ['price_list_table_header_color']
+      );
+
+      if (existing.length > 0) {
+        await connection.execute(
+          'UPDATE settings SET setting_value = ? WHERE setting_key = ?',
+          [priceListTableHeaderColor, 'price_list_table_header_color']
+        );
+      } else {
+        await connection.execute(
+          'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)',
+          ['price_list_table_header_color', priceListTableHeaderColor]
+        );
+      }
+    }
+
     await connection.end();
 
-    return NextResponse.json({ style, homePageDecoration, banners, brands, navbarColor, darkBackground, navyBackground, goldAccent, paradiseText, paradiseBackgroundColor, testimonial, blogPosts, showParadiseAnimation, showCarouselImages }, { status: 200 });
+    return NextResponse.json({ style, homePageDecoration, banners, brands, navbarColor, darkBackground, navyBackground, goldAccent, paradiseText, paradiseBackgroundColor, testimonial, blogPosts, showParadiseAnimation, showCarouselImages, priceListCategoryColor, priceListTableHeaderColor }, { status: 200 });
   } catch (error) {
     console.error('Error updating settings:', error);
     return NextResponse.json({ error: 'Failed to update settings' }, { status: 500 });

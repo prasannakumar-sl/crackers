@@ -11,21 +11,25 @@ export default function PriceList() {
   const [categories, setCategories] = useState([]);
   const [enlargedImage, setEnlargedImage] = useState(null);
   const [displayStyle, setDisplayStyle] = useState('table');
+  const [priceListCategoryColor, setPriceListCategoryColor] = useState('#a855f7');
+  const [priceListTableHeaderColor, setPriceListTableHeaderColor] = useState('#9333ea');
 
-  // Fetch display style from settings
+  // Fetch display style and colors from settings
   useEffect(() => {
-    const fetchDisplayStyle = async () => {
+    const fetchSettings = async () => {
       try {
         const response = await fetch('/api/settings');
         const data = await response.json();
         setDisplayStyle(data.style || 'table');
+        setPriceListCategoryColor(data.priceListCategoryColor || '#a855f7');
+        setPriceListTableHeaderColor(data.priceListTableHeaderColor || '#9333ea');
       } catch (error) {
-        console.error('Error fetching display style:', error);
+        console.error('Error fetching settings:', error);
         setDisplayStyle('table');
       }
     };
 
-    fetchDisplayStyle();
+    fetchSettings();
   }, []);
 
   // Fetch products from database
@@ -213,15 +217,18 @@ export default function PriceList() {
             categories.map((category, catIdx) => (
               <div key={catIdx} className="mb-12">
                 {/* Category Header */}
-                <div className="bg-purple-400 text-white py-2 sm:py-3 px-4 sm:px-6 rounded-t-lg font-bold text-sm sm:text-lg mb-0">
+                <div
+                  className="text-white py-2 sm:py-3 px-4 sm:px-6 rounded-t-lg font-bold text-sm sm:text-lg mb-0"
+                  style={{ backgroundColor: priceListCategoryColor }}
+                >
                   {catIdx + 1}. {category.name.toUpperCase()} ({category.discount})
                 </div>
 
                 {/* Table View */}
                 {displayStyle === 'table' && (
-                  <div className="navy-bg-section border border-purple-400 rounded-b-lg shadow-md w-full overflow-x-auto">
+                  <div className="navy-bg-section rounded-b-lg shadow-md w-full overflow-x-auto" style={{ border: `1px solid ${priceListCategoryColor}` }}>
                     <table className="w-full text-xs sm:text-sm">
-                      <thead className="bg-purple-600 text-white font-semibold sticky top-0">
+                      <thead className="text-white font-semibold sticky top-0" style={{ backgroundColor: priceListTableHeaderColor }}>
                         <tr>
                           <th className="px-1 sm:px-3 py-2 text-left whitespace-nowrap">Img</th>
                           <th className="px-1 sm:px-3 py-2 text-left whitespace-nowrap">Product</th>
@@ -321,13 +328,13 @@ export default function PriceList() {
 
                 {/* Cards View */}
                 {displayStyle === 'cards' && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 navy-bg-section border border-purple-400 rounded-b-lg overflow-hidden shadow-md p-3 sm:p-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 navy-bg-section rounded-b-lg overflow-hidden shadow-md p-3 sm:p-4" style={{ border: `1px solid ${priceListCategoryColor}` }}>
                     {category.products.map((product) => {
                       const qty = getQuantity(product.id);
                       const total = calculateTotal(product.discount, qty);
 
                       return (
-                        <div key={product.id} className="border border-purple-500 rounded-lg p-3 sm:p-4 hover:shadow-lg transition-shadow bg-gray-800">
+                        <div key={product.id} className="rounded-lg p-3 sm:p-4 hover:shadow-lg transition-shadow bg-gray-800" style={{ border: `1px solid ${priceListTableHeaderColor}` }}>
                           {/* Product Image */}
                           <div
                             className="w-full h-32 sm:h-40 bg-gray-700 rounded flex items-center justify-center text-2xl sm:text-3xl overflow-hidden cursor-pointer hover:opacity-80 transition-opacity mb-3"

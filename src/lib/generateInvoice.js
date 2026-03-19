@@ -1,6 +1,6 @@
-import html2pdf from 'html2pdf.js';
-
-export const generateInvoicePDF = (orderData, invoiceNumber) => {
+export const generateInvoicePDF = async (orderData, invoiceNumber) => {
+  // Dynamically import html2pdf only on the client side
+  const html2pdf = (await import('html2pdf.js')).default;
   const currentDate = new Date().toLocaleDateString('en-IN');
   
   const cartTotal = orderData.items.reduce((sum, item) => {

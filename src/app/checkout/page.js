@@ -137,7 +137,7 @@ export default function CheckoutPage() {
 
         // Generate and download invoice PDF
         try {
-          generateInvoicePDF(orderData, data.invoiceNumber || `invno_${String(data.orderId || '00000001').padStart(8, '0')}`);
+          await generateInvoicePDF(orderData, data.invoiceNumber || `invno_${String(data.orderId || '00000001').padStart(8, '0')}`);
         } catch (pdfError) {
           console.error('Error generating PDF:', pdfError);
         }
@@ -202,12 +202,15 @@ export default function CheckoutPage() {
                   <div key={item.id} className="flex gap-4 pb-6 border-b border-gray-600 last:border-b-0 last:pb-0">
                     {/* Product Image */}
                     {item.image && (
-                      <div className="w-24 h-24 flex-shrink-0 bg-gray-700 rounded-lg flex items-center justify-center text-4xl">
+                      <div className="w-24 h-24 flex-shrink-0 bg-gray-700 rounded-lg flex items-center justify-center text-4xl overflow-hidden">
                         {item.image.startsWith('http') || item.image.startsWith('/') ? (
                           <img
                             src={item.image}
                             alt={item.name}
                             className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.src = 'https://cdn.builder.io/api/v1/image/assets%2Fa8b7ea913e4d4cbb918cc3633423e9fa%2Fcf0b1bff048f4f4aa4c2904d1907c926';
+                            }}
                           />
                         ) : (
                           <span>{item.image}</span>

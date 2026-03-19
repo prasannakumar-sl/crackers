@@ -142,7 +142,7 @@ export default function OrderTrackPage() {
                         <span className={styles.icon}>{stage.icon}</span>
                       </div>
                       {index < STATUS_STAGES.length - 1 && (
-                        <div className={`${styles.connector} ${index < currentStatusIndex || index === 0 ? styles.completed : ''}`}></div>
+                        <div className={`${styles.connector} ${index < currentStatusIndex ? styles.completed : ''}`}></div>
                       )}
                     </div>
                     <div className={styles.stageInfo}>

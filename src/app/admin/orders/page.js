@@ -13,6 +13,12 @@ export default function OrdersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchTimeout, setSearchTimeout] = useState(null);
 
+  // Inline editing state
+  const [editingOrderId, setEditingOrderId] = useState(null);
+  const [editedStatus, setEditedStatus] = useState('');
+  const [editedPaymentStatus, setEditedPaymentStatus] = useState('');
+  const [savingOrderId, setSavingOrderId] = useState(null);
+
   // Download related state
   const [downloadingOrderId, setDownloadingOrderId] = useState(null);
   const [downloadOrderData, setDownloadOrderData] = useState(null);
@@ -146,6 +152,50 @@ export default function OrdersPage() {
     setSearchTimeout(timeout);
   };
 
+  const handleStartEdit = (order) => {
+    setEditingOrderId(order.id);
+    setEditedStatus(order.status);
+    setEditedPaymentStatus(order.payment_status || 'Unpaid');
+  };
+
+  const handleCancelEdit = () => {
+    setEditingOrderId(null);
+    setEditedStatus('');
+    setEditedPaymentStatus('');
+  };
+
+  const handleSaveStatusChange = async (orderId) => {
+    try {
+      setSavingOrderId(orderId);
+      const response = await fetch('/api/orders', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderId,
+          status: editedStatus,
+          paymentStatus: editedPaymentStatus
+        })
+      });
+
+      if (response.ok) {
+        setEditingOrderId(null);
+        setEditedStatus('');
+        setEditedPaymentStatus('');
+        fetchOrders(searchQuery);
+      } else {
+        const data = await response.json();
+        alert(`Failed to save changes: ${data.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error saving status changes:', error);
+      alert('Error saving status changes');
+    } finally {
+      setSavingOrderId(null);
+    }
+  };
+
   return (
     <>
       <div>
@@ -191,57 +241,110 @@ export default function OrdersPage() {
               </thead>
               <tbody>
                 {orders.map((order) => (
-                  <tr key={order.id} className="border-b border-gray-200 hover:bg-gray-50">
+                  <tr key={order.id} className={`border-b border-gray-200 ${editingOrderId === order.id ? 'bg-blue-50' : 'hover:bg-gray-50'}`}>
                     <td className="px-6 py-3 text-sm font-semibold text-gray-800">#{order.id}</td>
                     <td className="px-6 py-3 text-sm text-gray-800">{order.customer_name}</td>
                     <td className="px-6 py-3 text-sm text-gray-800">{order.phone}</td>
                     <td className="px-6 py-3 text-sm font-semibold text-green-600">₹{parseFloat(order.total_amount).toFixed(2)}</td>
                     <td className="px-6 py-3 text-sm text-gray-800">{order.item_count}</td>
                     <td className="px-6 py-3 text-sm">
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        order.status === 'not packing' ? 'bg-orange-100 text-orange-800' :
-                        order.status === 'packed' ? 'bg-blue-100 text-blue-800' :
-                        order.status === 'on the way' ? 'bg-purple-100 text-purple-800' :
-                        order.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                      </span>
+                      {editingOrderId === order.id ? (
+                        <select
+                          value={editedStatus}
+                          onChange={(e) => setEditedStatus(e.target.value)}
+                          className="px-2 py-1 border border-gray-300 rounded bg-white text-gray-800 text-xs font-semibold"
+                        >
+                          <option value="not packing">Not Packing</option>
+                          <option value="packed">Packed</option>
+                          <option value="on the way">On The Way</option>
+                          <option value="delivered">Delivered</option>
+                        </select>
+                      ) : (
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          order.status === 'not packing' ? 'bg-orange-100 text-orange-800' :
+                          order.status === 'packed' ? 'bg-blue-100 text-blue-800' :
+                          order.status === 'on the way' ? 'bg-purple-100 text-purple-800' :
+                          order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-3 text-sm">
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        order.payment_status === 'Paid' ? 'bg-green-100 text-green-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
-                        {order.payment_status || 'Unpaid'}
-                      </span>
+                      {editingOrderId === order.id ? (
+                        <select
+                          value={editedPaymentStatus}
+                          onChange={(e) => setEditedPaymentStatus(e.target.value)}
+                          className="px-2 py-1 border border-gray-300 rounded bg-white text-gray-800 text-xs font-semibold"
+                        >
+                          <option value="Unpaid">Unpaid</option>
+                          <option value="Paid">Paid</option>
+                        </select>
+                      ) : (
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          order.payment_status === 'Paid' ? 'bg-green-100 text-green-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {order.payment_status || 'Unpaid'}
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-3 text-sm text-gray-600">
                       {new Date(order.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-3 text-sm action-buttons">
-                      <button
-                        onClick={() => handleViewDetails(order.id)}
-                        className="action-button"
-                        title="View order details"
-                      >
-                        👁️
-                      </button>
-                      <button
-                        onClick={() => handleEditDetails(order.id)}
-                        className="action-button"
-                        title="Edit order"
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        onClick={() => handleDownloadInvoice(order.id)}
-                        className={`action-button ${downloadingOrderId === order.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        title="Download Invoice"
-                        disabled={downloadingOrderId === order.id}
-                      >
-                        {downloadingOrderId === order.id ? '⌛' : '📥'}
-                      </button>
+                      {editingOrderId === order.id ? (
+                        <>
+                          <button
+                            onClick={() => handleSaveStatusChange(order.id)}
+                            className="action-button save-btn"
+                            title="Save changes"
+                            disabled={savingOrderId === order.id}
+                          >
+                            {savingOrderId === order.id ? '⌛' : '✓'}
+                          </button>
+                          <button
+                            onClick={handleCancelEdit}
+                            className="action-button cancel-btn"
+                            title="Cancel edit"
+                          >
+                            ✕
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => handleStartEdit(order)}
+                            className="action-button"
+                            title="Edit order status"
+                          >
+                            ✎
+                          </button>
+                          <button
+                            onClick={() => handleViewDetails(order.id)}
+                            className="action-button"
+                            title="View order details"
+                          >
+                            👁️
+                          </button>
+                          <button
+                            onClick={() => handleEditDetails(order.id)}
+                            className="action-button"
+                            title="Edit full order"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            onClick={() => handleDownloadInvoice(order.id)}
+                            className={`action-button ${downloadingOrderId === order.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            title="Download Invoice"
+                            disabled={downloadingOrderId === order.id}
+                          >
+                            {downloadingOrderId === order.id ? '⌛' : '📥'}
+                          </button>
+                        </>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -299,6 +402,33 @@ export default function OrdersPage() {
 
         .action-button:active {
           background-color: #e5e7eb;
+        }
+
+        .action-button.save-btn {
+          background-color: #d1fae5;
+          border-color: #6ee7b7;
+          color: #065f46;
+        }
+
+        .action-button.save-btn:hover:not(:disabled) {
+          background-color: #a7f3d0;
+          border-color: #34d399;
+        }
+
+        .action-button.save-btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        .action-button.cancel-btn {
+          background-color: #fee2e2;
+          border-color: #fca5a5;
+          color: #991b1b;
+        }
+
+        .action-button.cancel-btn:hover {
+          background-color: #fecaca;
+          border-color: #f87171;
         }
       `}</style>
     </>

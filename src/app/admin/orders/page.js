@@ -183,7 +183,8 @@ export default function OrdersPage() {
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Phone</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Total Amount</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Items</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Order Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Payment Status</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Date</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700">Action</th>
                 </tr>
@@ -205,6 +206,14 @@ export default function OrdersPage() {
                         'bg-gray-100 text-gray-800'
                       }`}>
                         {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-3 text-sm">
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                        order.payment_status === 'Paid' ? 'bg-green-100 text-green-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {order.payment_status || 'Unpaid'}
                       </span>
                     </td>
                     <td className="px-6 py-3 text-sm text-gray-600">

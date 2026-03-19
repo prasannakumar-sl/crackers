@@ -138,11 +138,11 @@ export default function OrderTrackPage() {
                 {STATUS_STAGES.map((stage, index) => (
                   <div key={stage.status} className={styles.timelineItem}>
                     <div className={styles.timelineMarker}>
-                      <div className={`${styles.circle} ${index <= currentStatusIndex ? styles.completed : ''}`}>
+                      <div className={`${styles.circle} ${index <= currentStatusIndex || index === 0 ? styles.completed : ''}`}>
                         <span className={styles.icon}>{stage.icon}</span>
                       </div>
                       {index < STATUS_STAGES.length - 1 && (
-                        <div className={`${styles.connector} ${index < currentStatusIndex ? styles.completed : ''}`}></div>
+                        <div className={`${styles.connector} ${index < currentStatusIndex || index === 0 ? styles.completed : ''}`}></div>
                       )}
                     </div>
                     <div className={styles.stageInfo}>

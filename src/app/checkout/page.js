@@ -15,6 +15,7 @@ export default function CheckoutPage() {
     phone: '',
     email: '',
     address: '',
+    state: '',
   });
 
   const [payments, setPayments] = useState({
@@ -62,15 +63,49 @@ export default function CheckoutPage() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+
+    if (name === 'name') {
+      // Allow only letters and spaces
+      const lettersOnly = value.replace(/[^a-zA-Z\s]/g, '');
+      setFormData(prev => ({
+        ...prev,
+        [name]: lettersOnly
+      }));
+    } else if (name === 'phone') {
+      // Allow only numbers and limit to 10 digits
+      const numbersOnly = value.replace(/[^0-9]/g, '').slice(0, 10);
+      setFormData(prev => ({
+        ...prev,
+        [name]: numbersOnly
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleConfirmOrder = async () => {
-    if (!formData.name || !formData.phone || !formData.email || !formData.address) {
+    if (!formData.name || !formData.phone || !formData.email || !formData.address || !formData.state) {
       showAlert('Please fill in all customer details', 'warning');
+      return;
+    }
+
+    if (formData.name.trim().length === 0) {
+      showAlert('Please enter a valid name (letters only)', 'warning');
+      return;
+    }
+
+    if (formData.phone.length !== 10) {
+      showAlert('Phone number must be exactly 10 digits', 'warning');
+      return;
+    }
+
+    // Validate minimum order amount
+    const minimumOrder = formData.state.toLowerCase() === 'tamil nadu' ? 2000 : 3000;
+    if (cartTotal < minimumOrder) {
+      showAlert(`Minimum order amount is ₹${minimumOrder} for ${formData.state}. Current total: ₹${cartTotal.toFixed(2)}`, 'warning');
       return;
     }
 
@@ -242,6 +277,7 @@ export default function CheckoutPage() {
                     placeholder="Enter your name"
                     className="w-full border border-gray-600 bg-gray-700 text-white rounded px-4 py-2 focus:outline-none focus:border-yellow-500"
                   />
+                  <p className="text-xs text-gray-400 mt-1">Letters only</p>
                 </div>
                 <div>
                   <label className="block text-gray-300 font-semibold mb-2">Phone Number</label>
@@ -250,11 +286,26 @@ export default function CheckoutPage() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    placeholder="Enter phone number"
+                    placeholder="Enter 10-digit phone number"
+                    maxLength="10"
                     className="w-full border border-gray-600 bg-gray-700 text-white rounded px-4 py-2 focus:outline-none focus:border-yellow-500"
                   />
+                  <p className="text-xs text-gray-400 mt-1">{formData.phone.length}/10 digits</p>
                 </div>
-                <div className="md:col-span-2">
+                <div>
+                  <label className="block text-gray-300 font-semibold mb-2">State/Region</label>
+                  <select
+                    name="state"
+                    value={formData.state}
+                    onChange={handleInputChange}
+                    className="w-full border border-gray-600 bg-gray-700 text-white rounded px-4 py-2 focus:outline-none focus:border-yellow-500"
+                  >
+                    <option value="">Select your state</option>
+                    <option value="Tamil Nadu">Tamil Nadu (Min: ₹2000)</option>
+                    <option value="Other">Other States (Min: ₹3000)</option>
+                  </select>
+                </div>
+                <div>
                   <label className="block text-gray-300 font-semibold mb-2">Email</label>
                   <input
                     type="email"

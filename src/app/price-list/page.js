@@ -112,6 +112,7 @@ export default function PriceList() {
             originalPrice: originalPrice,
             price: salePrice,
             discount: salePrice,
+            image: product.image,
             quantity: newQty
           });
         }

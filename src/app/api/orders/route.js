@@ -17,7 +17,7 @@ export async function POST(request) {
     );
 
     const orderId = orderResult.insertId;
-    const invoiceNumber = `invno_${String(orderId).padStart(8, '0')}`;
+    const invoiceNumber = `invno ${String(orderId).padStart(8, '0')}`;
 
     // Update invoice number
     await connection.execute(

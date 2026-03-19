@@ -30,6 +30,9 @@ export default function InvoicePrint({ orderData, company, containerRef, payment
   const totalQty = items.reduce((sum, item) => sum + item.quantity, 0);
   const subTotal = parseFloat(order.total_amount);
 
+  // Calculate display order number (5-digit format starting from 11111)
+  const displayOrderNumber = order.id ? String(order.id + 11110).padStart(5, '0') : '00001';
+
   // Get payment methods from props or localStorage
   const getPaymentMethods = () => {
     if (paymentMethods) return paymentMethods;
@@ -72,6 +75,7 @@ export default function InvoicePrint({ orderData, company, containerRef, payment
           </div>
           <div className="bill-info">
             <div className="row"><span className="label">Bill No:</span> <span className="value">{order.invoice_number || `CC/${order.id}`}</span></div>
+            <div className="row"><span className="label">Order No:</span> <span className="value">{displayOrderNumber}</span></div>
             <div className="row"><span className="label">Date:</span> <span className="value">{new Date(order.created_at).toLocaleDateString('en-GB')}</span></div>
             <div className="row"><span className="label">Payment:</span> <span className="value font-bold">{order.payment_status || 'UnPaid'}</span></div>
           </div>

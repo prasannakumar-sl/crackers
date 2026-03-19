@@ -165,7 +165,7 @@ export default function CheckoutPage() {
 
         // Generate and download invoice PDF
         try {
-          await generateInvoicePDF(orderData, data.invoiceNumber || `invno_${String(data.orderId || '00000001').padStart(8, '0')}`);
+          await generateInvoicePDF(orderData, data.invoiceNumber || `invno ${String(data.orderId || '00000001').padStart(8, '0')}`, data.orderId);
         } catch (pdfError) {
           console.error('Error generating PDF:', pdfError);
         }

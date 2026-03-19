@@ -1,7 +1,10 @@
-export const generateInvoicePDF = async (orderData, invoiceNumber) => {
+export const generateInvoicePDF = async (orderData, invoiceNumber, orderId) => {
   // Dynamically import html2pdf only on the client side
   const html2pdf = (await import('html2pdf.js')).default;
   const currentDate = new Date().toLocaleDateString('en-IN');
+
+  // Calculate order number (5-digit format starting from 11111)
+  const displayOrderNumber = orderId ? String(orderId + 11110).padStart(5, '0') : '00001';
   
   const cartTotal = orderData.items.reduce((sum, item) => {
     const price = typeof item.discount === 'number' 
@@ -246,6 +249,10 @@ export const generateInvoicePDF = async (orderData, invoiceNumber) => {
             <div class="bill-info-row">
               <span class="bill-info-label">Bill No:</span>
               <span>${invoiceNumber}</span>
+            </div>
+            <div class="bill-info-row">
+              <span class="bill-info-label">Order No:</span>
+              <span>${displayOrderNumber}</span>
             </div>
             <div class="bill-info-row">
               <span class="bill-info-label">Date:</span>

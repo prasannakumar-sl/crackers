@@ -10,6 +10,8 @@ export default function OrdersPage() {
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchTimeout, setSearchTimeout] = useState(null);
 
   // Download related state
   const [downloadingOrderId, setDownloadingOrderId] = useState(null);
@@ -109,10 +111,11 @@ export default function OrdersPage() {
     }
   };
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (query = '') => {
     try {
       setLoading(true);
-      const response = await fetch('/api/orders');
+      const url = query ? `/api/orders?search=${encodeURIComponent(query)}` : '/api/orders';
+      const response = await fetch(url);
       const data = await response.json();
       if (response.ok) {
         setOrders(data);
@@ -126,10 +129,40 @@ export default function OrdersPage() {
     }
   };
 
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+
+    // Clear existing timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+
+    // Set new timeout for debounced search (500ms)
+    const timeout = setTimeout(() => {
+      fetchOrders(query);
+    }, 500);
+
+    setSearchTimeout(timeout);
+  };
+
   return (
     <>
       <div>
+        <div style={{display:"flex",justifyContent:"space-between"}}>
         <h2 className="text-3xl font-bold text-gray-800 mb-8">Orders</h2>
+
+        <div className="mb-6">
+          <input
+            type="text"
+            placeholder="Search by Customer Name or Phone..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500"
+          />
+        </div>
+
+        </div>
 
         <div className="bg-white rounded-lg shadow overflow-hidden">
           {loading ? (

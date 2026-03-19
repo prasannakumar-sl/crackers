@@ -163,6 +163,7 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const orderId = searchParams.get('id');
+    const searchQuery = searchParams.get('search');
 
     const connection = await getConnection();
 
@@ -192,6 +193,16 @@ export async function GET(request) {
         items: orderItems,
         company: companyInfo[0] || null
       });
+    } else if (searchQuery) {
+      // Search orders by customer name or phone
+      const searchTerm = `%${searchQuery}%`;
+      const [orders] = await connection.execute(
+        "SELECT * FROM orders WHERE customer_name LIKE ? OR phone LIKE ? ORDER BY status = 'Completed' ASC, created_at DESC",
+        [searchTerm, searchTerm]
+      );
+
+      await connection.end();
+      return NextResponse.json(orders);
     } else {
       // Fetch all orders
       const [orders] = await connection.execute(

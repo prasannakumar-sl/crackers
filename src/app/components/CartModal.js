@@ -27,11 +27,11 @@ export default function CartModal() {
       {/* Modal Drawer */}
       <div className="fixed top-0 right-0 h-full w-full sm:w-80 bg-white z-50 shadow-2xl flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="bg-teal-900 text-white p-4 flex justify-between items-center">
+      <div className="bg-teal-900 p-4 flex justify-between items-center">
         <h2 className="text-lg font-bold">Shopping Cart</h2>
         <button
           onClick={() => setShowCart(false)}
-          className="text-2xl font-bold hover:text-gray-200 transition-colors"
+          className="text-2xl font-bold text-white hover:text-gray-200 transition-colors"
         >
           ✕
         </button>
@@ -98,7 +98,7 @@ export default function CartModal() {
                   >
                     −
                   </button>
-                  <span className="w-8 text-center font-semibold text-sm">{item.quantity}</span>
+                  <span className="w-8 text-center text-black font-semibold text-sm">{item.quantity}</span>
                   <button
                     onClick={() => updateQuantity(item.id, item.quantity + 1)}
                     className="px-3 py-1 text-gray-600 hover:text-gray-900"

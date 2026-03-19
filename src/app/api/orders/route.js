@@ -197,7 +197,7 @@ export async function GET(request) {
       // Search orders by customer name or phone
       const searchTerm = `%${searchQuery}%`;
       const [orders] = await connection.execute(
-        "SELECT * FROM orders WHERE customer_name LIKE ? OR phone LIKE ? ORDER BY status = 'Completed' ASC, created_at DESC",
+        "SELECT * FROM orders WHERE customer_name LIKE ? OR phone LIKE ? ORDER BY FIELD(status, 'delivered', 'on the way', 'packed', 'not packing') ASC, created_at DESC",
         [searchTerm, searchTerm]
       );
 
@@ -206,7 +206,7 @@ export async function GET(request) {
     } else {
       // Fetch all orders
       const [orders] = await connection.execute(
-        "SELECT * FROM orders ORDER BY status = 'Completed' ASC, created_at DESC"
+        "SELECT * FROM orders ORDER BY FIELD(status, 'delivered', 'on the way', 'packed', 'not packing') ASC, created_at DESC"
       );
 
       await connection.end();

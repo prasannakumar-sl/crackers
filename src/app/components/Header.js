@@ -73,6 +73,7 @@ export default function Header() {
     { href: '/about-us', label: 'About Us' },
     { href: '/contact-us', label: 'Contact Us' },
     { href: '/payments-info', label: 'Payments Info' },
+    { href: '/ordertrack', label: 'Track Order' }
     // { href: '/chit-fund', label: 'Chit Fund' },
   ];
 
@@ -97,8 +98,8 @@ export default function Header() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex gap-8 text-sm items-center">
-          {navLinks.map(link => (
-            <a key={link.href} href={link.href} className="hover:text-yellow-400 transition-colors">
+          {navLinks.map((link, index) => (
+            <a key={`${link.href}-${index}`} href={link.href} className="hover:text-yellow-400 transition-colors">
               {link.label}
             </a>
           ))}
@@ -135,16 +136,14 @@ export default function Header() {
       {mobileMenuOpen && (
         <div className="md:hidden border-t" style={{ backgroundColor: adjustBrightness(navbarColor, -20) }}>
           <nav className="flex flex-col py-2">
-            {navLinks.map(link => (
+            {navLinks.map((link, index) => (
               <a
-                key={link.href}
+                key={`${link.href}-${index}`}
                 href={link.href}
-                className="px-6 py-3 transition-colors text-sm"
+                className="px-6 py-3 transition-colors text-sm hover-link"
                 style={{
                   borderBottom: `1px solid ${adjustBrightness(navbarColor, -20)}`,
                 }}
-                onMouseOver={(e) => e.target.style.backgroundColor = adjustBrightness(navbarColor, -10)}
-                onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {link.label}
@@ -155,9 +154,7 @@ export default function Header() {
                 setShowCart(true);
                 setMobileMenuOpen(false);
               }}
-              className="px-6 py-3 transition-colors text-sm text-left flex items-center gap-2"
-              onMouseOver={(e) => e.target.style.backgroundColor = adjustBrightness(navbarColor, -10)}
-              onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
+              className="px-6 py-3 transition-colors text-sm text-left flex items-center gap-2 hover-link"
             >
               🛒 Cart
               {cartItemsCount > 0 && (
@@ -168,12 +165,10 @@ export default function Header() {
             </button>
             <a
               href="/#/admin/login"
-              className="px-6 py-3 transition-colors text-sm block"
+              className="px-6 py-3 transition-colors text-sm block hover-link"
               style={{
                 borderBottom: `1px solid ${adjustBrightness(navbarColor, -20)}`,
               }}
-              onMouseOver={(e) => e.target.style.backgroundColor = adjustBrightness(navbarColor, -10)}
-              onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
               onClick={() => setMobileMenuOpen(false)}
             >
               Admin Login
@@ -181,6 +176,12 @@ export default function Header() {
           </nav>
         </div>
       )}
+
+      <style jsx>{`
+        .hover-link {
+          cursor: pointer;
+        }
+      `}</style>
     </header>
   );
 }

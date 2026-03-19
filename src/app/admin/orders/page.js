@@ -198,11 +198,13 @@ export default function OrdersPage() {
                     <td className="px-6 py-3 text-sm text-gray-800">{order.item_count}</td>
                     <td className="px-6 py-3 text-sm">
                       <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                        order.status === 'Completed' ? 'bg-green-100 text-green-800' :
+                        order.status === 'not packing' ? 'bg-orange-100 text-orange-800' :
+                        order.status === 'packed' ? 'bg-blue-100 text-blue-800' :
+                        order.status === 'on the way' ? 'bg-purple-100 text-purple-800' :
+                        order.status === 'delivered' ? 'bg-green-100 text-green-800' :
                         'bg-gray-100 text-gray-800'
                       }`}>
-                        {order.status}
+                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                       </span>
                     </td>
                     <td className="px-6 py-3 text-sm text-gray-600">

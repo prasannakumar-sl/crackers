@@ -66,9 +66,9 @@ export default function AdminLayout({ children }) {
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto py-4">
-          {navItems.map((item) => (
+          {navItems.map((item, index) => (
             <a
-              key={item.href}
+              key={`${item.href}-${index}`}
               href={`#${item.href}`}
               className="px-4 py-3 hover:bg-gray-800 transition-colors flex items-center gap-3 text-sm border-l-4 border-transparent hover:border-yellow-500"
             >

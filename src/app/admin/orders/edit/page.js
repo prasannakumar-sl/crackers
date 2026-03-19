@@ -20,7 +20,7 @@ export default function EditOrderPage({ orderId: propOrderId }) {
     customerDetails: {},
     items: [],
     paymentStatus: 'Unpaid',
-    status: 'Pending'
+    status: 'not packing'
   });
 
   useEffect(() => {
@@ -335,9 +335,10 @@ export default function EditOrderPage({ orderId: propOrderId }) {
                   onChange={(e) => setEditFormData(prev => ({ ...prev, status: e.target.value }))}
                   className="form-input"
                 >
-                  <option value="Pending">Pending</option>
-                  <option value="Completed">Completed</option>
-                  <option value="Cancelled">Cancelled</option>
+                  <option value="not packing">Not Packing</option>
+                  <option value="packed">Packed</option>
+                  <option value="on the way">On The Way</option>
+                  <option value="delivered">Delivered</option>
                 </select>
               </div>
             </div>

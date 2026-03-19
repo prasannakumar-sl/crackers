@@ -67,7 +67,7 @@ export default function OrderDetailsModal({ orderId, isOpen, onClose, editMode =
           discount: parseFloat(item.discount) || 0
         })),
         paymentStatus: orderData.order.payment_status || 'Unpaid',
-        status: orderData.order.status || 'Pending'
+        status: orderData.order.status || 'not packing'
       });
     }
   }, [isEditing, orderData]);

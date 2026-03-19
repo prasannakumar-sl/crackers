@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 
 export default function PriceList() {
-  const { cart, addToCart, setShowCart, updateQuantity, removeFromCart } = useCart();
+  const { cart, addToCart, setShowCart, updateQuantity, removeFromCart, getCartTotal } = useCart();
   const [quantities, setQuantities] = useState({});
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -104,14 +104,13 @@ export default function PriceList() {
         // Add new item to cart
         const product = allProducts.find(p => p.id === productId);
         if (product) {
-          const originalPrice = parseFloat(product.price);
-          const salePrice = originalPrice / 2;
+          const originalPrice = parseFloat(product.price) || 0;
+          const salePrice = originalPrice > 0 ? originalPrice / 2 : 0;
           addToCart({
             id: product.id,
             name: product.name,
             originalPrice: originalPrice,
             price: salePrice,
-            discount: salePrice,
             image: product.image,
             quantity: newQty
           });
@@ -148,9 +147,7 @@ export default function PriceList() {
 
   const calculateTotal = (price, qty) => (price * qty).toFixed(2);
 
-  const cartTotal = cart.reduce((total, item) => {
-    return total + (item.discount * item.quantity);
-  }, 0);
+  const cartTotal = getCartTotal();
 
   const cartItemsCount = cart.reduce((total, item) => total + item.quantity, 0);
 

@@ -11,10 +11,14 @@ export function CartProvider({ children }) {
 
   // Initialize cart from localStorage on mount
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
       try {
-        setCart(JSON.parse(savedCart));
+        const parsedCart = JSON.parse(savedCart);
+        console.log('Cart hydrated from localStorage:', parsedCart);
+        setCart(parsedCart);
       } catch (error) {
         console.error('Failed to parse saved cart:', error);
       }
@@ -92,6 +96,7 @@ export function CartProvider({ children }) {
     getCartItemCount,
     showCart,
     setShowCart,
+    isHydrated,
   };
 
   return (

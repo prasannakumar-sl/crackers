@@ -35,7 +35,7 @@ function ImageField({ image, name }) {
 }
 
 export default function CheckoutPage() {
-  const { cart, getCartTotal, clearCart } = useCart();
+  const { cart, getCartTotal, clearCart, isHydrated: cartIsHydrated } = useCart();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
@@ -105,6 +105,14 @@ export default function CheckoutPage() {
     console.log('Form data changed. Saving to localStorage:', formData);
     localStorage.setItem('checkoutFormData', JSON.stringify(formData));
   }, [formData, isHydrated]);
+
+  // Refresh Order Review data when entering checkout page or when cart changes
+  useEffect(() => {
+    if (!isHydrated) return;
+
+    console.log('Order Review data refreshed. Current cart:', cart);
+    console.log('Updated cart total:', getCartTotal());
+  }, [cart, isHydrated]);
 
   const handleCloseSnackbar = (event, reason) => {
     if (reason === 'clickaway') return;
@@ -213,6 +221,14 @@ export default function CheckoutPage() {
     }
   };
 
+  if (!cartIsHydrated) {
+    return (
+      <div className="min-h-screen dark-bg-section flex items-center justify-center">
+        <div className="text-white">Loading checkout...</div>
+      </div>
+    );
+  }
+
   if (cart.length === 0) {
     return (
       <div className="min-h-screen dark-bg-section flex items-center justify-center">
@@ -272,11 +288,13 @@ export default function CheckoutPage() {
                       <p className="text-gray-300">
                         Price:{' '}
                         <span className="font-semibold">
-                          ₹{item.discount
-                            ? typeof item.discount === 'number'
-                              ? (item.discount * item.quantity).toFixed(2)
-                              : (parseFloat(item.discount.replace('₹', '')) * item.quantity).toFixed(2)
-                            : '0.00'}
+                          ₹{
+                            typeof item.price === 'number'
+                              ? (item.price * item.quantity).toFixed(2)
+                              : item.price
+                              ? (parseFloat(item.price.replace('₹', '')) * item.quantity).toFixed(2)
+                              : '0.00'
+                          }
                         </span>
                       </p>
                     </div>

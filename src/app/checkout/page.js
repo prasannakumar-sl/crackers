@@ -38,6 +38,7 @@ export default function CheckoutPage() {
   const { cart, getCartTotal, clearCart } = useCart();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -69,6 +70,9 @@ export default function CheckoutPage() {
   });
 
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') return;
+
     const savedPayments = localStorage.getItem('adminPayments');
     if (savedPayments) {
       try {
@@ -78,7 +82,29 @@ export default function CheckoutPage() {
         console.error('Error parsing payment info:', error);
       }
     }
+
+    // Load customer details from localStorage
+    const savedFormData = localStorage.getItem('checkoutFormData');
+    console.log('Checkout page mounted. Loading form data from localStorage:', savedFormData);
+    if (savedFormData) {
+      try {
+        const parsed = JSON.parse(savedFormData);
+        console.log('Restored form data:', parsed);
+        setFormData(parsed);
+      } catch (error) {
+        console.error('Error parsing saved form data:', error);
+      }
+    }
+
+    setIsHydrated(true);
   }, []);
+
+  // Save form data to localStorage whenever it changes
+  useEffect(() => {
+    if (!isHydrated) return; // Don't save until we've loaded
+    console.log('Form data changed. Saving to localStorage:', formData);
+    localStorage.setItem('checkoutFormData', JSON.stringify(formData));
+  }, [formData, isHydrated]);
 
   const handleCloseSnackbar = (event, reason) => {
     if (reason === 'clickaway') return;
@@ -171,6 +197,7 @@ export default function CheckoutPage() {
         }
 
         clearCart();
+        localStorage.removeItem('checkoutFormData'); // Clear saved form data after successful order
         // Redirect or show success message
         setTimeout(() => {
           router.push('/');

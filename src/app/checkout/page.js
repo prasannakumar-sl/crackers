@@ -192,7 +192,7 @@ export default function CheckoutPage() {
         <div className="navy-bg-section p-8 rounded-lg shadow-lg text-center border border-gray-600">
           <h1 className="text-2xl font-bold mb-4 text-white">Your cart is empty</h1>
           <button
-            onClick={() => router.push('/')}
+            onClick={() => router.push('/price-list')}
             className="gold-button py-2 px-6 rounded"
           >
             Continue Shopping
@@ -400,7 +400,7 @@ export default function CheckoutPage() {
 
             {/* Continue Shopping Button */}
             <button
-              onClick={() => router.push('/')}
+              onClick={() => router.push('/price-list')}
               className="w-full border-2 gold-accent py-3 rounded font-bold text-white hover:bg-gray-800 transition"
             >
               Continue Shopping

@@ -35,30 +35,24 @@ export function CartProvider({ children }) {
 
   const addToCart = (product) => {
     setCart(prevCart => {
-      const existingItem = prevCart.find(item => item.id === product.id);
       const quantityToAdd = product.quantity || 1;
-      if (existingItem) {
-        return prevCart.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + quantityToAdd, bannerTitle: product.bannerTitle || item.bannerTitle }
-            : item
-        );
-      }
-      return [...prevCart, { ...product, quantity: quantityToAdd }];
+      // Create a unique cart item ID for each addition to support duplicate items
+      const cartItemId = `${product.id}-${Date.now()}-${Math.random()}`;
+      return [...prevCart, { ...product, quantity: quantityToAdd, cartItemId }];
     });
   };
 
-  const removeFromCart = (productId) => {
-    setCart(prevCart => prevCart.filter(item => item.id !== productId));
+  const removeFromCart = (cartItemId) => {
+    setCart(prevCart => prevCart.filter(item => item.cartItemId !== cartItemId));
   };
 
-  const updateQuantity = (productId, quantity) => {
+  const updateQuantity = (cartItemId, quantity) => {
     if (quantity <= 0) {
-      removeFromCart(productId);
+      removeFromCart(cartItemId);
     } else {
       setCart(prevCart =>
         prevCart.map(item =>
-          item.id === productId
+          item.cartItemId === cartItemId
             ? { ...item, quantity }
             : item
         )

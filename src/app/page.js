@@ -3,6 +3,31 @@
 import { useCart } from './context/CartContext';
 import ParadiseAnimation from './components/ParadiseAnimation';
 import { useState, useEffect } from 'react';
+import { Dialog, DialogTitle, DialogContent, DialogActions, IconButton } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import CloseIcon from '@mui/icons-material/Close';
+
+const BannerDialog = styled(Dialog)(({ theme }) => ({
+  '& .MuiDialog-paper': {
+    backgroundColor: 'var(--navy, #1a2847)',
+    color: 'white',
+    borderRadius: '12px',
+    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+  },
+  '& .MuiDialogTitle-root': {
+    padding: theme.spacing(2),
+    borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+  },
+  '& .MuiDialogContent-root': {
+    padding: theme.spacing(2),
+    overflowY: 'auto',
+  },
+  '& .MuiDialogActions-root': {
+    padding: theme.spacing(2),
+    borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+    backgroundColor: '#111827',
+  },
+}));
 
 export default function Home() {
   const { addToCart, getCartItemCount, getCartTotal } = useCart();
@@ -310,76 +335,161 @@ export default function Home() {
       </section>
 
       {/* Banner Products Modal */}
-      {selectedBanner && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[60] p-4" onClick={() => setSelectedBanner(null)}>
-          <div className="navy-bg-section rounded-xl max-w-2xl w-full overflow-hidden shadow-2xl flex flex-col max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
-            <div className={`p-6 text-white bg-gradient-to-r ${selectedBanner.gradientFrom} ${selectedBanner.gradientTo} relative`}>
-              <h2 className="text-2xl font-bold">{selectedBanner.title}</h2>
-              <p className="text-sm opacity-90">{selectedBanner.subtitle}</p>
-              <button
-                onClick={() => setSelectedBanner(null)}
-                className="absolute top-4 right-4 bg-white/20 hover:bg-white/40 rounded-full w-8 h-8 flex items-center justify-center text-white transition-colors"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="p-6 overflow-y-auto flex-grow">
-              {!selectedBanner.products || selectedBanner.products.length === 0 ? (
-                <div className="text-center py-8 text-gray-400">
-                  No products in this collection yet.
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {selectedBanner.products.map((product) => (
-                    <div key={product.id} className="flex items-center justify-between p-4 border border-gray-600 rounded-lg hover:bg-gray-800 transition-colors">
-                      <div className="flex-grow">
-                        <h4 className="font-bold text-white">{product.name}</h4>
-                        <p className="gold-text font-bold">₹{parseFloat(product.price).toFixed(2)}</p>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <span className="text-sm text-gray-300">Qty: {product.qty || 1}</span>
-                        {/* <button
-                          onClick={() => {
-                            addToCart({ ...product, quantity: parseInt(product.qty) || 1, bannerTitle: selectedBanner.title });
-                            // Optional: show some feedback that item was added
-                          }}
-                          className="bg-red-600 text-white px-4 py-2 rounded font-bold hover:bg-red-700 transition-colors text-sm"
-                        >
-                          ADD TO CART
-                        </button> */}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="p-4 border-t border-gray-600 bg-gray-800 flex justify-between items-center">
-              <button
-                onClick={() => {
-                  if (selectedBanner.products && selectedBanner.products.length > 0) {
-                    selectedBanner.products.forEach(product => {
-                      addToCart({ ...product, quantity: parseInt(product.qty) || 1, bannerTitle: selectedBanner.title });
-                    });
-                    setSelectedBanner(null);
-                  }
-                }}
-                className="px-6 py-2 gold-button rounded font-bold hover:bg-yellow-400 transition-colors shadow-md active:transform active:scale-95"
-              >
-                <span>🛒</span>
-                ADD TO CART
-              </button>
-              <button
-                onClick={() => setSelectedBanner(null)}
-                className="px-6 py-2 bg-gray-700 text-white rounded font-bold hover:bg-gray-600 transition-colors"
-              >
-                Close
-              </button>
-            </div>
+      <BannerDialog
+        onClose={() => setSelectedBanner(null)}
+        aria-labelledby="banner-dialog-title"
+        open={!!selectedBanner}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            backgroundImage: selectedBanner
+              ? `linear-gradient(135deg, ${selectedBanner.gradientFrom || 'var(--navy, #1a2847)'} 0%, ${selectedBanner.gradientTo || 'var(--navy, #1a2847)'} 100%)`
+              : undefined,
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            m: 0,
+            p: 2,
+            fontSize: '1.5rem',
+            fontWeight: 'bold',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            backgroundColor: selectedBanner
+              ? `linear-gradient(135deg, ${selectedBanner.gradientFrom || 'transparent'} 0%, ${selectedBanner.gradientTo || 'transparent'} 100%)`
+              : 'transparent',
+          }}
+          id="banner-dialog-title"
+        >
+          <div>
+            <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '1.5rem' }}>
+              {selectedBanner?.title}
+            </h2>
+            <p style={{ margin: 0, fontSize: '0.875rem', opacity: 0.9 }}>
+              {selectedBanner?.subtitle}
+            </p>
           </div>
-        </div>
-      )}
+          <IconButton
+            aria-label="close"
+            onClick={() => setSelectedBanner(null)}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: 'rgba(255, 255, 255, 0.7)',
+              '&:hover': {
+                color: 'rgba(255, 255, 255, 1)',
+              },
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent dividers>
+          {!selectedBanner?.products || selectedBanner?.products.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '2rem 0', color: '#9ca3af' }}>
+              No products in this collection yet.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {selectedBanner?.products.map((product) => (
+                <div
+                  key={product.id}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '1rem',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '0.5rem',
+                    transition: 'background-color 0.2s',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                >
+                  <div style={{ flex: 1 }}>
+                    <h4 style={{ margin: 0, fontWeight: 'bold', fontSize: '1rem', color: 'white' }}>
+                      {product.name}
+                    </h4>
+                    <p style={{ margin: '0.5rem 0 0 0', color: '#d4a574', fontWeight: 'bold' }}>
+                      ₹{parseFloat(product.price).toFixed(2)}
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <span style={{ fontSize: '0.875rem', color: '#d1d5db' }}>
+                      Qty: {product.qty || 1}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+
+        <DialogActions
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            gap: 1,
+          }}
+        >
+          <button
+            onClick={() => setSelectedBanner(null)}
+            style={{
+              padding: '0.75rem 1.5rem',
+              backgroundColor: '#374151',
+              color: 'white',
+              border: 'none',
+              borderRadius: '0.375rem',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s',
+            }}
+            onMouseEnter={(e) => (e.target.style.backgroundColor = '#4b5563')}
+            onMouseLeave={(e) => (e.target.style.backgroundColor = '#374151')}
+          >
+            Close
+          </button>
+          <button
+            onClick={() => {
+              if (selectedBanner?.products && selectedBanner?.products.length > 0) {
+                const bannerSelectionId = `${selectedBanner.id}-${Date.now()}-${Math.random()}`;
+                selectedBanner?.products.forEach(product => {
+                  addToCart({
+                    ...product,
+                    quantity: parseInt(product.qty) || 1,
+                    bannerTitle: selectedBanner?.title,
+                    bannerSelectionId: bannerSelectionId,
+                  });
+                });
+                setSelectedBanner(null);
+              }
+            }}
+            style={{
+              padding: '0.75rem 1.5rem',
+              backgroundColor: '#d4a574',
+              color: '#1a2847',
+              border: 'none',
+              borderRadius: '0.375rem',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+            }}
+            onMouseEnter={(e) => (e.target.style.backgroundColor = '#e5b689')}
+            onMouseLeave={(e) => (e.target.style.backgroundColor = '#d4a574')}
+          >
+            <span>🛒</span>
+            ADD TO CART
+          </button>
+        </DialogActions>
+      </BannerDialog>
 
       {/* Image Lightbox Modal */}
       {selectedImage && (

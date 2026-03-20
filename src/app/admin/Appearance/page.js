@@ -19,7 +19,11 @@ export default function AppearancePage() {
   const [priceListStyle, setPriceListStyle] = useState(null);
   const [styleLoading, setStyleLoading] = useState(true);
   const [homePageDecoration, setHomePageDecoration] = useState(null);
+  const [homePageDecorationLeft, setHomePageDecorationLeft] = useState(null);
+  const [homePageDecorationRight, setHomePageDecorationRight] = useState(null);
   const [decorationLoading, setDecorationLoading] = useState(false);
+  const [decorationLeftLoading, setDecorationLeftLoading] = useState(false);
+  const [decorationRightLoading, setDecorationRightLoading] = useState(false);
   const [banners, setBanners] = useState([]);
   const [bannersLoading, setBannersLoading] = useState(true);
   const [brands, setBrands] = useState([]);
@@ -41,8 +45,13 @@ export default function AppearancePage() {
   const [showParadiseAnimation, setShowParadiseAnimation] = useState(true);
   const [showCarouselImages, setShowCarouselImages] = useState(true);
   const [visibilityToggleSaving, setVisibilityToggleSaving] = useState(false);
+  const [decorationPositionTop, setDecorationPositionTop] = useState('1rem');
+  const [decorationPositionLeft, setDecorationPositionLeft] = useState('1rem');
+  const [decorationPositionSaving, setDecorationPositionSaving] = useState(false);
   const fileInputRef = useRef(null);
   const decorationInputRef = useRef(null);
+  const decorationLeftInputRef = useRef(null);
+  const decorationRightInputRef = useRef(null);
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -89,20 +98,28 @@ export default function AppearancePage() {
       const selectedOption = styleOptions.find(opt => opt.value === data.style);
       setPriceListStyle(selectedOption || styleOptions[1]); // Default to 'table'
       setHomePageDecoration(data.homePageDecoration || null);
+      setHomePageDecorationLeft(data.homePageDecorationLeft || null);
+      setHomePageDecorationRight(data.homePageDecorationRight || null);
       setBrands(data.brands || ['Renu Crackers', 'Mightloads', 'Sri Aravind', 'Ramesh']);
       setParadiseText(data.paradiseText || 'PARADISE');
       setParadiseBackgroundColor(data.paradiseBackgroundColor || '#000000');
       setShowParadiseAnimation(data.showParadiseAnimation !== false);
       setShowCarouselImages(data.showCarouselImages !== false);
+      setDecorationPositionTop(data.decorationPositionTop || '1rem');
+      setDecorationPositionLeft(data.decorationPositionLeft || '1rem');
     } catch (error) {
       console.error('Error fetching settings:', error);
       setPriceListStyle(styleOptions[1]); // Default to 'table'
       setHomePageDecoration(null);
+      setHomePageDecorationLeft(null);
+      setHomePageDecorationRight(null);
       setBrands(['Renu Crackers', 'Mightloads', 'Sri Aravind', 'Ramesh']);
       setParadiseText('PARADISE');
       setParadiseBackgroundColor('#000000');
       setShowParadiseAnimation(true);
       setShowCarouselImages(true);
+      setDecorationPositionTop('1rem');
+      setDecorationPositionLeft('1rem');
     } finally {
       setStyleLoading(false);
       setBrandsLoading(false);
@@ -490,6 +507,120 @@ export default function AppearancePage() {
     }
   };
 
+  const handleDecorationLeftFileSelect = async (e) => {
+    const file = e.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      showAlert('Please select a valid image file', 'error');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      showAlert('Image size must be less than 5MB', 'error');
+      return;
+    }
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const base64Data = event.target?.result;
+
+        setDecorationLeftLoading(true);
+        const response = await fetch('/api/settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ homePageDecorationLeft: base64Data }),
+        });
+
+        if (response.ok) {
+          await fetchSettings();
+          showAlert('✓ Left decoration image updated successfully!', 'success');
+          // Reset file input
+          if (decorationLeftInputRef.current) {
+            decorationLeftInputRef.current.value = '';
+          }
+        } else {
+          showAlert('Failed to update left decoration image', 'error');
+        }
+        setDecorationLeftLoading(false);
+      };
+
+      reader.onerror = () => {
+        showAlert('Failed to read file', 'error');
+        setDecorationLeftLoading(false);
+      };
+
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Error uploading left decoration:', error);
+      showAlert('Error uploading left decoration', 'error');
+      setDecorationLeftLoading(false);
+    }
+  };
+
+  const handleDecorationRightFileSelect = async (e) => {
+    const file = e.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      showAlert('Please select a valid image file', 'error');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      showAlert('Image size must be less than 5MB', 'error');
+      return;
+    }
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const base64Data = event.target?.result;
+
+        setDecorationRightLoading(true);
+        const response = await fetch('/api/settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ homePageDecorationRight: base64Data }),
+        });
+
+        if (response.ok) {
+          await fetchSettings();
+          showAlert('✓ Right decoration image updated successfully!', 'success');
+          // Reset file input
+          if (decorationRightInputRef.current) {
+            decorationRightInputRef.current.value = '';
+          }
+        } else {
+          showAlert('Failed to update right decoration image', 'error');
+        }
+        setDecorationRightLoading(false);
+      };
+
+      reader.onerror = () => {
+        showAlert('Failed to read file', 'error');
+        setDecorationRightLoading(false);
+      };
+
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Error uploading right decoration:', error);
+      showAlert('Error uploading right decoration', 'error');
+      setDecorationRightLoading(false);
+    }
+  };
+
   const handleSaveParadiseText = async () => {
     if (!paradiseText.trim()) {
       showAlert('Please enter text for Paradise Animation', 'error');
@@ -570,6 +701,85 @@ export default function AppearancePage() {
       showAlert('Error deleting decoration image', 'error');
     } finally {
       setDecorationLoading(false);
+    }
+  };
+
+  const handleDeleteDecorationLeft = async () => {
+    if (!confirm('Are you sure you want to delete the left decoration image?')) {
+      return;
+    }
+
+    try {
+      setDecorationLeftLoading(true);
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ homePageDecorationLeft: null }),
+      });
+
+      if (response.ok) {
+        await fetchSettings();
+        showAlert('✓ Left decoration image deleted successfully!', 'success');
+      } else {
+        showAlert('Failed to delete left decoration image', 'error');
+      }
+    } catch (error) {
+      console.error('Error deleting left decoration:', error);
+      showAlert('Error deleting left decoration image', 'error');
+    } finally {
+      setDecorationLeftLoading(false);
+    }
+  };
+
+  const handleDeleteDecorationRight = async () => {
+    if (!confirm('Are you sure you want to delete the right decoration image?')) {
+      return;
+    }
+
+    try {
+      setDecorationRightLoading(true);
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ homePageDecorationRight: null }),
+      });
+
+      if (response.ok) {
+        await fetchSettings();
+        showAlert('✓ Right decoration image deleted successfully!', 'success');
+      } else {
+        showAlert('Failed to delete right decoration image', 'error');
+      }
+    } catch (error) {
+      console.error('Error deleting right decoration:', error);
+      showAlert('Error deleting right decoration image', 'error');
+    } finally {
+      setDecorationRightLoading(false);
+    }
+  };
+
+  const handleSaveDecorationPosition = async () => {
+    try {
+      setDecorationPositionSaving(true);
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          decorationPositionTop,
+          decorationPositionLeft
+        }),
+      });
+
+      if (response.ok) {
+        showAlert('✓ Decoration position updated successfully!', 'success');
+      } else {
+        showAlert('Failed to update decoration position', 'error');
+      }
+    } catch (error) {
+      console.error('Error saving decoration position:', error);
+      showAlert('Error saving decoration position', 'error');
+    } finally {
+      setDecorationPositionSaving(false);
     }
   };
 
@@ -926,44 +1136,128 @@ export default function AppearancePage() {
 
         <div className="bg-white rounded-lg shadow p-6" style={{ marginTop: '2rem' }}>
         <h3 className="text-2xl font-bold text-gray-800 mb-6">Home Page Design</h3>
-        <p className="text-gray-600 mb-6">Upload a decoration image (GIF or image) to display on the home page corners.</p>
+        <p className="text-gray-600 mb-6">Upload separate decoration images for the left and right corners of the home page.</p>
 
-        <div className="bg-gray-50 rounded-lg p-6 mb-8">
-          <label className="block text-gray-700 font-medium mb-2">Upload Decoration Image</label>
-          <input
-            ref={decorationInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleDecorationFileSelect}
-            disabled={decorationLoading}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-          />
-          <p className="text-sm text-gray-500 mt-2">Supported formats: JPG, PNG, GIF, WebP (Max 5MB)</p>
-        </div>
+        {/* Left Decoration */}
+        <div className="mb-8">
+          <h4 className="text-lg font-semibold text-gray-800 mb-4">Left Decoration Image</h4>
+          <div className="bg-gray-50 rounded-lg p-6 mb-4">
+            <label className="block text-gray-700 font-medium mb-2">Upload Left Decoration Image</label>
+            <input
+              ref={decorationLeftInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleDecorationLeftFileSelect}
+              disabled={decorationLeftLoading}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+            />
+            <p className="text-sm text-gray-500 mt-2">Supported formats: JPG, PNG, GIF, WebP (Max 5MB)</p>
+          </div>
 
-        {homePageDecoration && (
-          <div className="mb-6">
-            <h4 className="text-lg font-semibold text-gray-800 mb-4">Current Decoration Image</h4>
+          {homePageDecorationLeft && (
             <div className="bg-white p-4 rounded-lg border border-gray-300">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <img
-                    src={homePageDecoration}
-                    alt="Home page decoration"
+                    src={homePageDecorationLeft}
+                    alt="Left decoration"
                     className="max-w-xs max-h-64 object-contain rounded"
                   />
-                  <p className="text-xs text-gray-600 mt-3">This image will appear on the top left and right corners of the home page</p>
+                  <p className="text-xs text-gray-600 mt-3">This image will appear on the top left corner</p>
                 </div>
                 <IconButton
-                  onClick={handleDeleteDecoration}
+                  onClick={handleDeleteDecorationLeft}
                   color="error"
-                  disabled={decorationLoading}
-                  title="Delete decoration image"
+                  disabled={decorationLeftLoading}
+                  title="Delete left decoration image"
                 >
                   <DeleteIcon />
                 </IconButton>
               </div>
             </div>
+          )}
+        </div>
+
+        {/* Right Decoration */}
+        <div className="mb-8">
+          <h4 className="text-lg font-semibold text-gray-800 mb-4">Right Decoration Image</h4>
+          <div className="bg-gray-50 rounded-lg p-6 mb-4">
+            <label className="block text-gray-700 font-medium mb-2">Upload Right Decoration Image</label>
+            <input
+              ref={decorationRightInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleDecorationRightFileSelect}
+              disabled={decorationRightLoading}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+            />
+            <p className="text-sm text-gray-500 mt-2">Supported formats: JPG, PNG, GIF, WebP (Max 5MB)</p>
+          </div>
+
+          {homePageDecorationRight && (
+            <div className="bg-white p-4 rounded-lg border border-gray-300">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <img
+                    src={homePageDecorationRight}
+                    alt="Right decoration"
+                    className="max-w-xs max-h-64 object-contain rounded"
+                  />
+                  <p className="text-xs text-gray-600 mt-3">This image will appear on the top right corner</p>
+                </div>
+                <IconButton
+                  onClick={handleDeleteDecorationRight}
+                  color="error"
+                  disabled={decorationRightLoading}
+                  title="Delete right decoration image"
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {(homePageDecorationLeft || homePageDecorationRight) && (
+          <div className="mt-6 bg-gray-50 rounded-lg p-4">
+            <h4 className="text-lg font-semibold text-gray-800 mb-4">Position Settings</h4>
+            <p className="text-sm text-gray-600 mb-4">Adjust where the decoration images appear on the home page</p>
+
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Distance from Top</label>
+                <input
+                  type="text"
+                  value={decorationPositionTop}
+                  onChange={(e) => setDecorationPositionTop(e.target.value)}
+                  placeholder="e.g., 1rem, 20px, 5%"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                />
+                <p className="text-xs text-gray-500 mt-1">Use values like: 1rem, 20px, 5%, etc.</p>
+              </div>
+
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Distance from Left/Right</label>
+                <input
+                  type="text"
+                  value={decorationPositionLeft}
+                  onChange={(e) => setDecorationPositionLeft(e.target.value)}
+                  placeholder="e.g., 1rem, 20px, 5%"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                />
+                <p className="text-xs text-gray-500 mt-1">Applied to both left and right sides</p>
+              </div>
+            </div>
+
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleSaveDecorationPosition}
+              disabled={decorationPositionSaving}
+              fullWidth
+            >
+              {decorationPositionSaving ? 'Saving...' : 'Save Position Settings'}
+            </Button>
           </div>
         )}
       </div>

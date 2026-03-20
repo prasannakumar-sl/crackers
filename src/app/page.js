@@ -39,6 +39,8 @@ export default function Home() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedBanner, setSelectedBanner] = useState(null);
   const [homePageDecoration, setHomePageDecoration] = useState(null);
+  const [homePageDecorationLeft, setHomePageDecorationLeft] = useState(null);
+  const [homePageDecorationRight, setHomePageDecorationRight] = useState(null);
   const [banners, setBanners] = useState([]);
   const [brands, setBrands] = useState(['Renu Crackers', 'Mightloads', 'Sri Aravind', 'Ramesh']);
   const [navbarColor, setNavbarColor] = useState('#1d4f4f');
@@ -53,6 +55,8 @@ export default function Home() {
   ]);
   const [showParadiseAnimation, setShowParadiseAnimation] = useState(true);
   const [showCarouselImages, setShowCarouselImages] = useState(true);
+  const [decorationPositionTop, setDecorationPositionTop] = useState('1rem');
+  const [decorationPositionLeft, setDecorationPositionLeft] = useState('1rem');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -69,6 +73,8 @@ export default function Home() {
         setSections(Array.isArray(sectionsData) ? sectionsData : []);
         setCarouselImages(Array.isArray(carouselData) ? carouselData : []);
         setHomePageDecoration(settingsData.homePageDecoration || null);
+        setHomePageDecorationLeft(settingsData.homePageDecorationLeft || null);
+        setHomePageDecorationRight(settingsData.homePageDecorationRight || null);
         setBanners(Array.isArray(settingsData.banners) ? settingsData.banners : []);
         setNavbarColor(settingsData.navbarColor || '#1d4f4f');
         setParadiseText(settingsData.paradiseText || 'PARADISE');
@@ -76,6 +82,8 @@ export default function Home() {
         setShowParadiseAnimation(settingsData.showParadiseAnimation !== false);
         setShowCarouselImages(settingsData.showCarouselImages !== false);
         setTestimonial(settingsData.testimonial || null);
+        setDecorationPositionTop(settingsData.decorationPositionTop || '1rem');
+        setDecorationPositionLeft(settingsData.decorationPositionLeft || '1rem');
         if (Array.isArray(settingsData.blogPosts)) {
           setBlogPosts(settingsData.blogPosts);
         }
@@ -97,6 +105,8 @@ export default function Home() {
         setSections([]);
         setCarouselImages([]);
         setHomePageDecoration(null);
+        setHomePageDecorationLeft(null);
+        setHomePageDecorationRight(null);
         setBanners([]);
       } finally {
         setLoading(false);
@@ -125,22 +135,22 @@ export default function Home() {
       
 
       {/* Decoration - Top Left Corner */}
-      {homePageDecoration && (
-        <div className="fixed top-4 left-4 z-10 pointer-events-none">
+      {homePageDecorationLeft && (
+        <div className="fixed z-10 pointer-events-none" style={{ top: decorationPositionTop, left: decorationPositionLeft }}>
           <img
-            src={homePageDecoration}
-            alt="Page Decoration"
+            src={homePageDecorationLeft}
+            alt="Page Decoration Left"
             className="w-24 h-24 md:w-32 md:h-32 object-contain"
           />
         </div>
       )}
 
       {/* Decoration - Top Right Corner */}
-      {homePageDecoration && (
-        <div className="fixed top-4 right-4 z-10 pointer-events-none">
+      {homePageDecorationRight && (
+        <div className="fixed z-10 pointer-events-none" style={{ top: decorationPositionTop, right: decorationPositionLeft }}>
           <img
-            src={homePageDecoration}
-            alt="Page Decoration"
+            src={homePageDecorationRight}
+            alt="Page Decoration Right"
             className="w-24 h-24 md:w-32 md:h-32 object-contain"
           />
         </div>

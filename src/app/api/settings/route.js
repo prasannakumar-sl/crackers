@@ -5,14 +5,18 @@ export async function GET() {
   try {
     const connection = await getConnection();
     const [settings] = await connection.execute(
-      'SELECT * FROM settings WHERE setting_key IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      ['price_list_style', 'home_page_decoration', 'home_page_banners', 'home_page_brands', 'navbar_color', 'dark_background_color', 'navy_background_color', 'gold_accent_color', 'paradise_text', 'paradise_background_color', 'testimonial_data', 'blog_posts_data', 'show_paradise_animation', 'show_carousel_images', 'price_list_category_color', 'price_list_table_header_color']
+      'SELECT * FROM settings WHERE setting_key IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      ['price_list_style', 'home_page_decoration', 'home_page_decoration_left', 'home_page_decoration_right', 'home_page_banners', 'home_page_brands', 'navbar_color', 'dark_background_color', 'navy_background_color', 'gold_accent_color', 'paradise_text', 'paradise_background_color', 'testimonial_data', 'blog_posts_data', 'show_paradise_animation', 'show_carousel_images', 'price_list_category_color', 'price_list_table_header_color', 'decoration_position_top', 'decoration_position_left']
     );
     await connection.end();
 
     const result = {
       style: 'table',
       homePageDecoration: null,
+      homePageDecorationLeft: null,
+      homePageDecorationRight: null,
+      decorationPositionTop: '1rem',
+      decorationPositionLeft: '1rem',
       navbarColor: '#1d4f4f',
       darkBackground: '#0f1e3d',
       navyBackground: '#1a2847',
@@ -66,6 +70,10 @@ export async function GET() {
         result.style = setting.setting_value;
       } else if (setting.setting_key === 'home_page_decoration') {
         result.homePageDecoration = setting.setting_value;
+      } else if (setting.setting_key === 'home_page_decoration_left') {
+        result.homePageDecorationLeft = setting.setting_value;
+      } else if (setting.setting_key === 'home_page_decoration_right') {
+        result.homePageDecorationRight = setting.setting_value;
       } else if (setting.setting_key === 'home_page_banners') {
         try {
           result.banners = JSON.parse(setting.setting_value);
@@ -110,6 +118,10 @@ export async function GET() {
         result.priceListCategoryColor = setting.setting_value;
       } else if (setting.setting_key === 'price_list_table_header_color') {
         result.priceListTableHeaderColor = setting.setting_value;
+      } else if (setting.setting_key === 'decoration_position_top') {
+        result.decorationPositionTop = setting.setting_value;
+      } else if (setting.setting_key === 'decoration_position_left') {
+        result.decorationPositionLeft = setting.setting_value;
       }
     });
 
@@ -119,6 +131,8 @@ export async function GET() {
     return NextResponse.json({
       style: 'table',
       homePageDecoration: null,
+      decorationPositionTop: '1rem',
+      decorationPositionLeft: '1rem',
       navbarColor: '#1d4f4f',
       darkBackground: '#0f1e3d',
       navyBackground: '#1a2847',
@@ -159,7 +173,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     const data = await request.json();
-    const { style, homePageDecoration, banners, brands, navbarColor, darkBackground, navyBackground, goldAccent, paradiseText, paradiseBackgroundColor, testimonial, blogPosts, showParadiseAnimation, showCarouselImages, priceListCategoryColor, priceListTableHeaderColor } = data;
+    const { style, homePageDecoration, homePageDecorationLeft, homePageDecorationRight, banners, brands, navbarColor, darkBackground, navyBackground, goldAccent, paradiseText, paradiseBackgroundColor, testimonial, blogPosts, showParadiseAnimation, showCarouselImages, priceListCategoryColor, priceListTableHeaderColor, decorationPositionTop, decorationPositionLeft } = data;
 
     const connection = await getConnection();
 
@@ -213,6 +227,68 @@ export async function POST(request) {
           await connection.execute(
             'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)',
             ['home_page_decoration', homePageDecoration]
+          );
+        }
+      }
+    }
+
+    // Update home page decoration left if provided
+    if (homePageDecorationLeft !== undefined) {
+      const [existing] = await connection.execute(
+        'SELECT id FROM settings WHERE setting_key = ? LIMIT 1',
+        ['home_page_decoration_left']
+      );
+
+      if (homePageDecorationLeft === null) {
+        // Delete the setting
+        if (existing.length > 0) {
+          await connection.execute(
+            'DELETE FROM settings WHERE setting_key = ?',
+            ['home_page_decoration_left']
+          );
+        }
+      } else {
+        // Update or insert
+        if (existing.length > 0) {
+          await connection.execute(
+            'UPDATE settings SET setting_value = ? WHERE setting_key = ?',
+            [homePageDecorationLeft, 'home_page_decoration_left']
+          );
+        } else {
+          await connection.execute(
+            'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)',
+            ['home_page_decoration_left', homePageDecorationLeft]
+          );
+        }
+      }
+    }
+
+    // Update home page decoration right if provided
+    if (homePageDecorationRight !== undefined) {
+      const [existing] = await connection.execute(
+        'SELECT id FROM settings WHERE setting_key = ? LIMIT 1',
+        ['home_page_decoration_right']
+      );
+
+      if (homePageDecorationRight === null) {
+        // Delete the setting
+        if (existing.length > 0) {
+          await connection.execute(
+            'DELETE FROM settings WHERE setting_key = ?',
+            ['home_page_decoration_right']
+          );
+        }
+      } else {
+        // Update or insert
+        if (existing.length > 0) {
+          await connection.execute(
+            'UPDATE settings SET setting_value = ? WHERE setting_key = ?',
+            [homePageDecorationRight, 'home_page_decoration_right']
+          );
+        } else {
+          await connection.execute(
+            'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)',
+            ['home_page_decoration_right', homePageDecorationRight]
           );
         }
       }
@@ -504,9 +580,49 @@ export async function POST(request) {
       }
     }
 
+    // Update decoration position top if provided
+    if (decorationPositionTop !== undefined) {
+      const [existing] = await connection.execute(
+        'SELECT id FROM settings WHERE setting_key = ? LIMIT 1',
+        ['decoration_position_top']
+      );
+
+      if (existing.length > 0) {
+        await connection.execute(
+          'UPDATE settings SET setting_value = ? WHERE setting_key = ?',
+          [decorationPositionTop, 'decoration_position_top']
+        );
+      } else {
+        await connection.execute(
+          'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)',
+          ['decoration_position_top', decorationPositionTop]
+        );
+      }
+    }
+
+    // Update decoration position left if provided
+    if (decorationPositionLeft !== undefined) {
+      const [existing] = await connection.execute(
+        'SELECT id FROM settings WHERE setting_key = ? LIMIT 1',
+        ['decoration_position_left']
+      );
+
+      if (existing.length > 0) {
+        await connection.execute(
+          'UPDATE settings SET setting_value = ? WHERE setting_key = ?',
+          [decorationPositionLeft, 'decoration_position_left']
+        );
+      } else {
+        await connection.execute(
+          'INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)',
+          ['decoration_position_left', decorationPositionLeft]
+        );
+      }
+    }
+
     await connection.end();
 
-    return NextResponse.json({ style, homePageDecoration, banners, brands, navbarColor, darkBackground, navyBackground, goldAccent, paradiseText, paradiseBackgroundColor, testimonial, blogPosts, showParadiseAnimation, showCarouselImages, priceListCategoryColor, priceListTableHeaderColor }, { status: 200 });
+    return NextResponse.json({ style, homePageDecoration, homePageDecorationLeft, homePageDecorationRight, banners, brands, navbarColor, darkBackground, navyBackground, goldAccent, paradiseText, paradiseBackgroundColor, testimonial, blogPosts, showParadiseAnimation, showCarouselImages, priceListCategoryColor, priceListTableHeaderColor, decorationPositionTop, decorationPositionLeft }, { status: 200 });
   } catch (error) {
     console.error('Error updating settings:', error);
     return NextResponse.json({ error: 'Failed to update settings' }, { status: 500 });

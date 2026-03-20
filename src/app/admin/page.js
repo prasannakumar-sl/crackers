@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Snackbar, Alert, IconButton } from '@mui/material';
+import { Snackbar, Alert, IconButton, TextField } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SectionManager from '../components/SectionManager';
 import ParadiseAnimation from '../components/ParadiseAnimation';
@@ -651,49 +651,43 @@ export default function AdminDashboard() {
             <h3 className="text-2xl font-bold text-gray-800 mb-6">Testimonials Section</h3>
 
             <div className="space-y-4">
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">Section Title</label>
-                <input
-                  type="text"
-                  value={testimonial.title}
-                  onChange={(e) => setTestimonial({ ...testimonial, title: e.target.value })}
-                  placeholder="e.g., CRACKERS INDIA"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
-                />
-              </div>
+              <TextField
+                fullWidth
+                label="Section Title"
+                value={testimonial.title}
+                onChange={(e) => setTestimonial({ ...testimonial, title: e.target.value })}
+                placeholder="e.g., CRACKERS INDIA"
+                variant="outlined"
+              />
 
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">Heading</label>
-                <input
-                  type="text"
-                  value={testimonial.heading}
-                  onChange={(e) => setTestimonial({ ...testimonial, heading: e.target.value })}
-                  placeholder="e.g., Client Says About Us"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
-                />
-              </div>
+              <TextField
+                fullWidth
+                label="Heading"
+                value={testimonial.heading}
+                onChange={(e) => setTestimonial({ ...testimonial, heading: e.target.value })}
+                placeholder="e.g., Client Says About Us"
+                variant="outlined"
+              />
 
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">Testimonial Quote</label>
-                <textarea
-                  value={testimonial.quote}
-                  onChange={(e) => setTestimonial({ ...testimonial, quote: e.target.value })}
-                  placeholder="Enter the customer testimonial..."
-                  rows="4"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
-                />
-              </div>
+              <TextField
+                fullWidth
+                label="Testimonial Quote"
+                value={testimonial.quote}
+                onChange={(e) => setTestimonial({ ...testimonial, quote: e.target.value })}
+                placeholder="Enter the customer testimonial..."
+                variant="outlined"
+                multiline
+                rows={4}
+              />
 
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">Attribution (Customer Name)</label>
-                <input
-                  type="text"
-                  value={testimonial.attribution}
-                  onChange={(e) => setTestimonial({ ...testimonial, attribution: e.target.value })}
-                  placeholder="e.g., Satisfied Customer"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
-                />
-              </div>
+              <TextField
+                fullWidth
+                label="Attribution (Customer Name)"
+                value={testimonial.attribution}
+                onChange={(e) => setTestimonial({ ...testimonial, attribution: e.target.value })}
+                placeholder="e.g., Satisfied Customer"
+                variant="outlined"
+              />
             </div>
           </div>
 
@@ -705,37 +699,33 @@ export default function AdminDashboard() {
               {blogPosts.map((post, index) => (
                 <div key={post.id} className="p-6 border border-gray-200 rounded-lg bg-gray-50">
                   <div className="space-y-4">
-                    <div>
-                      <label className="block text-gray-700 font-medium mb-2">Blog Post {index + 1} - Title</label>
-                      <input
-                        type="text"
-                        value={post.title}
-                        onChange={(e) => {
-                          const updated = [...blogPosts];
-                          updated[index] = { ...post, title: e.target.value };
-                          setBlogPosts(updated);
-                        }}
-                        placeholder="Enter blog post title..."
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
-                      />
-                    </div>
+                    <TextField
+                    fullWidth
+                    label={`Blog Post ${index + 1} - Title`}
+                    value={post.title}
+                    onChange={(e) => {
+                      const updated = [...blogPosts];
+                      updated[index] = { ...post, title: e.target.value };
+                      setBlogPosts(updated);
+                    }}
+                    placeholder="Enter blog post title..."
+                    variant="outlined"
+                  />
 
-                    <div>
-                      <label className="block text-gray-700 font-medium mb-2">Blog Post {index + 1} - Icon/Emoji</label>
-                      <input
-                        type="text"
-                        value={post.image}
-                        onChange={(e) => {
-                          const updated = [...blogPosts];
-                          updated[index] = { ...post, image: e.target.value };
-                          setBlogPosts(updated);
-                        }}
-                        placeholder="e.g., 🎆"
-                        maxLength="5"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
-                      />
-                      <p className="text-sm text-gray-500 mt-1">Enter an emoji or special character</p>
-                    </div>
+                  <TextField
+                    fullWidth
+                    label={`Blog Post ${index + 1} - Icon/Emoji`}
+                    value={post.image}
+                    onChange={(e) => {
+                      const updated = [...blogPosts];
+                      updated[index] = { ...post, image: e.target.value };
+                      setBlogPosts(updated);
+                    }}
+                    placeholder="e.g., 🎆"
+                    inputProps={{ maxLength: "5" }}
+                    variant="outlined"
+                    helperText="Enter an emoji or special character"
+                  />
                   </div>
                 </div>
               ))}
